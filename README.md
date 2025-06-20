@@ -2,21 +2,19 @@
 
 Developing a Family Allowance Management System
 
-打造家庭零用錢管理App — Nuxt 3 + .NET 8全端實作
+打造家庭零用錢管理App — Nuxt 3 + Go 全端實作
 
-### 專案介紹：Nuxt3 + .NET8 API + MSSQL 專案初始化與環境建立
+## 專案介紹：Nuxt3 + .NET8 API + MSSQL 專案初始化與環境建立
 
-新增 Git Cacao's
+### Git Repo 準備
 
-新增 Repo CacaoApi 存放 net 8 後端 Api 專案
+新增 github Organizations Cacao's 
 
-新增 Repo Cacao 存放 Nuxt 前端專案
+新增 github Repositories Cacao
 
-#### Ide 準備
+### Ide 準備
 
-Vscode 開發 Cacao Nuxt  專案
-
-vs 2022 開發 net CacaoApi
+Vscode 開發 Cacao Nuxt Web 與 Go API
 
 dbever 連線 mysql
 
@@ -26,9 +24,7 @@ docker Desktop 運行 docker container
 
 Cacao\Cacao\db\CacaoInit.sql
 
-#### 專案初始化
-
-新增專案 CacaoApi  
+### 初始化 cacaoapi GO web
 
 ```powershell
 # 初始化 module
@@ -39,13 +35,73 @@ go get -u gorm.io/gorm
 go get -u gorm.io/driver/mysql
 ```
 
-新增專案 Cacao 
+### 初始化 cacaoweb Nuxt app
 
 ```
+npx nuxi init cacaoweb
 
+pnpm add pinia @pinia/nuxt
+pnpm add pinia-plugin-persistedstate
+pnpm add dayjs
+pnpm add @ant-design/icons-vue
+npx nuxi@latest module add ionic
+npx nuxi@latest module add tailwindcss
+
+pnpm add -D eslint @nuxt/eslint-config eslint-plugin-nuxt eslint-plugin-vue eslint-config-prettier
+pnpm add -D @ant-design-vue/nuxt
+pnpm add -D dotenv
+pnpm add -D cross-env
 ```
 
+update nuxt.config.ts
 
+```typescript
+export default defineNuxtConfig({
+  devServer: {
+    port: 7726,
+  },
+  runtimeConfig: {
+    public: {
+      storeApi: 'cacaoapi',
+    }
+  },
+  compatibilityDate: '2025-06-20',
+  devtools: { enabled: true },
+  nitro: {
+    devProxy: {
+      '/cacaoapi': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+  modules: [
+    '@ant-design-vue/nuxt',
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+    '@nuxt/eslint',
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/ionic'
+  ],
+  antd: {
+    // Options
+  },
+  app: {
+    head: {
+      title: 'LineCRM.CarCare',
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
+  },
+  sourcemap: {
+    server: true,
+    client: true
+  },
+  ssr: false,
+})
+```
 
 ### 初始化 Nuxt3 專案，設定 SPA 模式 (`ssr: false`)
 
@@ -146,7 +202,7 @@ import { IonApp, IonContent } from '@ionic/vue'
 </template>
 ```
 
-### 初始化 .NET8 API 專案，連接 MSSQL，建置 EF Core Model（DB First）
+### 
 
 ### Gmail OAuth2 登入流程（前端登入拿 token，後端驗證）
 
@@ -337,131 +393,7 @@ tsCopyEditexport default defineNuxtConfig({
 - 必須申請 Google Play 開發者帳號（$25一次性）
 - 上傳、填資料、審核、上架
 
-------
 
-## 6. 最後提交成果
-
-- 專案原始碼 GitHub Repo
-- Demo影片（介紹功能流程）
-- 開發心得文章（整理遇到的問題與學到的事）
-
-## 1. 安裝 PWA 模組
-
-```
-npm install @vite-pwa/nuxt
-```
-
-------
-
-## 2. 在 `nuxt.config.ts` 加上 PWA 設定
-
-```
-tsCopyEditimport { defineNuxtConfig } from 'nuxt/config'
-
-export default defineNuxtConfig({
-  modules: [
-    '@vite-pwa/nuxt',
-  ],
-  pwa: {
-    registerType: 'autoUpdate', // 自動更新新版 Service Worker
-    manifest: {
-      id: '/',
-      name: 'PocketMoney 家庭零用錢管理',
-      short_name: 'PocketMoney',
-      description: '管理家庭成員的零用錢收支，支援Giver與Baby角色',
-      theme_color: '#4F46E5',
-      background_color: '#ffffff',
-      display: 'standalone',
-      start_url: '/',
-      scope: '/',
-      orientation: 'portrait-primary',
-      icons: [
-        {
-          src: '/icon-192x192.png',
-          sizes: '192x192',
-          type: 'image/png',
-        },
-        {
-          src: '/icon-512x512.png',
-          sizes: '512x512',
-          type: 'image/png',
-        }
-      ]
-    },
-    workbox: {
-      cleanupOutdatedCaches: true,
-      navigateFallback: '/',
-      runtimeCaching: [
-        {
-          urlPattern: /^https:\/\/your-api-domain\.com\/api\//,
-          handler: 'NetworkFirst',
-          options: {
-            cacheName: 'api-cache',
-            expiration: {
-              maxEntries: 50,
-              maxAgeSeconds: 300, // 5 minutes
-            },
-          },
-        },
-        {
-          urlPattern: ({ request }) => request.destination === 'image',
-          handler: 'CacheFirst',
-          options: {
-            cacheName: 'image-cache',
-            expiration: {
-              maxEntries: 100,
-              maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
-            },
-          },
-        }
-      ],
-    }
-  }
-})
-```
-
-------
-
-## 3. PWA 必備圖示（放在 `/public`）
-
-
-
-| 檔案                       | 尺寸    |
-| -------------------------- | ------- |
-| `/public/icon-192x192.png` | 192x192 |
-| `/public/icon-512x512.png` | 512x512 |
-
-✅ 記得自己產生高解析度 icon，讓裝置加到桌面時好看。
-
-------
-
-## 4. 實現自動更新提示 (Optional)
-
-如果你想讓使用者知道有新版本，可以自己在 Nuxt3 加一個提示：
-
-```
-tsCopyEdit// 在 app.vue 加上
-
-<script setup>
-import { useRegisterSW } from 'virtual:pwa-register/vue'
-
-const { needRefresh, updateServiceWorker } = useRegisterSW()
-
-const refreshApp = () => {
-  updateServiceWorker(true)
-}
-</script>
-
-<template>
-  <div v-if="needRefresh" class="fixed bottom-0 left-0 right-0 bg-blue-600 text-white p-2 text-center z-50">
-    發現新版本，<button @click="refreshApp" class="underline">點我更新</button>
-  </div>
-</template>
-```
-
-✅ 這樣當你部署新版本，使用者就會看到「發現新版本」提示！
-
-------
 
 # 最佳化注意事項
 
@@ -483,21 +415,6 @@ const refreshApp = () => {
 - 新版自動提示更新
 - 可以上 Google Play Store（Web App型）
 
-# 總結一句話
-
-> **這樣設定後，你的 Nuxt3 App 安裝到手機上，會幾乎跟原生 App 一模一樣體驗。**
-
-------
-
-✅ 完整 production-ready。
- ✅ 上線後馬上能讓人「加到主畫面」，正式運作！
-
-------
-
-要不要我再順便補一版 👉「專門針對 Android WebAPK最佳化的小技巧（例如隱藏狀態列、全屏設定）」？
- 要的話直接說：「要 WebAPK最佳化」，我馬上附上。🚀
- 要嗎？
-
 ### Nuxt3 專案轉入 Capacitor 專案，設定 Android專案環境
 
 
@@ -506,11 +423,13 @@ const refreshApp = () => {
 
 ### 打包 APK，申請 Google Play 開發者帳號，上傳 Google Play Console
 
-## Day ?? 
+## Day 
 
 ### 其他功能規劃
 
 ### 意外之財，我要先存起來
+
+
 
 
 
