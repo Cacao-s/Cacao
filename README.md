@@ -4,7 +4,7 @@ Developing a Family Allowance Management System
 
 打造家庭零用錢管理App — Nuxt 3 + Go 全端實作
 
-## 專案介紹：Nuxt3 + .NET8 API + MSSQL 專案初始化與環境建立
+## 專案介紹：Nuxt3 + GO API + MSSQL 專案初始化與環境建立
 
 ### Git Repo 準備
 
@@ -103,18 +103,6 @@ export default defineNuxtConfig({
 })
 ```
 
-### 初始化 Nuxt3 專案，設定 SPA 模式 (`ssr: false`)
-
-1. 安裝 Nuxt 3 專案
-
-如果你還沒建立專案，先建立一個：
-
-```
-nuxi init cacaoweb
-cd cacaoweb
-pnpm install
-```
-
 2. 安裝 Capacitor
 
 ```
@@ -206,33 +194,39 @@ import { IonApp, IonContent } from '@ionic/vue'
 
 ### Gmail OAuth2 登入流程（前端登入拿 token，後端驗證）
 
+
+
 ### 完成 Nuxt3 登入流程，登入後自動建立 User 資料（Giver / Baby）
+
+
 
 ### Nuxt3 建立 Pinia 狀態管理（userStore, walletStore）
 
-### 建立 .NET8 API：User Profile CRUD
+
+
+### 建立 GO API：User Profile CRUD
 
 ### 前端完成 Profile 頁面（個人資料管理）
 
-### 建立 .NET8 API：查詢餘額、發錢（Giver 發錢功能）
+### 建立 GO API：查詢餘額、發錢（Giver 發錢功能）
 
 ### 前端實作 Giver 發錢頁面（指定 Baby 加錢）
 
-### 建立 .NET8 API：提款申請（Baby 發起提款請求）
+### 建立 GO API：提款申請（Baby 發起提款請求）
 
 ### 前端實作 Baby 提款申請頁面
 
-### 建立 .NET8 API：提款審核（Giver同意/拒絕）
+### 建立 GO API：提款審核（Giver同意/拒絕）
 
 ### 前端實作 Giver 提款審核頁面
 
-### 建立 .NET8 API：支出紀錄（Baby新增支出）
+### 建立 GO API：支出紀錄（Baby新增支出）
 
 ### 前端實作 Baby 支出登記頁面
 
 ### 前端實作 Baby 支出歷史紀錄頁面
 
-### 建立 .NET8 API：Giver查看 Baby 消費紀錄
+### 建立 GO API：Giver查看 Baby 消費紀錄
 
 ### 前端實作 Giver 消費紀錄頁面（含搜尋/篩選）
 
@@ -240,7 +234,7 @@ import { IonApp, IonContent } from '@ionic/vue'
 
 ### Day 21 加入交易時間軸頁面（Timeline 顯示交易歷程）
 
-### Day 22 建立 .NET8 API：上傳使用者頭像（接收 Multipart / 上傳雲端或本地）
+### Day 22 建立 GO API：上傳使用者頭像（接收 Multipart / 上傳雲端或本地）
 
 ### Day 23 Nuxt3 實作頭像上傳功能
 
@@ -250,7 +244,7 @@ import { IonApp, IonContent } from '@ionic/vue'
 
 ### Day 25 完成多 Giver 支援單一 Baby 的資料結構與API調整
 
-### Day 26 建立 .NET8 排程服務（HostedService）自動定期加零用錢
+### Day 26 建立 GO 排程服務（HostedService）自動定期加零用錢
 
 ### Day 27 加入交易分類系統（食物、玩具等），前端後端同步支援分類
 
@@ -258,7 +252,7 @@ import { IonApp, IonContent } from '@ionic/vue'
 
 ------
 
-### Day 29 服務容器化（Docker化 Nuxt3 與 .NET8 API，連接 MSSQL）
+### Day 29 服務容器化（Docker化 Nuxt3 與 GO API，連接 MSSQL）
 
 ```
 # 基底 Node.js image
@@ -311,81 +305,7 @@ services:
       - NODE_ENV=production
 ```
 
-### Day 30 整合測試、修正 Bug、打包正式版、撰寫發表心得
-
-## 1. 整合測試與最後修正
-
-- 全面測試登入、發錢、提款申請、支出記錄、排程加零用錢等功能。
-- 確認前端 Nuxt3 與後端 .NET8 API 正常連線，MSSQL 資料一致。
-
-------
-
-## 2. 容器化部署
-
-- 使用 Dockerfile 打包 Nuxt3 前端與 .NET8 API。
-- 使用 Docker-Compose 統一管理（Web + API + MSSQL）。
-- 本地或雲端（如AWS、Azure、Vercel）部署完整環境。
-
-------
-
-## 3. 選擇正式釋出方式
-
-
-
-| 方式                | 說明                                                         |
-| ------------------- | ------------------------------------------------------------ |
-| Web App             | ✅ 將 Nuxt3 部署成正式網站，供瀏覽器使用                      |
-| PWA（推薦）         | ✅ 把 Nuxt3設成PWA，可安裝到手機桌面，像App體驗               |
-| WebView App（次選） | ✅ 用 Capacitor/Firebase/WebView 封裝 Nuxt3 網站，打包成 Android APK 上架 Google Play |
-
-------
-
-## 4. PWA 設定（推薦）
-
-- 使用 `@nuxtjs/pwa` 模組
-- 設定 manifest.json
-- 加入 Service Worker 離線快取
-- 支援「加到主畫面」功能（Add to HomeScreen）
-- 可透過 Chrome、Safari 安裝成應用程式
-
-範例設定：
-
-```
-bash
-
-
-CopyEdit
-npm install @nuxtjs/pwa
-```
-
-`nuxt.config.ts` 加上：
-
-```
-tsCopyEditexport default defineNuxtConfig({
-  modules: ['@nuxtjs/pwa'],
-  pwa: {
-    manifest: {
-      name: 'PocketMoneyApp',
-      short_name: 'PocketMoney',
-      start_url: '/',
-      display: 'standalone',
-      background_color: '#ffffff',
-      theme_color: '#4F46E5',
-      icons: [
-        {
-          src: '/icon.png',
-          sizes: '512x512',
-          type: 'image/png',
-        }
-      ]
-    }
-  }
-})
-```
-
-------
-
-## 5. 如果想打包成 APK 上架 Google Play（選項）
+### 5. 如果想打包成 APK 上架 Google Play（選項）
 
 - 使用 Capacitor 封裝 Nuxt3 SPA 網址
 - 指定 `server.url = 'https://your-webapp-domain.com'`
@@ -395,7 +315,7 @@ tsCopyEditexport default defineNuxtConfig({
 
 
 
-# 最佳化注意事項
+### 最佳化注意事項
 
 
 
@@ -407,7 +327,7 @@ tsCopyEditexport default defineNuxtConfig({
 | theme_color, background_color 要配色好看 | 不然安裝畫面很醜                     |
 | registerType 設 autoUpdate               | 確保有新版自動更新 Service Worker    |
 
-# 完成後效果
+### 完成後效果
 
 - 使用者可以「加到主畫面」
 - 打開像原生 App，無瀏覽器 UI
@@ -415,15 +335,13 @@ tsCopyEditexport default defineNuxtConfig({
 - 新版自動提示更新
 - 可以上 Google Play Store（Web App型）
 
-### Nuxt3 專案轉入 Capacitor 專案，設定 Android專案環境
-
 
 
 ### 測試本地 App（SQLite資料儲存、API呼叫正常），修正所有 Bugs
 
 ### 打包 APK，申請 Google Play 開發者帳號，上傳 Google Play Console
 
-## Day 
+
 
 ### 其他功能規劃
 
