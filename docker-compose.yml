@@ -1,0 +1,35 @@
+services:
+  cacao_mysql_3307:
+    image: mysql:lts # image long term support
+    container_name: cacao_mysql_3307
+    ports:
+    - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysettingpassword
+      MYSQL_DATABASE: TemplateDB
+    volumes:
+    - mysql_3307_data:/var/lib/mysql
+    restart: always
+
+  cacao_api:
+    image: mysql:lts # 改成我帳號的公用 docker registary
+    container_name: cacao_api
+    ports:
+    - "4545:80"
+    env_file:
+    - .env.production
+    - .env
+    environment:
+      # 改成自己維護的 db 不一定要依賴 cacao_mysql_3307
+      DB_USER: root
+      DB_PASS: mysettingpassword
+      DB_PORT: 3307
+      DB_HOST: cacao_mysql_3307
+    depends_on:
+    - cacao_mysql_3307
+    volumes:
+    - cacao_api:/var/lib/mysql # 改成 log 位置
+    restart: always
+
+volumes:
+  mysql_3307_data:

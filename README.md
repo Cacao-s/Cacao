@@ -18,14 +18,25 @@ Vscode 開發 Cacao Nuxt  專案
 
 vs 2022 開發 net CacaoApi
 
-ssms 連線 mssql
+dbever 連線 mysql
+
+docker Desktop 運行 docker container
+
+### 資料庫設計
+
+Cacao\Cacao\db\CacaoInit.sql
 
 #### 專案初始化
 
 新增專案 CacaoApi  
 
-```
-
+```powershell
+# 初始化 module
+go mod init cacaoapi
+# 安裝 Gin 套件
+go get -u github.com/gin-gonic/gin
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/mysql
 ```
 
 新增專案 Cacao 
@@ -34,11 +45,106 @@ ssms 連線 mssql
 
 ```
 
-### 資料庫設計
-
 
 
 ### 初始化 Nuxt3 專案，設定 SPA 模式 (`ssr: false`)
+
+1. 安裝 Nuxt 3 專案
+
+如果你還沒建立專案，先建立一個：
+
+```
+nuxi init cacaoweb
+cd cacaoweb
+pnpm install
+```
+
+2. 安裝 Capacitor
+
+```
+pnpm install --save @capacitor/core @capacitor/cli
+npx cap init
+```
+
+初始化時選擇：
+
+- App name: `YourAppName`
+- App id: `com.yourdomain.appname`
+
+3. 設定 `capacitor.config.ts`
+
+設定 build output 為 Nuxt 輸出的目錄：
+
+```
+tsCopyEditimport { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.yourdomain.appname',
+  appName: 'YourAppName',
+  webDir: 'dist',
+  bundledWebRuntime: false
+};
+
+export default config;
+```
+
+4. 加入 Android 平台
+
+```
+npx cap add android
+```
+
+5. 建立 Nuxt 的 Production Build
+
+```
+npm run build
+```
+
+確保你在 `nuxt.config.ts` 中使用的是 `ssr: false`，以便生成為 SPA：
+
+```
+tsCopyEditexport default defineNuxtConfig({
+  ssr: false
+})
+```
+
+6. 同步到 Android 專案
+
+```
+npx cap copy android
+```
+
+#### 7. 使用 Android Studio 開啟專案
+
+```
+npx cap open android
+```
+
+在 Android Studio 中編譯與部署到模擬器或實體裝置。
+
+### 附加：安裝 Ionic UI 元件
+
+你可以使用 Ionic 的核心元件：
+
+```
+npm install @ionic/vue @ionic/core
+```
+
+並在 `app.vue` 中初始化：
+
+```
+<script setup lang="ts">
+import { IonApp, IonContent } from '@ionic/vue'
+</script>
+
+<template>
+  <IonApp>
+    <IonContent>
+      <NuxtPage />
+    </IonContent>
+  </IonApp>
+</template>
+```
 
 ### 初始化 .NET8 API 專案，連接 MSSQL，建置 EF Core Model（DB First）
 
@@ -242,10 +348,6 @@ tsCopyEditexport default defineNuxtConfig({
 ## 1. 安裝 PWA 模組
 
 ```
-bash
-
-
-CopyEdit
 npm install @vite-pwa/nuxt
 ```
 
@@ -361,7 +463,7 @@ const refreshApp = () => {
 
 ------
 
-# 📢 最佳化注意事項
+# 最佳化注意事項
 
 
 
@@ -373,9 +475,7 @@ const refreshApp = () => {
 | theme_color, background_color 要配色好看 | 不然安裝畫面很醜                     |
 | registerType 設 autoUpdate               | 確保有新版自動更新 Service Worker    |
 
-------
-
-# 📢 完成後效果
+# 完成後效果
 
 - 使用者可以「加到主畫面」
 - 打開像原生 App，無瀏覽器 UI
@@ -383,9 +483,7 @@ const refreshApp = () => {
 - 新版自動提示更新
 - 可以上 Google Play Store（Web App型）
 
-------
-
-# 📢 總結一句話
+# 總結一句話
 
 > **這樣設定後，你的 Nuxt3 App 安裝到手機上，會幾乎跟原生 App 一模一樣體驗。**
 
