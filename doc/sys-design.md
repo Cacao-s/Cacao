@@ -1,6 +1,6 @@
 # Cacao 系統設計總覽
 
-本文件提供 Cacao MVP 的技術設計藍圖，涵蓋技術堆疊、架構、模組職責、資料模型、API 規範、部署與測試策略。內容與 `doc/vision.md`、`doc/mvp-spec.md` 保持一致，並聚焦行動 App 首發即上架的要求。
+本文件提供 Cacao MVP 的技術設計藍圖，涵蓋技術堆疊、架構、模組職責、資料模型、API 規範、部署與測試策略。內容與 `doc/product-guide.md` 保持一致，並聚焦行動 App 首發即上架的要求。
 
 ---
 
@@ -153,4 +153,4 @@ Middleware 順序：Request ID → Logger → Recovery → Rate Limit → CORS �
 | v0.2 | 2024-11 | 切換 React Native + Expo，調整整體設計 | 
 | v0.3 | ＜待定＞ | MVP 落地後更新實作細節與監控數據 |
 
-若架構或技術決策有重大變動，請先更新本文件，再同步 `doc/vision.md`、`doc/mvp-spec.md` 與 `doc/plan-30d.md`，確保全體成員對系統狀態保持一致。
+若架構或技術決策有重大變動，請先更新本文件，再同步 `doc/product-guide.md` 與 `doc/plan-30d.md`，確保全體成員對系統狀態保持一致。

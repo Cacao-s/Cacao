@@ -1,6 +1,6 @@
 # Cacao 30 天行動計畫
 
-此計畫協助在 30 個專注工作日內完成 Cacao MVP，並達到上架 App Store / Google Play 的準備標準。內容引用 `doc/vision.md`、`doc/mvp-spec.md`、`doc/sys-design.md`，請隨進度更新紀錄（建議建立 `LOG.md`）。
+此計畫協助在 30 個專注工作日內完成 Cacao MVP，並達到上架 App Store / Google Play 的準備標準。內容引用 `doc/product-guide.md` 與 `doc/sys-design.md`，請隨進度更新紀錄（建議建立 `LOG.md`）。
 
 ---
 
@@ -26,7 +26,7 @@
 
 ### Day 1　釐清願景與旅程
 - **Focus**：確認角色需求與成功畫面。
-- **Key Steps**：更新 `doc/vision.md` 內的痛點、旅程、成功指標；列出 Giver/Baby 三大需求；整理主要流程故事板。
+- **Key Steps**：更新 `doc/product-guide.md` 內的痛點、旅程、成功指標；列出 Giver/Baby 三大需求；整理主要流程故事板。
 - **Done When**：可口述完整旅程並得到認可，文檔同步。
 
 ### Day 2　資料模型與 API 藍圖
@@ -54,9 +54,8 @@
 - **Key Steps**：撰寫 `repositories/user_repository_test.go`（SQLite in-memory + testify）；新增 `db/seed_users.sql`、`cmd/seed/main.go`。
 - **Done When**：`go test ./...` 全數通過，種子資料可建立範例家庭。
 
-### Day 7　週檢視
 - **Focus**：同步程式與文件。
-- **Key Steps**：執行 `gofmt`, `golangci-lint`；更新 `doc/mvp-spec.md`、`doc/sys-design.md` 狀態；盤點風險與依賴。
+- **Key Steps**：執行 `gofmt`, `golangci-lint`；更新 `doc/product-guide.md`、`doc/sys-design.md` 狀態；盤點風險與依賴。
 - **Done When**：程式、文件一致，下週里程碑明確。
 
 ---
