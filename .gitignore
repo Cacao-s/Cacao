@@ -1,0 +1,176 @@
+# =========================
+# General
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+
+# 不要忽略範本
+!.env.example
+!.env.sample
+!.env.template
+
+# =========================
+# Env / Secrets（實際機密 & 本機設定）
+# =========================
+.env
+.env.*
+*.local.env
+*.env.local
+*.secret.yaml
+*.secrets.yaml
+*.local.yaml
+*.local.yml
+
+# configs/ 裡只忽略本機/秘密設定，其他照常版控
+configs/*local*.yaml
+configs/*secret*.yaml
+
+# =========================
+# Go / Backend build artifacts
+# =========================
+bin/
+*.exe
+*.test
+*.out
+
+# go tool / coverage
+coverage/
+*.cover
+*.coverprofile
+
+# 若不打算版控 vendor 才開啟
+# vendor/
+
+# =========================
+# Node / React / Expo / Web 前端
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json.*
+yarn.lock.*
+pnpm-lock.yaml.*
+
+# 各種 bundler 輸出
+dist/
+build/
+.next/
+.nuxt/
+.vite/
+.out/
+.cache/
+.tmp/
+.temp/
+.eslintcache
+.turbo/
+
+# apps/mobile（Expo / React Native）常見產物
+apps/mobile/.expo/
+apps/mobile/.expo-shared/
+apps/mobile/.bundle/
+apps/mobile/.expo/*
+apps/mobile/web-build/
+apps/mobile/metro-cache/
+apps/mobile/.vscode/
+
+# apps/web-admin 若是 React/Next/Vite 也會產出上述 dist/build/.next/.nuxt
+apps/web-admin/.next/
+apps/web-admin/.nuxt/
+apps/web-admin/dist/
+apps/web-admin/build/
+
+# =========================
+# iOS（React Native / EAS）
+# =========================
+ios/DerivedData/
+ios/build/
+ios/**/*.xcuserstate
+ios/**/*.xcworkspace/xcuserdata/
+ios/Pods/
+ios/.bundle/
+*.xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+
+# EAS / Xcode 憑證、描述檔（實際放 infra/eas/ 的就看你要不要版控）
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.cer
+
+# 如果 infra/eas 下有需要版控的檔案：請針對路徑 whitelisting
+# 例如：
+# !infra/eas/eas.json
+# !infra/eas/README.md
+
+# =========================
+# Android（React Native / EAS）
+# =========================
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/build/
+android/build/
+android/.cxx/
+android/app/*.keystore
+android/app/*.jks
+
+# =========================
+# Infra / Docker / Dev tools
+# =========================
+# Docker 常見暫存
+**/.docker-compose.override.yml
+**/docker-compose.override.yml
+**/.env.docker
+**/.env.docker.local
+
+# 若 infra/docker-compose 有 data/ volume 資料夾，可依情況忽略
+infra/docker-compose/data/
+infra/docker-compose/tmp/
+infra/docker-compose/logs/
+
+# MinIO / Mailhog / MySQL 等 local volume 目錄（視你實際掛載路徑調整）
+data/
+logs/
+tmp/
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# GoLand / JetBrains
+*.iws
+*.ipr
+
+# =========================
+# Tools / Codegen（依實際生成路徑調整）
+# =========================
+tools/tmp/
+tools/.cache/
+
+# 若 shared/client-sdk 是純 codegen，不想版控可打開：
+# shared/client-sdk/**
+# !shared/client-sdk/README.md
+
+# 若有 OpenAPI 產生的暫存檔：
+shared/api-schema/.openapi-tmp/
+shared/api-schema/.codegen/
