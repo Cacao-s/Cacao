@@ -154,3 +154,44 @@ Middleware 順序：Request ID → Logger → Recovery → Rate Limit → CORS �
 | v0.3 | ＜待定＞ | MVP 落地後更新實作細節與監控數據 |
 
 若架構或技術決策有重大變動，請先更新本文件，再同步 `doc/product-guide.md` 與 `doc/plan-30d.md`，確保全體成員對系統狀態保持一致。
+---
+
+## 12. Repo / Monorepo 結構建議
+- 以單一 repo 管理 Go 後端與 React Native App，統一 CI/CD、版本與審核資源，並預留 Web Admin 與 background worker 的擴充空間。
+- 採 `apps/`（客戶端）、`cmd/` + `internal/`（Go 服務）、`shared/`（契約與設計資產）分離，避免依賴交錯，也方便 Expo 與 Go 各自建置與測試。
+- `infra/` 集中 docker-compose、GitHub Actions、EAS/憑證等設定，確保 lint/test/build/submit 流程可以針對 iOS 上架自動驗證。
+
+```text
+cacao/
+├─ cmd/
+│  ├─ api/                 # REST 入口 (Gin)
+│  └─ jobs/                # Allowance/通知排程或 worker
+├─ internal/
+│  ├─ platform/            # config、logger、db、auth middleware
+│  ├─ auth/ families/ wallets/ allowances/ requests/ transactions/
+│  └─ notifications/ sync/ # 對應 MVP 模組
+├─ pkg/                    # 可共用的工具套件（idempotency、validator）
+├─ migrations/             # MySQL schema 版本控管
+├─ configs/                # app.{env}.yaml、.env 範本
+├─ services/
+│  └─ api/                 # go.mod、wire、routes 等對外入口
+├─ jobs/                   # 若日後拆獨立 worker service
+├─ apps/
+│  ├─ mobile/              # React Native + Expo Router
+│  └─ web-admin/           # 預留 React Web / 後台
+├─ shared/
+│  ├─ api-schema/          # OpenAPI / JSON Schema
+│  ├─ client-sdk/          # 由 schema 產生的 Go / TS SDK
+│  └─ ui-kit/              # design tokens、icons、i18n 資源
+├─ infra/
+│  ├─ docker-compose/      # MySQL、Mailhog、MinIO 等
+│  ├─ github/              # Actions workflow（lint/test/build/EAS）
+│  └─ eas/                 # eas.json、憑證、Fastlane notes
+├─ docs/                   # 規格、設計、部署文件
+└─ tools/                  # Taskfile、codegen、scripts
+```
+
+- `apps/mobile` 以 Expo Router、`features/`、`services/`、`stores/`、`hooks/`、`i18n/`、`theme/` 等目錄落實模組化，再與 `shared/api-schema` 產出的 TypeScript SDK + React Query 結合，確保 API 契約同步。
+- `cmd/api` 與 `internal/platform` 負責設定、連線與 middleware；業務邏輯分散在 `internal/<domain>`，透過 DI 工具（wire/fx）注入，對應本文件既有的 Service / Repository 分層。
+- `shared/ui-kit`、`shared/api-schema` 讓行動 App、未來的 Web/Admin 共用設計資產與型別，也能在 CI 內自動產生 SDK、lint preset。
+- `infra/github/*.yml` 收斂 PR pipeline：Go 單元測試 / golangci-lint、React Native lint/test，以及 EAS build 提交 TestFlight；若需要手動觸發，`tools/` 可提供 `task ios:beta` 等指令保持流程一致。
