@@ -195,3 +195,37 @@ cacao/
 - `cmd/api` 與 `internal/platform` 負責設定、連線與 middleware；業務邏輯分散在 `internal/<domain>`，透過 DI 工具（wire/fx）注入，對應本文件既有的 Service / Repository 分層。
 - `shared/ui-kit`、`shared/api-schema` 讓行動 App、未來的 Web/Admin 共用設計資產與型別，也能在 CI 內自動產生 SDK、lint preset。
 - `infra/github/*.yml` 收斂 PR pipeline：Go 單元測試 / golangci-lint、React Native lint/test，以及 EAS build 提交 TestFlight；若需要手動觸發，`tools/` 可提供 `task ios:beta` 等指令保持流程一致。
+
+---
+
+## 13. 開發初始化手冊
+- 詳細命令紀錄請參考 `doc/setup-log.md`；以下為成功初始化目前 repo 的摘要，後續新環境請依此流程微調。
+
+**Go API**
+- 於 repo 根目錄執行 `go mod init github.com/Cacao/Cacao`，接著 `go get github.com/gin-gonic/gin@v1.10.0` 以建立 baseline 依賴。
+- 依第 12 章的結構建立目錄（`cmd/api`, `internal/platform`, `internal/{auth,families,...}`, `pkg`, `migrations`, `configs`, `jobs`, `services/api`, `shared/*`, `tools` 等），避免後續搬家。
+- 參考目前的 `cmd/api/main.go` 與 `internal/platform/{config,router,server}`，確保：
+  - `config.Load()` 從 `CACAO_ENV / CACAO_API_PORT / CACAO_ALLOW_CORS` 讀取環境設定。
+  - `router.New()` 至少註冊 `/health`，作為 GitHub Actions 與監控檢查點。
+  - `server.New(...).Run()` 透過 `slog` 記錄啟動資訊。
+- 執行 `go build ./cmd/api` 驗證程式碼狀態，必要時把 `go test ./...`、`golangci-lint` 納入 `tools/Taskfile` 或 GitHub Actions。
+
+**Expo / React Native App**
+- 建立 `apps/mobile`：`npx create-expo-app@latest apps/mobile --template blank-typescript`，完成後立刻刪除預設 `App.tsx` 並導入 Expo Router。
+  - `package.json`：`main` 指向 `expo-router/entry`，scripts 增加 `lint`（`expo lint`）與 `typecheck`（`tsc --noEmit`）。
+  - `index.ts` 改為 `import 'expo-router/entry';`。
+  - `tsconfig.json` 增加 `paths` → `"@/*": ["./*"]`，方便共用 hooks/services。
+  - `app.json` 新增 `scheme: "cacao"` 與 `extra.apiUrl`（預設 `http://localhost:8080`），並於 `plugins` 列出 `expo-router`, `expo-sqlite`, `expo-localization`, `expo-secure-store`。
+- 套件安裝建議流程：
+  1. `npx expo install expo-router`.
+  2. `npx expo install @tanstack/react-query zustand @react-native-async-storage/async-storage expo-sqlite expo-notifications expo-localization expo-secure-store @react-native-community/netinfo expo-linking react-native-safe-area-context react-native-screens react-native-gesture-handler react-native-reanimated expo-status-bar`.
+  3. 其他純 JS 套件（`react-i18next`, `i18next` 等）用 `npm --prefix apps/mobile install`。
+- 建立 router 目錄：`app/_layout.tsx` 以 `SafeAreaProvider` + `QueryClientProvider` 包住 `Stack`，`app/(tabs)` 放 Dashboard/Requests/Settings 頁，並同步建立 `features/`, `services/`, `stores/`, `hooks/`, `i18n/`, `theme/`（可用 `.gitkeep` 保留空資料夾）。
+- 執行 `npm --prefix apps/mobile run lint`（首次會自動安裝 ESLint 與 `eslint-config-expo`）與 `npm --prefix apps/mobile run typecheck`，確保基本質量守門。
+
+**共用工作流程**
+- 根目錄 `package.json` 已定義工作區：
+  - `npm run dev:api` → `go run ./cmd/api`
+  - `npm run dev:mobile` → `npm --prefix apps/mobile run start`
+  - `npm run lint` → 目前代理至 Expo lint，可視需求擴充成 `eslint` + `golangci-lint`。
+- 如需重建任何端，務必在 `doc/setup-log.md` 追加時間戳，維持審計性；若流程有重大變更，回到本節同步更新，避免文件與實際狀態漂移。
