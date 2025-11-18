@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useAuth } from '../../features/auth/auth-provider';
+import { useTheme } from '../../theme';
 
 const mockDashboard = async () => {
   return {
@@ -18,26 +19,27 @@ const mockDashboard = async () => {
 export default function DashboardScreen() {
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: mockDashboard });
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   if (!data) {
     return null;
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Family Wallet</Text>
-      <Text style={styles.subtitle}>Hi, {user?.displayName ?? 'Giver'}!</Text>
-      <Text style={styles.balance}>${(data.balance / 100).toFixed(2)}</Text>
-      <Text style={styles.caption}>Pending requests: {data.pendingRequests}</Text>
-      <Text style={styles.caption}>Next allowance run: {data.upcomingAllowance}</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.title, { color: theme.text }]}>Family Wallet</Text>
+      <Text style={[styles.subtitle, { color: theme.mutedText }]}>Hi, {user?.displayName ?? 'Giver'}!</Text>
+      <Text style={[styles.balance, { color: theme.text }]}>${(data.balance / 100).toFixed(2)}</Text>
+      <Text style={[styles.caption, { color: theme.mutedText }]}>Pending requests: {data.pendingRequests}</Text>
+      <Text style={[styles.caption, { color: theme.mutedText }]}>Next allowance run: {data.upcomingAllowance}</Text>
 
-      <Text style={styles.section}>Recent activity</Text>
+      <Text style={[styles.section, { color: theme.text }]}>Recent activity</Text>
       <FlatList
         data={data.recentActivity}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>{item.label}</Text>
+          <View style={[styles.row, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.rowLabel, { color: theme.text }]}>{item.label}</Text>
             <Text style={[styles.rowAmount, item.amount < 0 && styles.negative]}>
               {(item.amount / 100).toFixed(2)}
             </Text>
