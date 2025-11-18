@@ -1,50 +1,50 @@
-# �W�h�`��
+# 規則總覽
 
-## �q�γW�h�]�A�Ω� `docs/` �ؿ����Ҧ��ɮס^
-| ���� | ���� |
+## 通用規則（適用於 `docs/` 目錄內所有檔案）
+| 項目 | 說明 |
 | --- | --- |
-| �y�� | `docs/` �ؿ�������󤺮e�@�ߨϥ��c�餤��C
-| �ɦW | `docs/` �ؿ������ɮ׻ݨϥέ^��R�W�A�B���פ֩� 20 �Ӧr���C
-| ��s�y�{ | �Y�W�h�ݭn�վ�A���u���ק糧�ɨæP�B�i����L Agent�C
+| 語言 | `docs/` 目錄內的文件內容一律使用繁體中文。
+| 檔名 | `docs/` 目錄內的檔案需使用英文命名，且長度少於 20 個字元。
+| 更新流程 | 若規則需要調整，請優先修改本檔並同步告知其他 Agent。
 
 ---
 
-## ���s�s�� `docs/plan-30d.md` ���n�D
+## 重新編輯 `docs/plan-30d.md` 的要求
 
-### ��X�ǫh
-- �����H�{���� `docs/plan-30d.md` �P�M�ײ{�p����¦�L�աA�T��L�������s�p�e�C
-- ���ȥ����伵�u30 �ӱM�`�u�@�駹���i�W�[ MVP�v�A�[�\�e�ݡB��ݡB���p�P�禬�C
+### 輸出準則
+- 必須以現有的 `docs/plan-30d.md` 與專案現況為基礎微調，禁止無關的全新計畫。
+- 任務必須支撐「30 個專注工作日完成可上架 MVP」，涵蓋前端、後端、部署與驗收。
 
-### ���c�榡
-1. �C�g�ݴ��ѡu���g�ؼ� / �G�I�v�q���C
-2. �C����Ȥ@�ߨϥ� `Focus / Key Steps / Done When` �榡�C
-3. �w�ƩT�w���u�g�˵��v��A���e�ݧt�{���X��ơB���i�׻P���I�˰Q�C
-4. ��餣�o�W���W�L�@�ӻݭn��h�骺���j���ȡA���n�ɽЩ�ѻP�ƧǨ̿�C
-5. ���ȴy�z��������q�ƩΥi���ҡA�קK�ҽk�r���]�Ҧp�u�A�׬�s�v�^�C
-6. �好�O�d�R�O�t�d�Ϭq�A�C�X��ڰ���L���u��Ϋ��O�C
+### 結構格式
+1. 每週需提供「本週目標 / 亮點」段落。
+2. 每日任務一律使用 `Focus / Key Steps / Done When` 格式。
+3. 安排固定的「週檢視」日，內容需含程式碼整備、文件進度與風險檢討。
+4. 單日不得規劃超過一個需要拆成多日的巨大任務，必要時請拆解與排序依賴。
+5. 任務描述必須具體量化或可驗證，避免模糊字眼（例如「適度研究」）。
+6. 文末保留命令速查區段，列出實際執行過的工具或指令。
 
-### �i���ˮ�
-- �������a�̯S�� Mermaid �Φ����i�ױ��A�õ����p���s�����v�C
+### 進度檢核
+- 必須附帶甘特或 Mermaid 形式的進度條，並註明如何更新完成率。
 
-### �޳N�J�I
-1. �R�O�P�d�һݲŦX�ثe�޳N���|�]Go�BReact Native�BExpo�BMySQL ���^�C
-2. �����Ƹ��� Git / �׺� / �s�边��¦���ѡA�w�]����̼��x�򥻤u��C
-3. �����Ʈw�Ϋ�ݽվ�ݦP�B���� migration�B�����ܼƻP�]�w�ɥ��ȡC
-4. �Y�o�A���p�B�����BOAuth ���]�w�A�����C�X�ˬd�I�P���ҵ��G�C
-5. �j�ո�ݾ�X�]�p FCM�BOAuth�^�ɡA�n�P�ɽT�{ server �P client ���]�w�ɡC
+### 技術焦點
+1. 命令與範例需符合目前技術堆疊（Go、React Native、Expo、MySQL 等）。
+2. 不重複解釋 Git / 終端 / 編輯器基礎知識，預設執行者熟悉基本工具。
+3. 任何資料庫或後端調整需同步指派 migration、環境變數與設定檔任務。
+4. 若牽涉部署、推播、OAuth 等設定，必須列出檢查點與驗證結果。
+5. 強調跨端整合（如 FCM、OAuth）時，要同時確認 server 與 client 的設定檔。
 
-### ���@�~�P���@
-1. ���T���X�ݭn��s�������|�]�p `docs/product-guide.md`�B`docs/sys-design.md`�^�C
-2. ��ĳ�إߩΧ�s `LOG.md` �H�l�ܶi�סB�t���P��ê�C
-3. �Y���ȯA�Φh�ظ�Ʃδ��տ�J�A�е����ӷ��P�x�s��m�C
-4. ���󻡩������O���i�l���ʡA���n�ɤޥι����ɮת����`�Ϊ���C
+### 文件作業與維護
+1. 明確指出需要更新的文件路徑（如 `docs/product-guide.md`、`docs/sys-design.md`）。
+2. 建議建立或更新 `LOG.md` 以追蹤進度、差異與阻礙。
+3. 若任務涉及多種資料或測試輸入，請註明來源與儲存位置。
+4. 任何說明必須保持可追溯性，必要時引用對應檔案的章節或表格。
 
-### ���ջP����
-1. �ܤֱƩw�@����� (Android/iOS) ���ջP����/�q�����ҡC
-2. �w�� Demo �t�m���^�U�A���n�ɪ����I�ϡB���v�ΤU�@�B��i�ƶ��C
-3. �Ҧ��w���B���p�P�]�֬������ȳ��n�C�X�ˬd�M��P�d���H�C
+### 測試與驗證
+1. 至少排定一次實機 (Android/iOS) 測試與推播/通知驗證。
+2. 安排 Demo 演練／回顧，必要時附錄截圖、錄影或下一步改進事項。
+3. 所有安全、隱私與稽核相關任務都要列出檢查清單與責任人。
 
-### �då�ޱ�
-1. �T��N Cacao �M�פ��~���x�ξǲߤ��e�g�J `docs/`�C
-2. �C����ȶ��T�{�e�m����A�קK�]�̿ॼ�����Ӱ����C
-3. �y��ݰȹ�i����A�ڵ��Ūx��ĳ�εL��ʪ����סC
+### 範疇管控
+1. 禁止將 Cacao 專案之外的泛用學習內容寫入 `docs/`。
+2. 每日任務須確認前置條件，避免因依賴未滿足而停滯。
+3. 語氣需務實可執行，拒絕空泛建議或無行動的評論。

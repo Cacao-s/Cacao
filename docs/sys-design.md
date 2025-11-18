@@ -1,206 +1,158 @@
-# Cacao ç³»çµ±è¨­è?ç¸½è¦½
+ï»¿# Cacao ç³»çµ±è¨­è¨ˆè—åœ–
 
-?¬æ?ä»¶æ?ä¾?Cacao MVP ?„æ?è¡“è¨­è¨ˆè??–ï?æ¶µè??€è¡“å??Šã€æ¶æ§‹ã€æ¨¡çµ„è·è²¬ã€è??™æ¨¡?‹ã€API è¦ç??éƒ¨ç½²è?æ¸¬è©¦ç­–ç•¥?‚å…§å®¹è? `docs/product-guide.md` ä¿æ?ä¸€?´ï?ä¸¦è??¦è???App é¦–ç™¼?³ä??¶ç?è¦æ???
+æœ¬æ–‡ä»¶æè¿° Cacao MVP çš„æŠ€è¡“å †ç–Šã€æ¨¡çµ„é‚Šç•Œã€è³‡æ–™æ¨¡å‹ã€API æµç¨‹èˆ‡éƒ¨ç½²ç­–ç•¥ã€‚æ‰€æœ‰å…§å®¹ä»¥ç¹é«”ä¸­æ–‡æ’°å¯«ï¼Œä¸¦èˆ‡ `docs/product-guide.md`ã€`docs/plan-30d.md` ä¿æŒåŒæ­¥ã€‚
 
 ---
 
-## 1. ?€è¡“å???
-| ?†å±¤ | ?¡ç”¨?€è¡?| èªªæ? |
+## 1. æŠ€è¡“å †ç–Š
+| å±¤ç´š | æŠ€è¡“ | èªªæ˜ |
 | --- | --- | --- |
-| Mobile App | React Native + Expo Routerï¼ˆTypeScriptï¼?| ?®ä?ç¨‹å?ç¢¼æ”¯??iOS/Androidï¼Œæ•´?ˆæ¨?­ã€æ·±å±¤é€???‡ç’°å¢ƒè¨­å®?|
-| ?€?‹ç®¡??| React Query?Zustand?Expo SQLite/MMKV | React Query è² è²¬ä¼ºæ??¨ç??‹ï?Zustand ç®¡ç??¬åœ°?€?‹è??¢ç?ä½‡å? |
-| UI / ä¸»é? | ?ªè? ThemeProviderï¼ˆdefault / light / darkï¼‰ã€Design Tokens | ç¢ºä?ä¸»é??‡æ??ç„¡?œç??‡ä??´è?è¦?|
-| å¾Œç«¯ API | Go 1.21 + Gin + GORM | ?§åˆ¶å±¤å??¢ã€æ“´?…æ€§ä½³ï¼Œæ”¯?´äº¤?“è??’ç? |
-| èªè??ˆæ? | Gmail OAuth2?JWT Access/Refresh?bcrypt | è¡Œå?ç«¯ä½¿??Secure Store/HttpOnly Cookie ?²å??‘è? |
-| è³‡æ?åº?| MySQL 8ï¼ˆæ­£å¼ï??SQLiteï¼ˆæ¸¬è©¦è? App ç·©å?ï¼?| MySQL ?ºå”¯ä¸€?Ÿå¯¦ä¾†æ?ï¼›SQLite ?ªå??«å?è³‡æ? |
-| ?¨æ’­ | Firebase Cloud Messaging?APNs?Expo Notifications | ?ä?è£ç½®è¨»å??å?å¥½è¨­å®šè??¨æ’­æ´¾é€?|
-| ?¥è?/??§ | zap/zerolog?Prometheus?Sentry/Expo EAS | çµæ??–æ—¥èª?+ ?‡æ?ï¼Œè¿½è¹¤è?æ±‚è??’ç??€??|
-| CI/CD | GitHub Actions?Expo EAS?Docker | ?ªå??·è? lint/test/buildï¼Œç”¢?ºå?ç«¯æ??è? App ??|
+| å¾Œç«¯æœå‹™ | Go 1.24ã€Ginã€Wire/DIï¼ˆé ç•™ï¼‰ | REST APIã€jobsã€å…±ç”¨ domain æ¨¡çµ„ |
+| è³‡æ–™åº« | MySQL 8ï¼ˆæœ¬åœ°å¯æ”¹ SQLiteï¼‰ã€Goose/Migrate | å„²å­˜ familiesã€walletsã€allowancesã€requestsã€transactions |
+| å¿«å–ï¼å„²å­˜ | Redisï¼ˆæœªä¾†ï¼‰ã€MinIO/S3ï¼ˆé™„ä»¶ï¼‰ | MVP å…ˆä»¥æœ¬åœ°æª”æ¡ˆæš«å­˜ï¼Œè¦æ ¼é ç•™ |
+| è¡Œå‹•ç«¯ | React Native (Expo SDK 54)ã€Expo Routerã€TypeScriptã€React Query | iOS/Android Appï¼Œæ”¯æ´ light/dark/high contrast ä¸»é¡Œ |
+| é€šçŸ¥ | Email/Webhook Stubã€Expo Notifications | MVP ä»¥ log æ¨¡å¼é‹ä½œï¼Œå¾ŒçºŒå°å…¥æ¨æ’­èˆ‡å¤–éƒ¨æœå‹™ |
+| DevOps | GitHub Actionsã€Docker Composeã€EASã€Taskfile | CI/CDã€ç’°å¢ƒç®¡ç†èˆ‡ build æµç¨‹ |
 
 ---
 
-## 2. ?¶æ?æ¦‚å¿µ
+## 2. æ¶æ§‹æ¦‚è¦½
 ```
-?Œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??           Mobile App          ??React Native + Expo
-?? - UI (Router / Screens)       ??
-?? - State (React Query / Store) ??
-?? - Offline Queue (SQLite)      ??
-?”â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¬â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-                ??HTTPS / JSON + Push
-?Œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¼â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??          API Gateway          ??Gin Router + Middleware
-?œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¬â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??Controllers   ??Services       ??é©—è??æ?æ¬Šã€å?æ¥­é?è¼?
-?œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?´â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??   Repositories (GORM)         ??
-?”â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¬â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-                ??
-?Œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¼â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??           MySQL 8             ???®ä??Ÿå¯¦ä¾†æ?
-?”â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¬â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-                ??
-?Œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¼â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-??    Background Jobs / Queue    ??Allowance ?’ç??é€šçŸ¥æ´¾é€ã€å?æ­¥è???
-?”â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¬â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-                ??
-?Œâ??€?€?€?€?€?€?€?€?€?€?€?€?€?€?¼â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
-?? FCM / APNs / Expo Push ?šé?    ??
-?”â??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€??
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Mobile App  â”‚ <---->â”‚  REST API   â”‚<--> MySQL
+â”‚ (Expo Router)â”‚       â”‚ (Go + Gin)  â”‚     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+         â–²                    â–²            â”‚
+         â”‚ é€šçŸ¥ webhook/log   â”‚ jobs       â–¼
+   Expo Notifications     Allowance Runner â”€â”€> future queue / notifier
 ```
+- Mobile åªèˆ‡ REST API æºé€šï¼Œæ‰€æœ‰è³‡æºçš†ç¶“ token é©—è­‰ã€‚
+- Jobs ä»¥ `server/cmd/jobs` åŸ·è¡Œï¼Œè² è²¬ allowance æ’ç¨‹èˆ‡é€šçŸ¥é‡é€ã€‚
+- `shared/api-schema` ç‚ºå–®ä¸€å¥‘ç´„ä¾†æºï¼Œç”¢ç”Ÿ TS/Go SDKï¼ˆå¾…å¯¦ä½œï¼‰ã€‚
 
 ---
 
-## 3. æ¨¡ç?è²¬ä»»?©é™£
-| æ¨¡ç? | Mobile | Backend | Jobs/Queue |
+## 3. æ¨¡çµ„é‚Šç•Œ
+| æ¨¡çµ„ | ä½ç½® | è·è²¬ |
+| --- | --- | --- |
+| `server/cmd/api` | Go binary | çµ„åˆ configã€DIã€å•Ÿå‹• HTTP server |
+| `server/internal/platform` | Go package | configã€routerã€serverã€loggerã€DBã€middleware |
+| `server/internal/domain/*` | Go package | æ¥­å‹™é‚è¼¯ï¼ˆauthã€familiesã€walletsã€allowancesã€requestsã€transactionsï¼‰ |
+| `server/internal/api/*` | Go package | è«‹æ±‚é©—è­‰ã€å›æ‡‰æ ¼å¼ï¼ˆç›®å‰åªæœ‰ authï¼‰ |
+| `server/internal/jobs` | Go package | Allowance schedulerã€job runnerã€æœªä¾† worker |
+| `apps/mobile/app` | Expo Router routes | Stack èˆ‡ tabsï¼Œç™»å…¥ã€Dashboardã€è«‹æ¬¾ã€è¨­å®š |
+| `apps/mobile/features/*` | Hooks + UI modules | AuthProviderã€Requestsã€Dashboardã€Settings ç­‰ |
+| `apps/mobile/theme` | ThemeProvider | Light/Dark/High Contrast ä¸»é¡Œèˆ‡é…è‰²è¡¨ |
+| `shared/api-schema` | OpenAPI | Swagger/JSON schemaï¼Œç”Ÿæˆ client SDK |
+| `infra/docker-compose` | Docker | MySQLã€Mailhogã€MinIOã€è§€å¯Ÿå·¥å…· |
+| `infra/github` | GitHub Actions | lint/test/build/workflow æª” |
+
+---
+
+## 4. è³‡æ–™æ¨¡å‹
+| è¡¨ | ä¸»è¦æ¬„ä½ | èªªæ˜ |
+| --- | --- | --- |
+| `families` | id, name, owner_id, created_at | å®¶åº­åŸºæœ¬è³‡æ–™ã€æ“æœ‰è€… |
+| `members` | id, family_id, user_id, role | å®¶åº­èˆ‡ä½¿ç”¨è€…çš„å°æ‡‰ï¼Œè§’è‰² (giver/baby) |
+| `wallets` | id, family_id, name, balance_cents, currency | éŒ¢åŒ…é¤˜é¡ï¼Œåƒ…å…è¨±éè² æ•¸ï¼Œæœªä¾†æ”¯æ´å¤šå¹£åˆ¥ |
+| `allowances` | id, wallet_id, schedule_type, amount_cents, next_run_at, status | å®šæœŸæ´¥è²¼è¨­å®šèˆ‡ç‹€æ…‹ |
+| `requests` | id, wallet_id, requester_id, amount_cents, note, receipt_uri, status, reviewed_by | è«‹æ¬¾ç´€éŒ„èˆ‡å¯©æ ¸è³‡è¨Š |
+| `transactions` | id, wallet_id, request_id, type, amount_cents, balance_after, metadata | æ ¸å‡†è«‹æ¬¾æˆ–æ‰‹å‹•èª¿æ•´çš„æµæ°´å¸³ |
+| `notifications` | id, type, payload, status, retries | é€šçŸ¥è¼¸å‡ºçš„è¨˜éŒ„ï¼ˆMVP ä»¥ log è¡¨ç¤ºï¼Œå¯å»¶ä¼¸ï¼‰ |
+
+ç´¢å¼•é‡é»ï¼š
+- `wallets (family_id, name)` uniqueï¼›`requests` ä¾ `wallet_id` + `status` å»ºç´¢å¼•ã€‚
+- éœ€è¦ç¨½æ ¸çš„æ¬„ä½ï¼ˆå¦‚ `requests.reviewed_by`ï¼‰å¿…é ˆè¨˜éŒ„ä½¿ç”¨è€…èˆ‡ timestampã€‚
+
+---
+
+## 5. API æ‘˜è¦
+| Method | Path | åŠŸèƒ½ | å‚™è¨» |
 | --- | --- | --- | --- |
-| èº«ä»½?‡å®¶åº?| è§’è‰²?¸æ??å?å¥½è¨­å®šã€é?è«‹æ?ç¨?| é©—è??å®¶åº­é??¯ã€å?å¥½å„²å­?| ?€è«‹é??Ÿé€šçŸ¥ï¼ˆå»¶ä¼¸ï? |
-| ?¢å? | ?¢å??—è¡¨?ç·¨è¼¯ã€é?é¡è?è¦ºå? | ?¢å? CRUD?é?é¡é?è­‰ã€è­¦??| è­¦æ??¨æ’­ï¼ˆå»¶ä¼¸ï? |
-| ?¶ç”¨??| è¦å??—è¡¨?å??œã€æ­·??| å»ºç?/?´æ–°è¦å??é?é¡æª¢??| ?’ç???¬¾?å»ºç«‹äº¤?“ã€é€šçŸ¥ |
-| è«‹æ¬¾ | ?‰ç¨¿?é?ä»¶ã€é€å‡º | å»ºç?è«‹æ¬¾?ç??‹æ›´??| è£œä»¶?é?ï¼ˆå»¶ä¼¸ï? |
-| å¯©æ ¸ | ?¸å?/?€?ã€å?è¨?| æ¬Šé?é©—è??äº¤?“ç???| å¯©æ ¸?é?ï¼ˆå»¶ä¼¸ï? |
-| äº¤æ? | ?‚é?è»¸ã€å?é¡ã€çµ±è¨?| äº¤æ?å¯«å…¥?æŸ¥è©¢ã€å ±è¡¨è???| å®šæ?çµ±è?ï¼ˆå»¶ä¼¸ï? |
-| ?šçŸ¥ | ?¨æ’­ä¸­å??å?å¥?| äº‹ä»¶å»ºæ??è?ç½®è¨»??| æ´¾é€æ¨?­ã€é?è©?|
-| ?¢ç??Œæ­¥ | ä½‡å?ç®¡ç??ç??‹æ?ç¤?| `/sync/operations`?å†ªç­‰è???| å¤±æ??æ’­?‡å?è­?|
+| POST | `/api/v1/auth/login` | ä½¿ç”¨å¸³å¯†ç™»å…¥ | å›å‚³ token + ä½¿ç”¨è€…è³‡è¨Š |
+| GET | `/api/v1/health` | å¥åº·æª¢æŸ¥ | ä¾›ç›£æ§æ¢é‡ä½¿ç”¨ |
+| POST | `/api/v1/families` | å»ºç«‹å®¶åº­ | MVP å…ˆç”±å–®ä¸€ Giver å»ºç«‹ |
+| GET | `/api/v1/families/:id/summary` | å®¶åº­æ¦‚æ³ï¼ˆéŒ¢åŒ…ã€è«‹æ¬¾ï¼‰ | Dashboard ä½¿ç”¨ |
+| POST | `/api/v1/wallets` | å»ºç«‹éŒ¢åŒ… | é©—è­‰ balance >= 0 |
+| POST | `/api/v1/allowances` | å»ºç«‹æ´¥è²¼ | æ’ç¨‹è³‡è¨Šå¯«å…¥ DB |
+| POST | `/api/v1/requests` | å»ºç«‹è«‹æ¬¾ | é™„ä»¶æš«å­˜ URI |
+| GET | `/api/v1/families/:id/requests` | æŸ¥è©¢è«‹æ¬¾ | æ”¯æ´ç‹€æ…‹ç¯©é¸ |
+| PATCH | `/api/v1/requests/:id/approve` | æ ¸å‡†è«‹æ¬¾ | åŒæ™‚å¯«å…¥ transaction |
+| PATCH | `/api/v1/requests/:id/decline` | é§å›è«‹æ¬¾ | éœ€è¦ reason |
+
+æ‰€æœ‰ API å›æ‡‰æ¡ `{ data, error }` æ ¼å¼ï¼ŒéŒ¯èª¤éœ€å¸¶ `code`ï¼ˆä¾‹å¦‚ `invalid_credentials`ï¼‰ã€‚
 
 ---
 
-## 4. è³‡æ?æ¨¡å??˜è?
-| è¡?| ?é?æ¬„ä? | èªªæ? |
+## 6. å·¥ä½œæµç¨‹
+### 6.1 ç™»å…¥
+1. å®¢æˆ¶ç«¯é€å‡ºå¸³å¯†è‡³ `/auth/login`ã€‚
+2. ä¼ºæœå™¨é©—è­‰å¾Œç”¢ç”Ÿ tokenï¼ˆç›®å‰ç‚º HMAC + random nonceï¼‰ã€‚
+3. å›å‚³ `token`ã€`expiresAt` èˆ‡ `roles`ï¼Œå‰ç«¯å„²å­˜æ–¼ memoryï¼ˆæœªä¾†åŠ  SecureStoreï¼‰ã€‚
+
+### 6.2 è«‹æ¬¾æ ¸å‡†
+1. Baby å»ºç«‹è«‹æ¬¾ï¼ˆpendingï¼‰ã€‚
+2. Giver æ–¼åˆ—è¡¨æŒ‘é¸è«‹æ¬¾ â†’ `approve` APIã€‚
+3. domain å±¤æª¢æŸ¥é¤˜é¡ã€å¯«å…¥ transactionã€æ›´æ–° request ç‹€æ…‹ã€‚
+4. Notifier æ¥æ”¶åˆ°äº‹ä»¶ï¼Œæ¨é€ Email/Logï¼ŒApp é€é React Query è‡ªå‹•åˆ·æ–°ã€‚
+
+### 6.3 Allowance æ’ç¨‹
+1. Job runner æ¯åˆ†é˜æª¢æŸ¥ `allowances` æ˜¯å¦åˆ°æœŸã€‚
+2. é‡å°ç¬¦åˆæ¢ä»¶çš„ allowance å»ºç«‹ transaction + é€šçŸ¥ã€‚
+3. æ›´æ–° `next_run_at`ï¼Œè‹¥å¤±æ•—å¯«å…¥ retry è³‡è¨Šã€‚
+
+---
+
+## 7. è¡Œå‹• App è¨­è¨ˆ
+- **è·¯ç”±**ï¼š`app/_layout.tsx` å»ºç«‹ Stackï¼ˆç™»å…¥ã€Tabsï¼‰ã€‚Tabs å« Dashboardã€Requestsã€Settingsã€‚
+- **è³‡æ–™å±¤**ï¼šReact Query ç®¡ç† API cacheï¼Œ`services/api.ts` è™•ç† fetch èˆ‡éŒ¯èª¤è¨Šæ¯ã€‚
+- **ç‹€æ…‹**ï¼š`features/auth/AuthProvider` ç®¡ç† tokenã€éŒ¯èª¤ç‹€æ…‹ï¼›`theme/ThemeProvider` è®“æ‰€æœ‰ç•«é¢å¯åˆ‡æ› Light/Dark/High Contrastã€‚
+- **UI æŒ‡å—**ï¼š
+  - å­—é«”ï¼šç³»çµ±é è¨­ + 16px åŸºæº–ã€‚
+  - é¡è‰²ï¼š`theme` å®šç¾©èƒŒæ™¯ã€æ–‡å­—ã€é‚Šæ¡†ã€å¼·èª¿è‰²ï¼›High Contrast æ¨¡å¼ä½¿ç”¨é»‘/ç™½ + é»ƒè‰²æç¤ºã€‚
+  - å¯åŠæ€§ï¼šæ‰€æœ‰äº’å‹•å…ƒä»¶éœ€æœ‰ 44px é»æ“Šå€åŸŸã€‚
+
+---
+
+## 8. æ¸¬è©¦ç­–ç•¥
+| å±¤ç´š | å·¥å…· | å…§å®¹ |
 | --- | --- | --- |
-| `users` | email, password_hash, google_sub, display_name, locale, theme, role, status | ä½¿ç”¨?…ä¸»æª”ï??«ç³»çµ±è??²ï?giver/baby/adminï¼‰è??å¥½ |
-| `families` | name, currency, timezone, created_by | å®¶åº­è¨­å?ï¼Œè??å“¡?é? `family_members` ?œè¯ |
-| `family_members` | family_id, user_id, family_role, invited_by, joined_at | å®¶åº­?§è??²ï?giver/baby/...ï¼‰ï??¯æ´?€è«‹æ?ç¨?|
-| `wallets` | family_id, name, type, balance, currency, warning_threshold, status | ?¢å?é¤˜é??±äº¤?“å?ç¸½ç¶­?ä???|
-| `allowances` | family_id, giver_member_id, receiver_member_id, wallet_id, amount, frequency, next_run_at, status | å®šæ?/?¨æ??¼æ”¾è¦å??‡æ?ç¨‹è?è¨?|
-| `requests` | family_id, requester_member_id, wallet_id, amount, category, notes, attachment_url, status, decision_by, decision_at, rejection_reason | è«‹æ¬¾è¨˜é?ï¼Œç??‹å???draft/pending/approved/rejected/cancelled |
-| `transactions` | family_id, wallet_id, type, amount, source_type, source_id, category, occurred_at, notes | ?‘æ?ç´€?„ï?`type` ??credit/debit |
-| `notifications` | user_id, event_type, payload, delivery_status, read_at | ?¨æ’­??App ?§æ??’ç?çµ±ä?ä¾†æ? |
-| `sync_queue` | device_id, user_id, operation_type, payload, temp_id, status, retries, last_error | è¡Œå?ç«¯é›¢ç·šæ?ä½œä??³å??„ç??‹è¿½è¹?|
-| `audit_logs` | actor_id, family_id, action, resource_type, resource_id, metadata, created_at | å®‰å…¨ç¨½æ ¸?å®¢?æŸ¥è©¢ç”¨ |
-
-è©³ç´° Schema ??Migration ??`docs/data-model.md` ç¶­è­·??
+| å–®å…ƒæ¸¬è©¦ | `go test ./internal/...` | Domain é‚è¼¯ã€validatorã€jobs |
+| API æ¸¬è©¦ | Postman/k6ã€httpexpect | ç™»å…¥ã€å®¶åº­ã€è«‹æ¬¾ã€æ ¸å‡†æµç¨‹ |
+| è¡Œå‹•ç«¯ | Expo Jestã€Detox (å¾ŒçºŒ) | hooks èˆ‡ç•«é¢å¿«ç…§ã€åŸºæœ¬å°èˆª |
+| æ•´åˆæ¸¬è©¦ | docker compose + k6 | èµ°å®Œç™»å…¥â†’è«‹æ¬¾â†’æ ¸å‡† â†’ é€šçŸ¥ |
+| ç›£æ§ | JSON Logã€æœªä¾†æ¥ DataDog/OTLP | è¨˜éŒ„ request idã€latencyã€error rate |
 
 ---
 
-## 5. API è¦ç?
-- **è·¯ç”±?†ç?**ï¼š`/auth`, `/users`, `/families`, `/wallets`, `/allowances`, `/requests`, `/transactions`, `/notifications`, `/sync`, `/health`, `/metrics`??
-- **?æ??¼å?**ï¼š`{ success: boolean, data?: T, error?: { code, message, details? } }`??
-- **?ˆæ?**ï¼šä½¿??`Authorization: Bearer <AccessToken>`ï¼›Refresh Token ?é? HttpOnly Cookie ??Secure Store ?­é? `/auth/refresh`??
-- **?ªç???*ï¼š`Idempotency-Key` header ?‹ç”¨?¼æ??¹è??€?‹ç?è«‹æ?ï¼ˆè?æ¬¾ã€å?æ­¥ã€ç™¼?¾ï???
-- **?„ä»¶ä¸Šå‚³**ï¼šæ¡?ç°½ URLï¼ˆS3/GCS/R2ï¼‰æ? `multipart/form-data`ï¼Œé??¶æ?æ¡ˆå¤§å°è??¼å?ï¼ˆä?å¦??? MB, jpg/png/pdfï¼‰ã€?
-- **?¯èª¤ç¢?*ï¼šçµ±ä¸€??`docs/api-outline.md` å®šç¾©ï¼Œå??«èº«ä»½å¤±?ˆã€è?æºä?å­˜åœ¨?é?é¡ä?è¶³ã€å†ªç­‰è?çªç?æ¡ˆä???
-
-Middleware ?†å?ï¼šRequest ID ??Logger ??Recovery ??Rate Limit ??CORS ??JWT é©—è? ???ˆæ???
+## 9. éƒ¨ç½²èˆ‡ç’°å¢ƒ
+- **æœ¬æ©Ÿ**ï¼š`docker compose` å•Ÿå‹• MySQLã€Mailhogã€MinIOï¼›`npm run dev:api` / `dev:mobile` å•Ÿå‹•æœå‹™ã€‚
+- **Staging**ï¼šGitHub Actions build â†’ deploy è‡³ Kubernetes/Renderï¼ˆé ç•™ï¼‰ã€‚Secrets ç®¡ç†æ–¼ GitHubã€‚
+- **EAS**ï¼š`apps/mobile/eas/` ä¿å­˜æ†‘è­‰èˆ‡ `eas.json`ï¼›build é€é `eas build --profile preview`ã€‚
+- **è¨­å®š**ï¼šæ‰€æœ‰ç’°å¢ƒè®Šæ•¸çš†ä»¥ `CACAO_*` å‰ç¶´ï¼Œåˆ—æ–¼ `.env.example`ã€‚
 
 ---
 
-## 6. Mobile App è¨­è?
-- **å°ˆæ?çµæ?**ï¼š`app/`ï¼ˆè·¯?±ï??`features/`ï¼ˆé??Ÿæ¨¡çµ„ï??`components/`?`stores/`?`services/`?`hooks/`?`i18n/`?`theme/`??
-- **?€?‹æ?ç¨?*ï¼šReact Query ??? API ???å?å¾Œå¯«??cacheï¼Œä¸¦?Œæ­¥?³å?è¦ç•«?¢ï??¢ç??‚è???SQLite ç·©å???
-- **?¢ç?æ©Ÿåˆ¶**ï¼šZustand `offlineQueue` + SQLiteï¼Œè??„æ?ä½œè? `temp_id`ï¼›`useSync` hook ??½ç¶²è·¯?€?‹ï??ªå??¹æ¬¡?¼å« `/sync/operations`??
-- **?¨æ’­**ï¼š`expo-notifications` è¨»å?è£ç½® Token ???³è‡³ `/notifications/devices`ï¼›é??Šæ¨?­é€é? deep link å°å?å°æ??«é¢??
-- **ä¸»é?/èªç³»**ï¼šThemeProvider ?­é? Design Tokenï¼Œæ”¯??default/light/darkï¼›`react-i18next` ??Expo Localization ç®¡ç? zh-TW/en ?‡æ???
-- **æ¸¬è©¦**ï¼šJest + React Native Testing Libraryï¼ˆå–®??UIï¼‰ï?Detox ??Maestroï¼ˆE2Eï¼‰ã€?
+## 10. å®‰å…¨èˆ‡éš±ç§
+- ä½¿ç”¨ bcryptï¼ˆæˆ– scryptï¼‰å­˜æ”¾å¯†ç¢¼ï¼Œç¦æ­¢æ˜æ–‡ã€‚
+- Token ç›®å‰ç‚ºè‡ªç°½å¼ HMACï¼Œæœªä¾†å¯æ”¹ JWT ä¸¦åŠ å…¥ refresh tokenã€‚
+- æ‰€æœ‰è«‹æ¬¾é™„ä»¶åƒ…å­˜æª”åèˆ‡é ç°½ URIï¼Œå¯¦é«”ç”± MinIO/S3 ç®¡ç†ã€‚
+- éœ€å¯¦ä½œ Rate Limitï¼ˆGin middlewareï¼‰ä»¥é¿å…æš´åŠ›æ”»æ“Šã€‚
+- Log ä¸å¾—åŒ…å«æ•æ„Ÿå­—ä¸²ï¼ˆå¯†ç¢¼ã€session secretï¼‰ã€‚
 
 ---
 
-## 7. å¾Œç«¯è¨­è?
-- **å°ˆæ?çµæ?**ï¼š`main.go` ?Ÿå? ??`config/` è¼‰å…¥?°å? ??`routes/` è¨»å?è·¯ç”± ??`controllers/` ?•ç? HTTP ??`services/` å¯¦ä??†æ¥­?è¼¯ ??`repositories/` å­˜å?è³‡æ?åº???`models/` å®šç¾©å¯¦é? ??`jobs/` ?•ç??’ç??‡ä?????`infra/` ?´å?å¤–éƒ¨?å???
-- **?å?å±¤é?é»?*ï¼?
-  - `AuthService`ï¼šè¨»?Šã€ç™»?¥ã€OAuth?Token ?¼è?/?·æ–°?ç™»?ºã€?
-  - `FamilyService`ï¼šå»ºç«‹å®¶åº­ã€é?è«‹æ?ç¨‹ã€è??²æ??é?è­‰ã€?
-  - `WalletService`ï¼šéŒ¢??CRUD?é?é¡èª¿?´ï?ä½¿ç”¨ DB äº¤æ?ï¼‰ã€è­¦?’é€šçŸ¥??
-  - `AllowanceService`ï¼šè??‡å»ºç«‹ã€æ?ç¨‹ã€é?é¡æª¢?¥ã€äº¤?“ç”¢?Ÿã€?
-  - `RequestService`ï¼šè?ç¨¿ã€æ?äº¤ã€å¯©?¸ã€é?ä»¶ç®¡?†ã€?
-  - `TransactionService`ï¼šäº¤?“å¯«?¥ã€æŸ¥è©¢ã€çµ±è¨ˆè??™è?ç®—ã€?
-  - `NotificationService`ï¼šè?ç½®è¨»?Šã€ä?ä»¶å»ºæª”ã€æ¨?­æ´¾?ã€é?è©¦ã€?
-  - `SyncService`ï¼šæ¥?¶é›¢ç·šæ‰¹æ¬¡ã€å†ªç­‰åˆ¤?·ã€å¯«?¥äº¤?“ã€?
-- **?’ç?/ä½‡å?**ï¼šä½¿??`robfig/cron` ??`go-co-op/gocron` ?·è? Allowance ?¼æ”¾?é€šçŸ¥?é€ï?å¿…è??‚ä»¥è³‡æ?åº«é???Redis ç¢ºä??®ä??·è???
+## 11. æ–‡ä»¶ç¶­è­·
+- ç³»çµ±è¨­è¨ˆè‹¥æœ‰ä¿®æ”¹ï¼Œè«‹ç«‹åˆ»æ›´æ–°æœ¬æª”ä¸¦åŒæ­¥ `docs/product-guide.md`ã€`docs/plan-30d.md`ã€‚
+- é‡å¤§æ±ºç­–è«‹å¯«å…¥ `docs/adr/`ï¼ˆè‹¥æœªå»ºç«‹è«‹æ–°å¢è³‡æ–™å¤¾ï¼‰ã€‚
+- åœ¨æ¯æ¬¡é€±æª¢è¦–å°‡å®Œæˆåº¦æ¨™è¨˜æ–¼æœ¬æª”æœ€å¾Œç« ç¯€ï¼Œä»¥åˆ©å¯©æŸ¥ã€‚
 
 ---
 
-## 8. å®‰å…¨?‡å?è¦?
-- å¯†ç¢¼??bcryptï¼ˆcost ??12ï¼‰ï??»å…¥?Ÿç”¨?Ÿç??åˆ¶??
-- JWT Access Token ç´?15 ?†é?ï¼ŒRefresh Token 14 å¤©ï??¯è¨­å®šé??å–®?–ç??¬è?å¤±æ???
-- ?è??ä?ï¼ˆç™»?¥ã€è??²è??´ã€é?é¡èª¿?´ï?å¯«å…¥ `audit_logs`??
-- Log ?¿å?ç´€?„å€‹è??Tokenï¼›é?è¨?INFO ç­‰ç?ï¼Œæ”¯?´å¯èª¿æ•´??
-- CORS ?åˆ¶?¨å??¹ç¶²?Ÿè?è¡Œå?è£ç½®ä½¿ç”¨??schemeï¼›æ???API èµ?HTTPS??
-- æº–å??±ç??¿ç??æ??™æ?æ¬¾ã€æ??è²?ï?ç¬¦å? Apple/Google å¯©æ ¸??
+## 12. æœªä¾†å·¥ä½œ
+1. å»ºç«‹ `shared/client-sdk/ts`ï¼Œè®“ Expo ç›´æ¥å¼•ç”¨ typed APIã€‚
+2. å°å…¥ OAuth / å®¶é•·ç¤¾ç¾¤ç™»å…¥ï¼Œæ¸›å°‘å¸³è™Ÿç¶­è­·æˆæœ¬ã€‚
+3. ä¸²æ¥çœŸå¯¦æ¨æ’­ï¼ˆAPNs/FCMï¼‰èˆ‡éƒµä»¶æœå‹™ï¼ˆSendGridï¼‰ã€‚
+4. å¼•å…¥äº‹ä»¶åŒ¯æµæ’ï¼ˆNATS/Kafkaï¼‰ä¾›é€šçŸ¥èˆ‡å¯©è¨ˆä½¿ç”¨ã€‚
 
----
-
-## 9. ?¨ç½²?‡ç’°å¢?
-- **?‹ç™¼**ï¼šDocker Compose ?Ÿå? MySQLï¼›Expo ??? `http://localhost:8080`ï¼›ç’°å¢ƒè??¸ç”± `.env` ç®¡ç???
-- **Staging**ï¼šéƒ¨ç½²æ–¼?²ç«¯ï¼ˆRender/Railway/Fly.io ç­‰ï?ï¼Œæ•´??HTTPS?å?ä»½è???§ï¼›Expo EAS ?¢å‡ºæ¸¬è©¦ buildï¼ˆAndroid Internal / TestFlightï¼‰ã€?
-- **Production**ï¼šç¨ç«‹è??™åº«?‡æ??¨ç?å¼æ??™ï?è¨­è‡ª?•å??´è???§?Šè­¦ï¼›App ?¼å?æ­???ˆã€?
-- **CI/CD**ï¼šGitHub Actions ?·è? lint/test ??å»ºç½® Docker ? å? ??è§¸ç™¼ EAS Buildï¼ˆé?è¦?æ­??ï¼‰ï??¨ç½²?³æœ¬è¨˜é???`docs/deploy-playbook.md`??
-
----
-
-## 10. æ¸¬è©¦ç­–ç•¥
-- **å¾Œç«¯**ï¼š`go test ./...`ï¼ˆå–®???å?/?´å?ï¼‰ã€`golangci-lint`?Postman/k6 ?ˆç??‡è?è¼‰æ¸¬è©¦ã€?
-- **è¡Œå?ç«?*ï¼šJestï¼ˆé?è¼??ƒä»¶ï¼‰ã€React Native Testing Libraryï¼ˆUIï¼‰ã€Detox/Maestroï¼ˆé??µæ?ç¨‹ï??Expo E2E Preview??
-- **?‹å? QA**ï¼šä? `docs/plan-30d.md` ä¸­ç??±æª¢è¦–è??€çµ?QA æ¸…å–®?·è???
-- **è¦†è??‡ç›®æ¨?*ï¼šå?ç«¯æ ¸å¿ƒæ¨¡çµ???70%ï¼Œè??•ç«¯?œéµæ¨¡ç? > 50%ï¼ŒE2E è¦†è??»å…¥?è?æ¬¾ã€å¯©?¸ã€é€šçŸ¥??
-
----
-
-## 11. ?ˆæœ¬?‡ç¶­è­?
-| ?ˆæœ¬ | ?¥æ? | ?é? |
-| --- | --- | --- |
-| v0.1 | 2024-10 | Nuxt + Go ?ç??¶æ?ï¼ˆå·²?œç”¨ï¼?|
-| v0.2 | 2024-11 | ?‡æ? React Native + Expoï¼Œèª¿?´æ•´é«”è¨­è¨?| 
-| v0.3 | ï¼œå?å®šï? | MVP ?½åœ°å¾Œæ›´?°å¯¦ä½œç´°ç¯€?‡ç›£?§æ•¸??|
-
-?¥æ¶æ§‹æ??€è¡“æ±ºç­–æ??å¤§è®Šå?ï¼Œè??ˆæ›´?°æœ¬?‡ä»¶ï¼Œå??Œæ­¥ `docs/product-guide.md` ??`docs/plan-30d.md`ï¼Œç¢ºä¿å…¨é«”æ??¡å?ç³»çµ±?€?‹ä??ä??´ã€?
----
-
-## 12. Repo / Monorepo µ²ºc«ØÄ³
-- ¥ş³¡¼Ò²Õ¶°¤¤¦b³æ¤@ repo¡A`server/` ©Ó¸ü Go ¼Ò²Õ¡B`apps/` ¥]§t«eºİ¡]Expo ¦æ°Êºİ + ¹w¯dªº Web Admin¡^¡B`shared/` ºŞ²z«´¬ù»P³]­p¸ê²£¡B`infra/` ºŞ²z³¡¸p¸}¥»¡B`docs/` «O¦s³W®æ»P­pµe¡C¦p¦¹¥iÅı CI/CD ¦@¥Î¦P¤@®MÅv­­»PÀË¬d¡A«áÄò¤]¯à³v¨B©î¤À¡C
-- `server/` ¤º³¡¥u«O¯d Go ¬ÛÃö¤º®e¡G`cmd/`¡]`api`¡B`jobs`¡^¡B`internal/`¡]`platform`¡B`domain`¡B`jobs` µ¥¤l¼Ò²Õ¡^¡B`configs/`¡B`migrations/`¡B`tools/`¡B`pkg/`¡A²M·¡¬É©w `cmd/` ­t³d DI + ±Ò°Ê¡A·~°ÈÅŞ¿è¶°¤¤¦b `internal/`¡C
-- `apps/` ¤Uºû«ù `mobile/` + `web-admin/` µ²ºc¡F¦æ°Êºİ±Ä Expo Router¡Amobile ±MÄİªº EAS/¾ÌÃÒ/fastlane ³]©w²¾¨ì `apps/mobile/eas/`¡AÁ×§K©M¥ş°ì `infra/` ²V¦b¤@°_¡C
-- `shared/` ¤À¦¨ `api-schema/`¡]OpenAPI/JSON Schema¡^¡B`client-sdk/`¡]¥Ñ schema codegen ªº Go/TS SDK¡^¡B`ui-kit-*`¡]¨Ì§Ş³N´Ì©î¤Àªº UI ®M¥ó¡^¡A½T«O schema ¬°³æ¤@¯u¬Û¨Ó·½¡C
-- `infra/` ±M¤ß³B²z¸óªA°È°òÂ¦³]¬I¡Gdocker-compose¡BGitHub Actions¡B¸ê®Æ®wªì©l¸}¥»µ¥¡Fmobile ¯S¦³ªº³]©w«h·h¦^ `apps/mobile`¡C
-- `docs/` §ï¬°ÁcÅé¤¤¤å¿é¥X¡]°Ñ·Ó `rules.md`¡^¡A¶°¤¤²£«~¡B¨t²Î³]­p»P 30 ¤é­pµe¡F§R°£ÂÂªº `docs/sys-design.md` «á¡A½Ğ¦b¬ÛÃö `docs/*.md` °O¿ı­«­n²§°Ê¡C
-
-```text
-cacao/
-¢u¢w server/
-¢x  ¢u¢w cmd/                # api¡Bjobs µ¥ binary
-¢x  ¢u¢w internal/           # platform¡Bdomain¡Bjobs¡Bshared util
-¢x  ¢u¢w configs/            # app.{env}.yaml¡B.env.example
-¢x  ¢u¢w migrations/         # DB schema ª©¥»±±ºŞ
-¢x  ¢u¢w tools/              # codegen / Task CLI
-¢x  ¢|¢w pkg/                # ¯u¥¿¥i¶}©ñªº¦@¥Î®M¥ó¡]¥Ø«e¥i¯d¥Õ¡^
-¢u¢w apps/
-¢x  ¢u¢w mobile/             # Expo Router app¡]§t eas/¡Bservices/¡Bfeatures/ µ¥¡^
-¢x  ¢|¢w web-admin/          # React Web «á¥x¹w¯dªÅ¶¡
-¢u¢w shared/
-¢x  ¢u¢w api-schema/         # OpenAPI / JSON Schema¡]³æ¤@¯u¬Û¨Ó·½¡^
-¢x  ¢u¢w client-sdk/         # ¥Ñ schema codegen ªº Go / TS SDK
-¢x  ¢|¢w ui-kit-*            # ¨Ì§Ş³N´Ì©î¤Àªº³]­p¨t²Î
-¢u¢w infra/
-¢x  ¢u¢w docker-compose/     # MySQL¡BMailhog¡BMinIO µ¥ local infra
-¢x  ¢|¢w github/             # GitHub Actions workflows
-¢u¢w docs/                  # product guide¡Bsys-design¡Bplan-30d
-¢|¢w shared tooling         # package.json¡Bpnpm-workspace.yaml µ¥ monorepo ¤¤¥¡³]©w
-```
-
-- `server/cmd/api` ¥u°µ config + ±Ò°Ê¡]¸ü¤J `server/internal/platform/router`¡^¡A·~°ÈÅŞ¿è¶°¤¤¦b `internal/domain/*`¡A`internal/jobs` «h´£¨Ñ worker/scheduler¡C  
-- `apps/mobile` ³z¹L `services/api.ts` ³s½u `EXPO_PUBLIC_API_URL`¡A`features/auth` ´£¨Ñ Provider/Hook¡AExpo Router ªº `app/_layout.tsx` ²Î¤@±¾¸ü `AuthProvider`¡AÁ×§K¸ô¥Ñ´²¸¨¡C  
-- `package.json`¡]repo root¡^ºŞ²z¸ó¼Ò²Õ©R¥O¡G`npm run dev:api`¡B`npm run dev:jobs`¡B`npm run dev:mobile`¡B`npm run lint`¡B`npm run typecheck`¡A¨Ã«Å§i `workspaces: ["apps/*", "shared/*"]`¡A¤è«K¥¼¨Ó¤Á´« pnpm workspace¡C  
-- `infra/github/*.yml` ±±¨î PR pipeline¡]Go ³æ¤¸´ú¸Õ / golangci-lint¡BReact Native lint/typecheck¡B¥²­nªº EAS build/´£¥æ¡^¡F­Y»İ¤H¤uÄ²µo EAS¡A«ØÄ³¦b `server/tools/` ©Î `apps/mobile/scripts/` ©ñ¸m¹ïÀ³ CLI¡C## 13. ?‹ç™¼?å??–æ???- è©³ç´°?½ä»¤ç´€?„è??ƒè€?`docs/sys-design.md`ï¼›ä»¥ä¸‹ç‚º?å??å??–ç›®??repo ?„æ?è¦ï?å¾Œç??°ç’°å¢ƒè?ä¾æ­¤æµç?å¾®èª¿??
-**Go API**
-- ??repo ?¹ç›®?„åŸ·è¡?`go mod init github.com/Cacao/Cacao`ï¼Œæ¥??`go get github.com/gin-gonic/gin@v1.10.0` ä»¥å»ºç«?baseline ä¾è³´??- ä¾ç¬¬ 12 ç« ç?çµæ?å»ºç??®é?ï¼ˆ`cmd/api`, `internal/platform`, `internal/{auth,families,...}`, `pkg`, `migrations`, `configs`, `jobs`, `services/api`, `shared/*`, `tools` ç­‰ï?ï¼Œé¿?å?çºŒæ¬å®¶ã€?- ?ƒè€ƒç›®?ç? `cmd/api/main.go` ??`internal/platform/{config,router,server}`ï¼Œç¢ºä¿ï?
-  - `config.Load()` å¾?`CACAO_ENV / CACAO_API_PORT / CACAO_ALLOW_CORS` è®€?–ç’°å¢ƒè¨­å®šã€?  - `router.New()` ?³å?è¨»å? `/health`ï¼Œä???GitHub Actions ?‡ç›£?§æª¢?¥é???  - `server.New(...).Run()` ?é? `slog` è¨˜é??Ÿå?è³‡è???- ?·è? `go build ./cmd/api` é©—è?ç¨‹å?ç¢¼ç??‹ï?å¿…è??‚æ? `go test ./...`?`golangci-lint` ç´å…¥ `tools/Taskfile` ??GitHub Actions??
-**Expo / React Native App**
-- å»ºç? `apps/mobile`ï¼š`npx create-expo-app@latest apps/mobile --template blank-typescript`ï¼Œå??å?ç«‹åˆ»?ªé™¤?è¨­ `App.tsx` ä¸¦å???Expo Router??  - `package.json`ï¼š`main` ?‡å? `expo-router/entry`ï¼Œscripts å¢å? `lint`ï¼ˆ`expo lint`ï¼‰è? `typecheck`ï¼ˆ`tsc --noEmit`ï¼‰ã€?  - `index.ts` ?¹ç‚º `import 'expo-router/entry';`??  - `tsconfig.json` å¢å? `paths` ??`"@/*": ["./*"]`ï¼Œæ–¹ä¾¿å…±??hooks/services??  - `app.json` ?°å? `scheme: "cacao"` ??`extra.apiUrl`ï¼ˆé?è¨?`http://localhost:8080`ï¼‰ï?ä¸¦æ–¼ `plugins` ?—å‡º `expo-router`, `expo-sqlite`, `expo-localization`, `expo-secure-store`??- å¥—ä»¶å®‰è?å»ºè­°æµç?ï¼?  1. `npx expo install expo-router`.
-  2. `npx expo install @tanstack/react-query zustand @react-native-async-storage/async-storage expo-sqlite expo-notifications expo-localization expo-secure-store @react-native-community/netinfo expo-linking react-native-safe-area-context react-native-screens react-native-gesture-handler react-native-reanimated expo-status-bar`.
-  3. ?¶ä?ç´?JS å¥—ä»¶ï¼ˆ`react-i18next`, `i18next` ç­‰ï???`npm --prefix apps/mobile install`??- å»ºç? router ?®é?ï¼š`app/_layout.tsx` ä»?`SafeAreaProvider` + `QueryClientProvider` ?…ä? `Stack`ï¼Œ`app/(tabs)` ??Dashboard/Requests/Settings ?ï?ä¸¦å?æ­¥å»ºç«?`features/`, `services/`, `stores/`, `hooks/`, `i18n/`, `theme/`ï¼ˆå¯??`.gitkeep` ä¿ç?ç©ºè??™å¤¾ï¼‰ã€?- ?·è? `npm --prefix apps/mobile run lint`ï¼ˆé?æ¬¡æ??ªå?å®‰è? ESLint ??`eslint-config-expo`ï¼‰è? `npm --prefix apps/mobile run typecheck`ï¼Œç¢ºä¿åŸº?¬è³ª?å??€??
-**?±ç”¨å·¥ä?æµç?**
-- ?¹ç›®??`package.json` å·²å?ç¾©å·¥ä½œå?ï¼?  - `npm run dev:api` ??`go run ./cmd/api`
-  - `npm run dev:mobile` ??`npm --prefix apps/mobile run start`
-  - `npm run lint` ???®å?ä»????Expo lintï¼Œå¯è¦–é?æ±‚æ“´?…æ? `eslint` + `golangci-lint`??- å¦‚é??å»ºä»»ä?ç«¯ï??™å???`docs/sys-design.md` è¿½å??‚é??³ï?ç¶­æ?å¯©è??§ï??¥æ?ç¨‹æ??å¤§è®Šæ›´ï¼Œå??°æœ¬ç¯€?Œæ­¥?´æ–°ï¼Œé¿?æ?ä»¶è?å¯¦é??€?‹æ?ç§»ã€?
-
-
+ä»»ä½•å°æ¶æ§‹æˆ–è³‡æ–™æ¨¡å‹çš„èª¿æ•´ï¼Œéƒ½å¿…é ˆåœ¨ merge å‰é™„ä¸Šæ–‡ä»¶ diffï¼Œç¢ºä¿åœ˜éšŠåŒæ­¥ã€‚
