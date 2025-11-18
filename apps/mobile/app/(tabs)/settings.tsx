@@ -1,9 +1,18 @@
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button } from 'react-native';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useAuth } from '../../features/auth/auth-provider';
 
 export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    logout();
+    router.replace('/auth/login');
+  };
 
   return (
     <View style={styles.container}>
@@ -14,6 +23,9 @@ export default function SettingsScreen() {
       <View style={styles.row}>
         <Text style={styles.label}>Dark theme</Text>
         <Switch value={darkMode} onValueChange={setDarkMode} />
+      </View>
+      <View style={styles.buttonRow}>
+        <Button title="Sign out" onPress={handleSignOut} />
       </View>
     </View>
   );
@@ -34,5 +46,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+  },
+  buttonRow: {
+    marginTop: 32,
   },
 });

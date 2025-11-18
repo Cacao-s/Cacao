@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { useAuth } from '../../features/auth/auth-provider';
 
 const mockDashboard = async () => {
   return {
@@ -16,6 +17,7 @@ const mockDashboard = async () => {
 
 export default function DashboardScreen() {
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: mockDashboard });
+  const { user } = useAuth();
 
   if (!data) {
     return null;
@@ -24,6 +26,7 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Family Wallet</Text>
+      <Text style={styles.subtitle}>Hi, {user?.displayName ?? 'Giver'}!</Text>
       <Text style={styles.balance}>${(data.balance / 100).toFixed(2)}</Text>
       <Text style={styles.caption}>Pending requests: {data.pendingRequests}</Text>
       <Text style={styles.caption}>Next allowance run: {data.upcomingAllowance}</Text>
@@ -55,6 +58,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
   },
   balance: {
     fontSize: 40,

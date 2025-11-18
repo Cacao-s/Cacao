@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../../features/auth/auth-provider';
 
 type TabBarIconProps = {
   color: string;
@@ -16,6 +17,12 @@ const renderIcon = (name: keyof typeof MaterialCommunityIcons.glyphMap) => {
 };
 
 export default function TabsLayout() {
+  const { token } = useAuth();
+
+  if (!token) {
+    return <Redirect href="/auth/login" />;
+  }
+
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="index" options={{ title: 'Dashboard', tabBarIcon: renderIcon('view-dashboard-outline') }} />

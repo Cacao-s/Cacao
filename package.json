@@ -1,12 +1,15 @@
-﻿{
+{
   "name": "cacao",
   "private": true,
   "workspaces": [
-    "apps/mobile"
+    "apps/*",
+    "shared/*"
   ],
   "scripts": {
-    "dev:api": "go run ./cmd/api",
+    "dev:api": "cd server && go run ./cmd/api",
+    "dev:jobs": "cd server && go run ./cmd/jobs",
     "dev:mobile": "npm --prefix apps/mobile run start",
-    "lint": "npm --prefix apps/mobile run lint || true"
+    "lint": "npm --prefix apps/mobile run lint || true",
+    "typecheck": "npm --prefix apps/mobile run typecheck || true"
   }
 }
