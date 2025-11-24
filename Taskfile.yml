@@ -1,0 +1,31 @@
+version: '3'
+
+tasks:
+  server:test:
+    desc: Run Go unit tests for the API and jobs modules
+    dir: server
+    cmds:
+      - go test ./...
+
+  mobile:lint:
+    desc: Run Expo lint rules
+    cmds:
+      - npm --prefix apps/mobile run lint
+
+  mobile:typecheck:
+    desc: Run TypeScript type checking for the mobile app
+    cmds:
+      - npm --prefix apps/mobile run typecheck
+
+  compose:config:
+    desc: Validate docker-compose configuration
+    cmds:
+      - docker compose -f infra/docker-compose/docker-compose.yml config
+
+  health:
+    desc: Run the standard readiness checks (Go tests + mobile lint/typecheck + compose config)
+    cmds:
+      - task: server:test
+      - task: mobile:lint
+      - task: mobile:typecheck
+      - task: compose:config

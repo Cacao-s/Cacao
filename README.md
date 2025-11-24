@@ -87,6 +87,11 @@ The Expo app reads the `EXPO_PUBLIC_*` values while the Go server ingests the `C
  npm --prefix apps/mobile run typecheck
 ```
 
+## Readiness Checks
+- Install [go-task](https://taskfile.dev) so the `task` CLI is available on your machine.
+- Run `task health` from the repo root to execute the standard Go tests, Expo lint/typecheck, and docker-compose validation in one shot.
+- On Windows you can call `.\infra\windows\check-readiness.ps1` (wraps `task health` and supports `-VerboseMode`) if you prefer a PowerShell entrypoint.
+
 ## Troubleshooting
 - **Expo lint reports BOM issues**: ensure files are saved without BOM (UTF-8) and note any fixes inside `docs/sys-design.md`.
 - **`expo-router` dependency conflicts**: always run `npx expo install <package>` so that versions match the current SDK (54.x).
