@@ -2,59 +2,76 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Expo Web",
+      "name": "Expo: Web",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/apps/mobile",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "run",
-        "start"
+        "start",
+        "--workspace=apps/mobile",
+        "--",
+        "--clear"
       ],
       "console": "integratedTerminal",
-      "outFiles": [
-        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
-      ]
-    },
-    {
-      "name": "Expo Android",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/apps/mobile",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "android"
-      ],
-      "console": "integratedTerminal",
-      "outFiles": [
-        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
-      ]
-    },
-    {
-      "name": "Expo iOS",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/apps/mobile",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "ios"
-      ],
-      "console": "integratedTerminal",
-      "outFiles": [
-        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
-      ]
-    },
-    {
-      "name": "Attach to Expo",
-      "type": "node",
-      "request": "attach",
-      "port": 19000,
+      "outputCapture": "std",
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Expo: Web (No Cache Clear)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "start",
+        "--workspace=apps/mobile"
+      ],
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Expo: Android",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "android",
+        "--workspace=apps/mobile"
+      ],
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Expo: iOS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "ios",
+        "--workspace=apps/mobile"
+      ],
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
       ]
     }
-  ],
-  "compounds": []
+  ]
 }

@@ -3,148 +3,166 @@
 
 ## Expo App
 
-### Q0001
-為什麼 package-lock.json 在子目錄 即便我所有的前端城市 都寫在apps apps\mobile apps\web-admin 我直覺應該要在 apps\ 項下
 
-原因：npm 不是 monorepo-aware。哪個資料夾有 package.json，你在那裡跑 npm install 就會產生自己的 package-lock.json。
 
-想集中在 apps/
-→ 必須用 workspace（npm workspaces / pnpm / yarn）。
-→ 不然永遠會在子目錄產生。
+### Q0009 
 
-如果你願意，我可以幫你：
-提供 完整範例：workspace、scripts、Turbo、EAS（若是 Expo）、Nuxt 3 架構
+npm start --workspace=apps/mobile -- --clear
+解釋，這什麼
 
-### Q0002
-解析我的專案細節， package-lock.json 在 apps 好還是不好
+### Q0008 ADB 匯出
 
-**當前狀態分析**：
+#### SQLite 資料庫的實際儲存位置
 
-你的專案根目錄 `package.json` 已經定義了 workspace：
-```json
-{
-  "workspaces": ["apps/*", "shared/*"],
-  "packageManager": "pnpm@10.5.0+..."
-}
-```
+在 Android 裝置/模擬器上:
 
-**目前的問題**：
-1. ❌ 根目錄有 `package-lock.json`（npm 的 lock file）
-2. ❌ 根目錄有 `node_modules/`
-3. ✅ 已宣告使用 `pnpm@10.5.0` 作為 packageManager
-4. ✅ `apps/mobile/` 使用 `pnpm-lock.yaml`（正確）
-5. ⚠️ 混用 npm 和 pnpm，狀態不一致
+但這個檔案**只存在於手機/模擬器內部**，你的電腦硬碟上找不到!
 
-**建議方案：統一使用 pnpm workspace**
+#### 為什麼你在電腦找不到?
 
-### 為什麼應該在根目錄統一管理？
+因為 React Native app 執行在**裝置上**,不是你的電腦上:
 
-#### ✅ 優點（推薦）：
-1. **單一 lock file**：只有一個 `pnpm-lock.yaml` 在根目錄
-2. **共享依賴**：重複的套件（如 TypeScript、React）只安裝一次
-3. **統一版本**：避免 mobile/web-admin 使用不同版本的相同套件
-4. **更快安裝**：pnpm 的 symlink 機制，節省磁碟空間和時間
-5. **統一指令**：在根目錄一次執行所有子專案的指令
+- **開發時**: 你的電腦只是執行 Metro bundler (JavaScript 打包器)
+- **資料庫**: SQLite 檔案儲存在手機/模擬器的內部儲存空間
+- **你的電腦**: 只有原始碼檔案 ([mobile](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html))
 
-#### ❌ 子目錄各自管理的缺點：
-1. 每個子專案都有自己的 `node_modules/`（重複浪費）
-2. 多個 lock file 難以同步
-3. 版本衝突風險高
-4. CI/CD 需要分別安裝多次
+#### ADB 的作用
 
-### 建議執行步驟：
+**ADB (Android Debug Bridge)** 是一個工具,讓你可以:
 
-**1. 清理根目錄的 npm 殘留**
-```bash
-# 刪除根目錄的 npm 產物
-rm -rf node_modules package-lock.json
-```
+1. 從手機/模擬器**複製檔案到電腦**
+2. 把 `/data/data/.../cacao.db` (手機上) → `cacao.db` (你的電腦上)
 
-**2. 創建 `pnpm-workspace.yaml`**
-```yaml
-packages:
-  - 'apps/*'
-  - 'shared/*'
-```
-
-**3. 清理所有子專案的 node_modules**
-```bash
-rm -rf apps/*/node_modules apps/*/package-lock.json
-```
-
-**4. 在根目錄執行 pnpm install**
-```bash
-pnpm install
-```
-
-**5. 更新根目錄的 package.json scripts**
-```json
-{
-  "scripts": {
-    "dev:mobile": "pnpm --filter mobile start",
-    "dev:web": "pnpm --filter web-admin dev",
-    "lint": "pnpm -r run lint",
-    "typecheck": "pnpm -r run typecheck",
-    "build:mobile": "pnpm --filter mobile run build"
-  }
-}
-```
-
-### 最終結構：
+#### 實際流程圖
 
 ```
-Cacao/
-├── pnpm-workspace.yaml        # pnpm workspace 配置
-├── package.json               # 根目錄統一管理
-├── pnpm-lock.yaml            # ✅ 唯一的 lock file
-├── node_modules/             # ✅ 統一的依賴目錄
-│   └── .pnpm/               # pnpm 的 virtual store
-├── apps/
-│   ├── mobile/
-│   │   ├── package.json     # 宣告依賴
-│   │   └── node_modules/    # ❌ 刪除（使用根目錄的）
-│   └── web-admin/
-│       ├── package.json
-│       └── node_modules/    # ❌ 刪除（使用根目錄的）
-└── shared/
-    └── ...
+┌─────────────────┐         ┌──────────────────┐
+│  你的電腦 D:\   │         │ Android 裝置      │
+│                 │         │                  │
+│  原始碼:        │ Metro   │ 執行中的 App:     │
+│  src/           │────────→│ JavaScript       │
+│  models/        │ bundler │                  │
+│  database/      │         │ SQLite DB:       │
+│                 │         │ cacao.db ←────── │
+│                 │         │ (實際資料在這)   │
+└─────────────────┘         └──────────────────┘
+         ↑                           │
+         │        ADB 導出            │
+         └───────────────────────────┘
+       把 cacao.db 複製到電腦
 ```
 
-### 結論：
+你現在的狀況
 
-**強烈建議在根目錄統一管理**，因為：
-1. 你已經宣告了 workspace 和 pnpm
-2. 可以享受 pnpm workspace 的所有優勢
-3. 符合現代 monorepo 最佳實踐
-4. 避免目前 npm/pnpm 混用的混亂狀態
+目前資料庫**確實存在**,但在:
 
-### Q0003 Metro 是什麼？
+- ✅ 手機內部儲存 (如果用 Expo Go 實機測試)
+- ✅ 模擬器內部儲存 (如果用 Android 模擬器)
+- ❌ **不在** [Cacao](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 資料夾
 
-Metro = React Native / Expo 專用的 JavaScript Bundler。
+#### 驗證方法
 
-作用類似：
+執行以下命令確認資料庫存在:
 
-Web：Vite / Webpack
+會看到 `cacao.db` 檔案!
 
-iOS/Android 原生：無類似系統，Metro 就是唯一 bundler
+**要不要我建立 App 內的資料庫檢視器?** 這樣你不用導出檔案,直接在 App 裡就能看到所有資料!
 
-Expo App：100% 依賴 Metro
+### Q0007 路徑太長
 
-Metro 的職責：
+你的真正錯誤現在非常明確：
 
-把所有 JS/TS 檔案打包成一個 bundle（給手機執行）
+**Windows 路徑太長 → CMake + Ninja 無法編譯 Expo Native 模組**
 
-處理 React Native 的特殊轉換（JS → 原生 Bridge）
+錯誤核心：
 
-watch 檔案變化
+```
+full path 有 227 characters  
+CMAKE_OBJECT_PATH_MAX = 250  
+The build may not work correctly.
 
-處理路徑解析（resolve）
+ninja: error: manifest 'build.ninja' still dirty after 100 tries
+```
 
-特點：
-Metro 不像 Vite 或 Webpack 那麼聰明。對 monorepo、symlink 敏感。
-如果解析不到某個檔案，就直接報 500 bundle error。
+這是 Windows 的經典問題（尤其是 pnpm + monorepo）：
 
-你的 500 錯誤就是 Metro 找不到 expo-router/entry。
+**pnpm node_modules 路徑非常深 → Windows 原生 CMake/Ninja 超過路徑上限 → 編譯失敗**
+
+Expo SDK 50 / RN 0.75 原生模組（expo-modules-core）有 C++ 檔案，必須使用 CMake/Ninja 編譯。
+ 但 Windows 預設最大完整路徑長度仍然偏低（即使你啟用了長路徑支持，CMake/Ninja 自己也有限制）。
+
+```
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
+
+你遇到的是「CMake + pnpm + Windows MAX_PATH 限制」的典型組合爆炸。
+
+最有效順序是：
+
+移到更短的專案路徑（立刻有效）
+
+改用 npm/yarn，不使用 pnpm
+
+啟用 Windows LongPath
+
+必要時關掉 Fabric
+
+#### 以管理員身份執行 PowerShell,然後執行:
+
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+
+#### 或透過 regedit:
+
+1. Win+R → regedit
+
+2. 前往: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+
+3. 新增 DWORD: LongPathsEnabled = 1
+
+4. 重啟電腦
+
+### Q0006 Gradle 版本依賴重新安裝
+
+看到問題了！Gradle 建置需要 Java 11+，但系統使用的是 Java 8。讓我幫您設定正確的 Java 版本：
+
+
+
+java -version
+
+
+
+$env:JAVA_HOME
+
+確認是 Java 8 且 JAVA_HOME 未設定。Android Studio 通常包含 Java 17。讓我找到並設定它：
+
+
+
+Get-ChildItem "C:\Program Files\Android\Android Studio" -Recurse -Directory -Filter "jbr" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+
+完美！找到了 JBR（JetBrains Runtime）。讓我設定 JAVA_HOME：
+
+
+
+[System.Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Program Files\Android\Android Studio\jbr', [System.EnvironmentVariableTarget]::User); $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'; & "$env:JAVA_HOME\bin\java.exe" -version
+
+**安裝狀態確認：**
+
+- ✅ JAVA_HOME 已設定為 Android Studio 的 JDK
+- ✅ Java 版本：OpenJDK **21.0.8**（符合 Gradle 8.14.3 需求）
+
+**接下來需要重新啟動 VS Code 讓環境變數生效：**
+
+1. 請**完全關閉 VS Code**
+2. 重新開啟 VS Code
+3. 再次執行 "Run Android" debug 配置
+
+重啟後 Gradle 應該會使用 Java 21，可以通過 JVM 版本檢查。如果還有其他錯誤（例如找不到 Android 裝置），我們再繼續處理。
+
+### Q0005 Gradle 是什麼？
+
+本地執行 debug
+
+cd apps/mobile/android; .\gradlew.bat assembleDebug --stacktrace
 
 ### Q0004 symlink 是什麼？
 
@@ -204,92 +222,148 @@ config.resolver.nodeModulesPaths = [
 
 「嘿，真實的套件都在 workspace 根目錄，不是在 apps/mobile 下面。」
 
-### Q0005 Gradle 是什麼？
+### Q0003 Metro 是什麼？
 
-cd apps/mobile/android; .\gradlew.bat assembleDebug --stacktrace
+Metro = React Native / Expo 專用的 JavaScript Bundler。
 
-### Q0006 Gradle 版本依賴重新安裝
+作用類似：
 
-看到問題了！Gradle 建置需要 Java 11+，但系統使用的是 Java 8。讓我幫您設定正確的 Java 版本：
+Web：Vite / Webpack
 
+iOS/Android 原生：無類似系統，Metro 就是唯一 bundler
 
+Expo App：100% 依賴 Metro
 
-java -version
+Metro 的職責：
 
+把所有 JS/TS 檔案打包成一個 bundle（給手機執行）
 
+處理 React Native 的特殊轉換（JS → 原生 Bridge）
 
-$env:JAVA_HOME
+watch 檔案變化
 
-確認是 Java 8 且 JAVA_HOME 未設定。Android Studio 通常包含 Java 17。讓我找到並設定它：
+處理路徑解析（resolve）
 
+特點：
+Metro 不像 Vite 或 Webpack 那麼聰明。對 monorepo、symlink 敏感。
+如果解析不到某個檔案，就直接報 500 bundle error。
 
+你的 500 錯誤就是 Metro 找不到 expo-router/entry。
 
-Get-ChildItem "C:\Program Files\Android\Android Studio" -Recurse -Directory -Filter "jbr" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+### Q0002
+解析我的專案細節， package-lock.json 在 apps 好還是不好
 
-完美！找到了 JBR（JetBrains Runtime）。讓我設定 JAVA_HOME：
+**當前狀態分析**：
 
-
-
-[System.Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Program Files\Android\Android Studio\jbr', [System.EnvironmentVariableTarget]::User); $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'; & "$env:JAVA_HOME\bin\java.exe" -version
-
-**安裝狀態確認：**
-
-- ✅ JAVA_HOME 已設定為 Android Studio 的 JDK
-- ✅ Java 版本：OpenJDK **21.0.8**（符合 Gradle 8.14.3 需求）
-
-**接下來需要重新啟動 VS Code 讓環境變數生效：**
-
-1. 請**完全關閉 VS Code**
-2. 重新開啟 VS Code
-3. 再次執行 "Run Android" debug 配置
-
-重啟後 Gradle 應該會使用 Java 21，可以通過 JVM 版本檢查。如果還有其他錯誤（例如找不到 Android 裝置），我們再繼續處理。
-
-### Q0007 路徑太長
-
-你的真正錯誤現在非常明確：
-
-**Windows 路徑太長 → CMake + Ninja 無法編譯 Expo Native 模組**
-
-錯誤核心：
-
-```
-full path 有 227 characters  
-CMAKE_OBJECT_PATH_MAX = 250  
-The build may not work correctly.
-
-ninja: error: manifest 'build.ninja' still dirty after 100 tries
+你的專案根目錄 `package.json` 已經定義了 workspace：
+```json
+{
+  "workspaces": ["apps/*", "shared/*"],
+  "packageManager": "pnpm@10.5.0+..."
+}
 ```
 
-這是 Windows 的經典問題（尤其是 pnpm + monorepo）：
+**目前的問題**：
+1. ❌ 根目錄有 `package-lock.json`（npm 的 lock file）
+2. ❌ 根目錄有 `node_modules/`
+3. ✅ 已宣告使用 `pnpm@10.5.0` 作為 packageManager
+4. ✅ `apps/mobile/` 使用 `pnpm-lock.yaml`（正確）
+5. ⚠️ 混用 npm 和 pnpm，狀態不一致
 
-**pnpm node_modules 路徑非常深 → Windows 原生 CMake/Ninja 超過路徑上限 → 編譯失敗**
+**建議方案：統一使用 pnpm workspace**
 
-Expo SDK 50 / RN 0.75 原生模組（expo-modules-core）有 C++ 檔案，必須使用 CMake/Ninja 編譯。
- 但 Windows 預設最大完整路徑長度仍然偏低（即使你啟用了長路徑支持，CMake/Ninja 自己也有限制）。
+#### 為什麼應該在根目錄統一管理？
+
+#### ✅ 優點（推薦）：
+
+1. **單一 lock file**：只有一個 `pnpm-lock.yaml` 在根目錄
+2. **共享依賴**：重複的套件（如 TypeScript、React）只安裝一次
+3. **統一版本**：避免 mobile/web-admin 使用不同版本的相同套件
+4. **更快安裝**：pnpm 的 symlink 機制，節省磁碟空間和時間
+5. **統一指令**：在根目錄一次執行所有子專案的指令
+
+#### ❌ 子目錄各自管理的缺點：
+
+1. 每個子專案都有自己的 `node_modules/`（重複浪費）
+2. 多個 lock file 難以同步
+3. 版本衝突風險高
+4. CI/CD 需要分別安裝多次
+
+#### 建議執行步驟：
+
+**1. 清理根目錄的 npm 殘留**
+```bash
+# 刪除根目錄的 npm 產物
+rm -rf node_modules package-lock.json
+```
+
+**2. 創建 `pnpm-workspace.yaml`**
+```yaml
+packages:
+  - 'apps/*'
+  - 'shared/*'
+```
+
+**3. 清理所有子專案的 node_modules**
+```bash
+rm -rf apps/*/node_modules apps/*/package-lock.json
+```
+
+**4. 在根目錄執行 pnpm install**
+```bash
+pnpm install
+```
+
+**5. 更新根目錄的 package.json scripts**
+```json
+{
+  "scripts": {
+    "dev:mobile": "pnpm --filter mobile start",
+    "dev:web": "pnpm --filter web-admin dev",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "build:mobile": "pnpm --filter mobile run build"
+  }
+}
+```
+
+最終結構：
 
 ```
-New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+Cacao/
+├── pnpm-workspace.yaml        # pnpm workspace 配置
+├── package.json               # 根目錄統一管理
+├── pnpm-lock.yaml            # ✅ 唯一的 lock file
+├── node_modules/             # ✅ 統一的依賴目錄
+│   └── .pnpm/               # pnpm 的 virtual store
+├── apps/
+│   ├── mobile/
+│   │   ├── package.json     # 宣告依賴
+│   │   └── node_modules/    # ❌ 刪除（使用根目錄的）
+│   └── web-admin/
+│       ├── package.json
+│       └── node_modules/    # ❌ 刪除（使用根目錄的）
+└── shared/
+    └── ...
 ```
 
-### Q0006
-你遇到的是「CMake + pnpm + Windows MAX_PATH 限制」的典型組合爆炸。
+#### 結論：
 
-最有效順序是：
+**強烈建議在根目錄統一管理**，因為：
+1. 你已經宣告了 workspace 和 pnpm
+2. 可以享受 pnpm workspace 的所有優勢
+3. 符合現代 monorepo 最佳實踐
+4. 避免目前 npm/pnpm 混用的混亂狀態
 
-移到更短的專案路徑（立刻有效）
+### Q0001
 
-改用 npm/yarn，不使用 pnpm
+為什麼 package-lock.json 在子目錄 即便我所有的前端城市 都寫在apps apps\mobile apps\web-admin 我直覺應該要在 apps\ 項下
 
-啟用 Windows LongPath
+原因：npm 不是 monorepo-aware。哪個資料夾有 package.json，你在那裡跑 npm install 就會產生自己的 package-lock.json。
 
-必要時關掉 Fabric
+想集中在 apps/
+→ 必須用 workspace（npm workspaces / pnpm / yarn）。
+→ 不然永遠會在子目錄產生。
 
-# 以管理員身份執行 PowerShell,然後執行:
-New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
-
-# 或透過 regedit:
-# 1. Win+R → regedit
-# 2. 前往: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
-# 3. 新增 DWORD: LongPathsEnabled = 1
-# 4. 重啟電腦
+如果你願意，我可以幫你：
+提供 完整範例：workspace、scripts、Turbo、EAS（若是 Expo）、Nuxt 3 架構

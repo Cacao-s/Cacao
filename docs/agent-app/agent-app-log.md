@@ -2,13 +2,11 @@
 
 
 
-### F0011 實作 Google OAuth 登入
-
-### F0010 實作帳號密碼註冊/登入 UI
-
-### F0009 
+### F0010 實作 Google OAuth 登入
 
 
+
+### F0009 實作帳號密碼註冊/登入 UI
 
 ### F0008 定義資料模型（users, sync_queue）
 

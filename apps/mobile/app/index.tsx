@@ -1,9 +1,12 @@
 import { View, Text, StyleSheet, Button, Alert, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { testDatabaseConnection, testAllModels, cleanupTestData } from '../src/utils/testDatabase';
 import { seedDatabase, clearDatabase } from '../src/utils/seedDatabase';
 import { registerUser, loginUser } from '../src/services/authService';
 
 export default function Index() {
+  const router = useRouter();
+
   const handleTestDatabase = async () => {
     const success = await testDatabaseConnection();
     if (success) {
@@ -95,6 +98,23 @@ export default function Index() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Welcome to Cacao</Text>
       <Text style={styles.subtitle}>Family Allowance Management Platform</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>使用者功能</Text>
+        <View style={styles.buttonContainer}>
+          <Button 
+            title="前往登入頁面" 
+            onPress={() => router.push('/login')} 
+            color="#6200EE" 
+          />
+          <View style={styles.buttonSpacer} />
+          <Button 
+            title="前往註冊頁面" 
+            onPress={() => router.push('/register')} 
+            color="#03DAC6" 
+          />
+        </View>
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>資料庫測試</Text>

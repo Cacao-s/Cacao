@@ -70,6 +70,21 @@ cd ../..  # 回到根目錄
 pnpm --filter mobile install
 ```
 
+### Launch.json 設定優化
+
+Debug 配置已優化為 4 個核心選項:
+
+- **`Expo: Web`** - 啟動開發伺服器(自動清除快取)
+  - 使用 `npm start --workspace=apps/mobile -- --clear`
+  - 清除 Metro bundler 快取,確保乾淨啟動
+- **`Expo: Web (No Cache Clear)`** - 快速啟動(不清快取)
+  - 使用 `npm start --workspace=apps/mobile`
+  - 適合程式碼小改動時使用
+- **`Expo: Android`** - 啟動 Android 平台
+  - 使用 `npm run android --workspace=apps/mobile`
+- **`Expo: iOS`** - 啟動 iOS 平台
+  - 使用 `npm run ios --workspace=apps/mobile`
+
 ### 安裝新套件規則
 
 1. **在根目錄操作**（強制）:
