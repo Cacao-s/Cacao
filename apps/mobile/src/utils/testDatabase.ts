@@ -1,5 +1,5 @@
 import { database } from '../database';
-import User from '../models/User';
+import { User, Family, Wallet, Transaction } from '../models';
 
 /**
  * Test WatermelonDB connection and basic operations
@@ -46,14 +46,46 @@ export async function testDatabaseConnection() {
 }
 
 /**
+ * Test all models with CRUD operations
+ */
+export async function testAllModels() {
+  try {
+    console.log('🧪 Testing all models...');
+
+    // Test families
+    const familiesCollection = database.get<Family>('families');
+    const families = await familiesCollection.query().fetch();
+    console.log(`✅ Families: ${families.length} records`);
+
+    // Test wallets
+    const walletsCollection = database.get<Wallet>('wallets');
+    const wallets = await walletsCollection.query().fetch();
+    console.log(`✅ Wallets: ${wallets.length} records`);
+    wallets.forEach((wallet) => {
+      const balance = wallet.balanceCents / 100;
+      console.log(`  - ${wallet.name}: ${wallet.currency} $${balance}`);
+    });
+
+    // Test transactions
+    const transactionsCollection = database.get<Transaction>('transactions');
+    const transactions = await transactionsCollection.query().fetch();
+    console.log(`✅ Transactions: ${transactions.length} records`);
+
+    console.log('🎉 All models test completed!');
+    return true;
+  } catch (error) {
+    console.error('❌ Models test failed:', error);
+    return false;
+  }
+}
+
+/**
  * Clean up test data
  */
 export async function cleanupTestData() {
   try {
     const usersCollection = database.get<User>('users');
-    const testUsers = await usersCollection
-      .query()
-      .fetch();
+    const testUsers = await usersCollection.query().fetch();
 
     await database.write(async () => {
       for (const user of testUsers) {

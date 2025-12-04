@@ -5,8 +5,6 @@ module.exports = function (api) {
     plugins: [
       // WatermelonDB decorators support
       ['@babel/plugin-proposal-decorators', { legacy: true }],
-      // WatermelonDB babel plugin
-      '@nozbe/watermelondb/babel/esm',
     ],
   };
 };

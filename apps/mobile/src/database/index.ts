@@ -2,7 +2,18 @@ import { Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 
 import { schema } from './schema';
-import { User, Family, FamilyMember, Wallet, Request } from '../models';
+import {
+  User,
+  Family,
+  FamilyMember,
+  Wallet,
+  Allowance,
+  Request,
+  Transaction,
+  Notification,
+  SyncQueue,
+  AuditLog,
+} from '../models';
 
 // Create SQLite adapter
 const adapter = new SQLiteAdapter({
@@ -23,7 +34,11 @@ export const database = new Database({
     Family,
     FamilyMember,
     Wallet,
+    Allowance,
     Request,
-    // Add more models as needed
+    Transaction,
+    Notification,
+    SyncQueue,
+    AuditLog,
   ],
 });

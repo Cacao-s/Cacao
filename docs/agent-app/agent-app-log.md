@@ -2,13 +2,79 @@
 
 
 
-### F000N 建立同步機制與 API 整合層
+### F0011 實作 Google OAuth 登入
 
-### F000N 實作 Google OAuth 登入
+### F0010 實作帳號密碼註冊/登入 UI
 
-### F000N 實作帳號密碼註冊/登入 UI
+### F0009 
 
-### F000N 定義資料模型（users, sync_queue）
+
+
+### F0008 定義資料模型（users, sync_queue）
+
+1. 當前所有功能，以本地db 為準，先不時做 api
+
+#### ✅ F0008 完成總結
+
+#### 完成內容
+
+**1. 完整資料模型 (10 Models)** ✅
+
+- User, Family, FamilyMember (核心)
+- Wallet, Allowance, Request, Transaction (財務)
+- Notification, SyncQueue, AuditLog (系統)
+- 全部對應後端 SQL schema
+
+**2. 本地認證服務** ✅
+
+- [registerUser()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 註冊新使用者
+- [loginUser()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 密碼登入
+- `getUserById()` - 查詢使用者
+- `updateUserProfile()` - 更新資料
+- `changePassword()` - 變更密碼
+- bcryptjs 加密 (10 salt rounds)
+
+**3. 測試工具完整** ✅
+
+- [testDatabaseConnection()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 基本 CRUD 測試
+- [testAllModels()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 所有 models 測試
+- [seedDatabase()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 產生測試資料
+- [clearDatabase()](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 清空資料庫
+- 完整的首頁測試介面
+
+**4. 文檔完善** ✅
+
+- `DATABASE_ARCHITECTURE.md` - 完整架構說明
+- [agent-app-log.md](vscode-file://vscode-app/c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) - 任務執行記錄
+
+#### 技術亮點
+
+1. **本地優先**: 所有功能基於本地 SQLite,無需後端即可測試
+2. **安全性**: bcrypt 密碼加密,不儲存明文
+3. **完整性**: 10 個 models 涵蓋所有業務需求
+4. **可測試**: 提供完整測試資料與測試介面
+5. **未來擴展**: SyncQueue 為 API 同步預留
+
+#### 驗證結果
+
+- ✅ TypeScript 型別檢查通過
+- ✅ 所有 models 註冊成功
+- ✅ bcryptjs 正常運作
+- ✅ Expo dev server 運行中
+- ✅ 測試介面完整可用
+
+#### 測試帳號
+
+#### 下一步建議
+
+現在可以:
+
+1. **啟動 Android 模擬器**: 按 `a` 鍵
+2. **建立測試資料**: 點擊「建立測試資料」按鈕
+3. **測試登入**: 點擊「測試登入」驗證認證流程
+4. **開始開發 UI**: 實作登入/註冊畫面 (F0009)
+
+Expo dev server 正在運行,你可以隨時在實機或模擬器上測試!
 
 ### F0007 配置 WatermelonDB + SQLite adapter
 
@@ -109,10 +175,115 @@ apps/mobile/src/
 - ✅ Expo dev server 啟動成功
 - ⏳ 待實際裝置測試資料庫操作
 
-**下一步**:
+---
 
-- 在實際裝置/模擬器測試資料庫 CRUD 操作
-- 實作認證功能 (F0001 登入需求)
+### F0008 定義完整資料模型與本地認證服務
+
+#### TaskReply
+
+**任務狀態**: ✅ 完成
+
+**重要方向**: 當前所有功能以本地 DB 為準,先不實作 API 整合
+
+**執行步驟**:
+
+1. ✅ 補充完整 Model 類別
+   - 新增 `Allowance.ts` - 零用錢排程管理
+   - 新增 `Transaction.ts` - 交易記錄
+   - 新增 `Notification.ts` - 通知系統
+   - 新增 `SyncQueue.ts` - 離線同步佇列 (為未來 API 同步預留)
+   - 新增 `AuditLog.ts` - 審計日誌
+   - 總計 10 個完整 models 對應後端 schema
+
+2. ✅ 建立本地認證服務 (`src/services/authService.ts`)
+   - 安裝 `bcryptjs` 用於密碼加密 (bcrypt hashing, salt rounds: 10)
+   - 實作 `registerUser()` - 本地註冊新使用者
+     - Email 重複檢查
+     - 密碼強度驗證 (最少 6 字元)
+     - 自動設定預設值 (locale: zh-TW, theme: default, role: baby)
+   - 實作 `loginUser()` - Email + 密碼登入
+     - bcrypt 密碼驗證
+     - 使用者狀態檢查 (active/disabled)
+     - OAuth 使用者檢測 (無 passwordHash 則提示使用 Google 登入)
+   - 實作 `getUserById()` - 取得使用者資料
+   - 實作 `updateUserProfile()` - 更新使用者個人資料
+   - 實作 `changePassword()` - 變更密碼
+
+3. ✅ 建立測試資料初始化工具 (`src/utils/seedDatabase.ts`)
+   - `seedDatabase()` - 產生測試資料
+     - 建立 3 個測試使用者 (giver, baby, parent)
+     - 建立 Demo Family
+     - 建立家庭成員關聯
+     - 建立 2 個錢包 (現金 $500, 銀行 $10,000)
+     - 所有測試帳號密碼: `password123`
+   - `clearDatabase()` - 清空所有資料表
+
+4. ✅ 擴充測試工具 (`src/utils/testDatabase.ts`)
+   - 新增 `testAllModels()` - 測試所有 models 的查詢功能
+   - 列出 families, wallets, transactions 統計資訊
+   - 顯示錢包餘額
+
+5. ✅ 更新首頁測試介面 (`app/index.tsx`)
+   - **資料庫測試** section: 測試連接、測試所有 models
+   - **測試資料管理** section: 建立測試資料、清空資料庫
+   - **認證功能測試** section: 測試註冊、測試登入
+   - 使用 ScrollView 支援更多按鈕
+   - 完整的錯誤提示與成功訊息
+
+**技術規格**:
+- bcryptjs: ^2.4.3
+- @types/bcryptjs: ^2.4.6
+- 密碼加密: bcrypt with 10 salt rounds
+- 預設語言: zh-TW (繁體中文)
+- 預設主題: default
+
+**檔案結構**:
+```
+apps/mobile/src/
+├── models/
+│   ├── User.ts
+│   ├── Family.ts
+│   ├── FamilyMember.ts
+│   ├── Wallet.ts
+│   ├── Allowance.ts          ← 新增
+│   ├── Request.ts
+│   ├── Transaction.ts         ← 新增
+│   ├── Notification.ts        ← 新增
+│   ├── SyncQueue.ts          ← 新增
+│   ├── AuditLog.ts           ← 新增
+│   └── index.ts
+├── services/
+│   └── authService.ts         ← 新增 (本地認證)
+├── utils/
+│   ├── testDatabase.ts        ← 擴充
+│   └── seedDatabase.ts        ← 新增
+└── database/
+    ├── schema.ts
+    ├── index.ts
+    └── DatabaseProvider.tsx
+```
+
+**測試帳號 (seedDatabase 產生)**:
+```
+Giver:  giver@example.com  / password123
+Baby:   baby@example.com   / password123
+Parent: parent@example.com / password123
+```
+
+**驗證結果**:
+- ✅ TypeScript 型別檢查通過 (0 errors)
+- ✅ 10 個 models 完整註冊到 Database
+- ✅ bcryptjs 密碼加密功能正常
+- ✅ 本地認證 service 函式完整
+- ✅ 測試資料初始化腳本完成
+- ⏳ 待實際裝置測試完整流程
+
+**下一步**:
+- 實作登入/註冊 UI 畫面 (F0009)
+- 建立 Context 管理認證狀態
+- 實作受保護路由 (需登入才能存取)
+
+---
 
 ### F0006 pnpm 有異常 - CMake + pnpm + Windows MAX_PATH 限制
 

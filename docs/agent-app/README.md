@@ -52,6 +52,8 @@ pnpm typecheck    # = pnpm -r run typecheck
 pnpm lint         # = pnpm -r run lint
 
 # Adnriod Debug
+# 啟動模擬器
+npm start --workspace=apps/mobile
 cd D:\Cacao\apps\mobile\android                                                        
 .\gradlew.bat assembleDebug     
 ```
