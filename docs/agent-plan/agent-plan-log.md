@@ -54,4 +54,16 @@ PATH → 包含 platform-tools 和 emulator
 
 完整的詳細步驟說明已經生成，包含所有安裝步驟、疑難排解和最佳實踐。需要我協助建立 launch.json 檔案嗎？
 
-### P0003
+### P0003 andriod 模擬器不能跑
+1.       "name": "Run Android",
+2. 安裝好了 執行還是有問題
+3. 我已經安裝好 
+4. D:; cd 'D:\Users\AmandaChou\git\github\Cacao\Cacao/apps/mobile'; ${env:NODE_OPTIONS}=' --require "c:/Users/AmandaChou/AppData/Local/Programs/Microsoft VS Code/resources/app/extensions/ms-vscode.js-debug/src/bootloader.js"  --inspect-publish-uid=http'; ${env:VSCODE_INSPECTOR_OPTIONS}=':::{"inspectorIpc":"\\\\.\\pipe\\node-cdp.31076-5a6a453b-63.sock","deferredMode":false,"waitForDebugger":"","execPath":"C:\\Program Files\\nodejs\\node.exe","onlyEntrypoint":false,"autoAttachMode":"always","fileCallback":"C:\\Users\\AMANDA~1\\AppData\\Local\\Temp\\node-debug-callback-dc2b9ac279f064aa"}'; & 'C:\Program Files\nodejs\npx.cmd' '--experimental-network-inspection' 'expo' 'run:android' 
+Debugger attached.
+Debugger attached.
+CommandError: No Android connected device found, and no emulators could be started automatically.
+Connect a device or create an emulator (https://docs.expo.dev/workflow/android-studio-emulator).
+Then follow the instructions here to enable USB debugging:
+https://developer.android.com/studio/run/device.html#developer-device-options. If you are using Genymotion go to Settings -> ADB, select "Use custom Android SDK tools", and point it at your Android SDK directory.
+Waiting for the debugger to disconnect...
+Waiting for the debugger to disconnect.. 

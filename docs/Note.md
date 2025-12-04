@@ -203,3 +203,72 @@ config.resolver.nodeModulesPaths = [
 來告訴 Metro：
 
 「嘿，真實的套件都在 workspace 根目錄，不是在 apps/mobile 下面。」
+
+### Q0005 Gradle 是什麼？
+
+cd apps/mobile/android; .\gradlew.bat assembleDebug --stacktrace
+
+### Q0006 Gradle 版本依賴重新安裝
+
+看到問題了！Gradle 建置需要 Java 11+，但系統使用的是 Java 8。讓我幫您設定正確的 Java 版本：
+
+
+
+java -version
+
+
+
+$env:JAVA_HOME
+
+確認是 Java 8 且 JAVA_HOME 未設定。Android Studio 通常包含 Java 17。讓我找到並設定它：
+
+
+
+Get-ChildItem "C:\Program Files\Android\Android Studio" -Recurse -Directory -Filter "jbr" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+
+完美！找到了 JBR（JetBrains Runtime）。讓我設定 JAVA_HOME：
+
+
+
+[System.Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Program Files\Android\Android Studio\jbr', [System.EnvironmentVariableTarget]::User); $env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'; & "$env:JAVA_HOME\bin\java.exe" -version
+
+**安裝狀態確認：**
+
+- ✅ JAVA_HOME 已設定為 Android Studio 的 JDK
+- ✅ Java 版本：OpenJDK **21.0.8**（符合 Gradle 8.14.3 需求）
+
+**接下來需要重新啟動 VS Code 讓環境變數生效：**
+
+1. 請**完全關閉 VS Code**
+2. 重新開啟 VS Code
+3. 再次執行 "Run Android" debug 配置
+
+重啟後 Gradle 應該會使用 Java 21，可以通過 JVM 版本檢查。如果還有其他錯誤（例如找不到 Android 裝置），我們再繼續處理。
+
+### Q0007 路徑太長
+
+你的真正錯誤現在非常明確：
+
+**Windows 路徑太長 → CMake + Ninja 無法編譯 Expo Native 模組**
+
+錯誤核心：
+
+```
+full path 有 227 characters  
+CMAKE_OBJECT_PATH_MAX = 250  
+The build may not work correctly.
+
+ninja: error: manifest 'build.ninja' still dirty after 100 tries
+```
+
+這是 Windows 的經典問題（尤其是 pnpm + monorepo）：
+
+**pnpm node_modules 路徑非常深 → Windows 原生 CMake/Ninja 超過路徑上限 → 編譯失敗**
+
+Expo SDK 50 / RN 0.75 原生模組（expo-modules-core）有 C++ 檔案，必須使用 CMake/Ninja 編譯。
+ 但 Windows 預設最大完整路徑長度仍然偏低（即使你啟用了長路徑支持，CMake/Ninja 自己也有限制）。
+
+```
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+```
+

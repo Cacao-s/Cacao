@@ -128,7 +128,7 @@ $ pnpm --filter mobile start
 ✅ QR code 已生成（可用 Expo Go 掃描）
 ✅ Web 界面：http://localhost:8081
 ```
-###　F000５ 執行有異常
+###　F0005 執行有異常
 1. debug "name": "Start Expo Server"
 2. Web Bundling failed 1595ms node_modules\.pnpm\expo-router@6.0.15_@expo+me_d25fb73b44f411a33f6d117d75737780\node_modules\expo-router\entry.js (263 modules)   
 3. entry.bundle:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
@@ -152,12 +152,9 @@ Checked background terminal output
 
 問題很清楚了！缺少 react-native-web 依賴。Expo SDK 54 的 Web 支援需要這個套件：
 
-
 pnpm --filter mobile add react-native-web react-dom
-伺服器停止了。讓我等待安裝完成：
 
-
-### F0004 配置 WatermelonDB + SQLite adapter
+### F000N 配置 WatermelonDB + SQLite adapter
 
 ### F000N 定義資料模型（users, sync_queue）
 
@@ -165,5 +162,4 @@ pnpm --filter mobile add react-native-web react-dom
 ### F000N 實作帳號密碼註冊/登入 UI
 ### F000N 實作 Google OAuth 登入
 ### F000N 建立同步機制與 API 整合層
-
 
