@@ -10,6 +10,8 @@
     "dev:jobs": "cd server && go run ./cmd/jobs",
     "dev:mobile": "npm --prefix apps/mobile run start",
     "lint": "npm --prefix apps/mobile run lint || true",
-    "typecheck": "npm --prefix apps/mobile run typecheck || true"
+    "typecheck": "npm --prefix apps/mobile run typecheck || true",
+    "agent:node": "node infra/Agent/agent-node.js",
+    "agent:go": "cd infra/Agent/go && go run ."
   }
 }
