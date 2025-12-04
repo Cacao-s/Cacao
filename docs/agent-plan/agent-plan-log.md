@@ -67,3 +67,7 @@ Then follow the instructions here to enable USB debugging:
 https://developer.android.com/studio/run/device.html#developer-device-options. If you are using Genymotion go to Settings -> ADB, select "Use custom Android SDK tools", and point it at your Android SDK directory.
 Waiting for the debugger to disconnect...
 Waiting for the debugger to disconnect.. 
+
+### P0004 專案重新 clone
+1. 我的 launch.json 不見了，幫我補回、要可以執行 Expo、andriod
+2. nomodule 也樣重新安裝

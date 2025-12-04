@@ -272,3 +272,24 @@ Expo SDK 50 / RN 0.75 原生模組（expo-modules-core）有 C++ 檔案，必須
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 ```
 
+### Q0006
+你遇到的是「CMake + pnpm + Windows MAX_PATH 限制」的典型組合爆炸。
+
+最有效順序是：
+
+移到更短的專案路徑（立刻有效）
+
+改用 npm/yarn，不使用 pnpm
+
+啟用 Windows LongPath
+
+必要時關掉 Fabric
+
+# 以管理員身份執行 PowerShell,然後執行:
+New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+
+# 或透過 regedit:
+# 1. Win+R → regedit
+# 2. 前往: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem
+# 3. 新增 DWORD: LongPathsEnabled = 1
+# 4. 重啟電腦
