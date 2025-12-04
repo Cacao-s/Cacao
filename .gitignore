@@ -79,7 +79,6 @@ apps/mobile/.bundle/
 apps/mobile/.expo/*
 apps/mobile/web-build/
 apps/mobile/metro-cache/
-apps/mobile/.vscode/
 
 # apps/web-admin 若是 React/Next/Vite 也會產出上述 dist/build/.next/.nuxt
 apps/web-admin/.next/
@@ -146,11 +145,12 @@ tmp/
 # =========================
 # IDE / Editor
 # =========================
-.vscode/
+# .vscode 目錄的設定檔應該版控,只忽略個人化設定
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
 !.vscode/launch.json
+!.vscode/tasks.json
 
 .idea/
 *.iml

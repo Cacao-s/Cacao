@@ -154,6 +154,73 @@ Checked background terminal output
 
 pnpm --filter mobile add react-native-web react-dom
 
+### F0006 pnpm 有異常 - CMake + pnpm + Windows MAX_PATH 限制
+
+#### TaskReply
+**任務狀態**: ✅ 已解決
+
+**問題描述**:
+遇到「CMake + pnpm + Windows MAX_PATH 限制」典型組合爆炸:
+```
+CMake Warning: Object file directory has 193 characters.
+Maximum full path is 250 characters.
+D:/Cacao/node_modules/.pnpm/expo-modules-core@3.0.26_re_.../...
+ninja: error: manifest 'build.ninja' still dirty after 100 tries
+```
+
+**嘗試過的方案** (全部無效):
+1. ❌ 啟用 Windows LongPath (需管理員權限)
+2. ❌ 修改 pnpm 配置 (`virtual-store-dir=.s`, `shamefully-hoist=true`)
+3. ❌ 關閉 New Architecture (`newArchEnabled=false`)
+4. ❌ 從 workspace 移除 mobile (`!apps/mobile`)
+
+**最終解決方案**: ✅ **改回使用 npm**
+pnpm 的虛擬儲存結構 `.pnpm/<package>@<version>_<hash>/node_modules/<package>` 導致路徑過長:
+- pnpm 路徑: `D:/Cacao/node_modules/.pnpm/expo-modules-core@3.0.26_re_49caeda90c2acd67edece2fdd6ab80f4/node_modules/expo-modules-core` (193+ 字元)
+- npm 路徑: `D:\Cacao\node_modules\expo-modules-core` (39 字元)
+
+**執行步驟**:
+```bash
+# 1. 清理 pnpm 相關檔案
+Remove-Item -Force .npmrc, pnpm-lock.yaml, pnpm-workspace.yaml
+Remove-Item -Recurse -Force node_modules
+
+# 2. 修改 package.json (移除 packageManager, 改用 npm 語法)
+- "dev:mobile": "pnpm --filter mobile start"
++ "dev:mobile": "npm run start --workspace=apps/mobile"
+
+# 3. 修改 .vscode/launch.json
+- "runtimeExecutable": "npx"
++ "runtimeExecutable": "npm"
+- "runtimeArgs": ["expo", "start"]
++ "runtimeArgs": ["run", "start"]
+
+# 4. 重新安裝
+npm install
+
+# 5. 重新產生 Android 專案
+cd apps/mobile
+npx expo prebuild --platform android
+
+# 6. 建置成功!
+cd android
+.\gradlew.bat assembleDebug
+# BUILD SUCCESSFUL in 4m 10s
+```
+
+**關鍵配置變更**:
+- `gradle.properties`: `newArchEnabled=false` (避免 CMake Fabric 編譯)
+- 使用 npm workspace (保留 monorepo 優勢但路徑更短)
+
+**建置結果**:
+```
+✅ APK 成功產生: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+✅ BUILD SUCCESSFUL in 4m 10s
+✅ 253 actionable tasks: 229 executed, 24 up-to-date
+```
+
+**結論**: Windows + React Native + pnpm 是已知組合問題，官方建議在 Windows 開發時使用 npm 或 yarn。
+
 ### F000N 配置 WatermelonDB + SQLite adapter
 
 ### F000N 定義資料模型（users, sync_queue）

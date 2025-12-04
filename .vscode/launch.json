@@ -1,0 +1,60 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Expo: Start Dev Server",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/apps/mobile",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start"
+      ],
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
+      ]
+    },
+    {
+      "name": "Expo: Run on Android",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/apps/mobile",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "android"
+      ],
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
+      ]
+    },
+    {
+      "name": "Expo: Run on iOS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/apps/mobile",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "ios"
+      ],
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceFolder}/apps/mobile/.expo/**/*.js"
+      ]
+    },
+    {
+      "name": "Attach to Expo",
+      "type": "node",
+      "request": "attach",
+      "port": 19000,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ],
+  "compounds": []
+}

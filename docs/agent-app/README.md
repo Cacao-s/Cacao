@@ -50,6 +50,10 @@ pnpm -r run test       # 執行所有測試
 pnpm dev:mobile   # = pnpm --filter mobile start
 pnpm typecheck    # = pnpm -r run typecheck
 pnpm lint         # = pnpm -r run lint
+
+# Adnriod Debug
+cd D:\Cacao\apps\mobile\android                                                        
+.\gradlew.bat assembleDebug     
 ```
 
 #### Workspace 內操作（不推薦）
