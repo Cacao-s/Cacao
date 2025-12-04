@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nozbe/watermelondb": "^0.28.0",
+    "@nozbe/with-observables": "^1.6.0",
     "expo": "~54.0.25",
     "expo-constants": "~18.0.10",
     "expo-linking": "~8.0.9",
