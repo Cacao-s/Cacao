@@ -1,0 +1,17 @@
+{
+  "name": "cacao",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "shared/*"
+  ],
+  "scripts": {
+    "dev:api": "cd server && go run ./cmd/api",
+    "dev:jobs": "cd server && go run ./cmd/jobs",
+    "dev:mobile": "npm run start --workspace=apps/mobile",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "agent:node": "node infra/Agent/agent-node.js",
+    "agent:go": "cd infra/Agent/go && go run ."
+  }
+}
