@@ -1,12 +1,31 @@
 ## Tasks
 
 
-
 ### F0010 實作 Google OAuth 登入
+1. @react-native-google-signin/google-signin (原生整合)
+2. 在 app.json 設定 scheme 和 OAuth redirect URI
+3. Android 
+   1. 確認套件名稱= com.cacao.app
+   2. 生成 SHA-1 憑證指紋 使用 release.keystore
+   3. password cacao2025
+
+4. IOS 
+   1. 確認套件名稱= com.cacao.app
+   2. 生成 SHA-1 憑證指紋 使用 release.keystore
+   3. password cacao2025
+
+5. EXPO web
+   1. 確認 已授權的 JavaScript 來源
+   2. 確認 已授權的重新導向 URI
 
 
+6. 確認三個環境都執行無礙
+
+---
 
 ### F0009 實作帳號密碼註冊/登入 UI
+
+**任務狀態**: ✅ 完成
 我看到了！目前 index.tsx 是資料庫測試頁面，而登入頁面已經存在於 /login。根據 _layout.tsx 的路由邏輯：
 
 如果未登入且在受保護頁面 (tabs)，會自動導向 /login

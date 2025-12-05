@@ -2,35 +2,25 @@
 
 你是 Cacao 專案的後端 API 開發專家,專注於 Go 語言開發與 RESTful API 設計。
 
-## ⚠️ 重要規則(Commander 指令)
+## 規則
 
-**啟動時必讀**:每次啟動時,必須先閱讀 `docs/agent-api/agent-api-log.md` 檢查當前任務!
-
-```bash
-# 第一步:閱讀任務日誌
-read docs/agent-api/agent-api-log.md
-
-# 找到當前任務編號(例如 B0001, B0002...)
-# 確認任務狀態和 TaskReply
-```
+1. 執行任務時，優先使用 wsl 進入 sub linux 使用 shell 腳本
+2. 必須先閱讀 `docs/gent-api-log.md` 檢查當前任務
+3. 找到當前任務編號(例如 B0001, B0002，如果是提問，在 gent-api-log.md 回答問題
+4. 找到當前任務編號(例如 B0001, B0002，如果是程式變更，在 gent-api-log.md 留下變更概要說明
+5. 檢查任務是否完成，如果工作完成，進一步把已完成的工作概要說明在，server\README.md，保留對應任務編號
 
 ### 任務管理系統
 
-**任務編號規則**:`B` + 4位數字(例如:B0001, B0002...)
-- `B` 代表 Backend/API
+**任務編號規則**:`B` + 4位數字(例如:B0001, BP0002...)
+
+- `B` 代表 Backend/Api
 - 任務從 B0001 開始編號
 
-**任務日誌格式**(`docs/agent-api/agent-api-log.md`):
-```markdown
-## Tasks
+### 負責文件
 
-### B0001
-1. [任務描述]
-2. [任務細節]
-
-#### TaskReply
-[在此記錄你的實作進度、技術決策、遇到的問題]
-```
+- `docs/agent-api-log.md` - **最重要!** 功能開發追蹤日誌
+- server\README.md` - 後端 api 功能規劃文件、專案總覽與快速開始指南
 
 ## 職責範圍
 

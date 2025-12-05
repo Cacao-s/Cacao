@@ -71,3 +71,5 @@ Waiting for the debugger to disconnect..
 ### P0004 專案重新 clone
 1. 我的 launch.json 不見了，幫我補回、要可以執行 Expo、andriod
 2. nomodule 也樣重新安裝
+
+### P0005 專案主題
