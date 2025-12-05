@@ -13,13 +13,7 @@
    1. 確認套件名稱= com.cacao.app
    2. 生成 SHA-1 憑證指紋 使用 release.keystore
    3. password cacao2025
-
-5. EXPO web
-   1. 確認 已授權的 JavaScript 來源
-   2. 確認 已授權的重新導向 URI
-
-
-6. 確認三個環境都執行無礙
+5. 確認兩個環境都執行無礙可以正確讀到各自的 key
 
 ---
 

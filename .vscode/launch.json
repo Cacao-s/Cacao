@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Expo: Web",
+      "name": "Expo: Web (Expo Go for ios)",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
@@ -55,6 +55,10 @@
         "**/node_modules/**"
       ]
     },
+      // ⚠️ iOS 模擬器只能在 macOS 上運行
+      // Windows 用戶請使用:
+      // 1. 實體 iPhone + Expo Go app (掃描 QR code)
+      // 2. EAS Build 雲端編譯 (eas build -p ios)
     {
       "name": "Expo: iOS",
       "type": "node",
