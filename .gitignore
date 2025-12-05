@@ -54,10 +54,8 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 package-lock.json.*
 yarn.lock.*
-pnpm-lock.yaml.*
 
 # 各種 bundler 輸出
 dist/

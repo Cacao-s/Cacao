@@ -1,5 +1,11 @@
 ## Tasks
 
+### F0010 解決 一直有 Cannot assign to read-only property 'NONE'
+1. 配置缺少 @babel/plugin-proposal-class-properties loose true插件: 嘗試新增，還是有這個錯誤
+2. @babel/plugin-transform-class-properties loose true: 嘗試新增，還是有這個錯誤
+3. 已修正 register.tsx 的 KeyboardAvoidingView 已修正將 Android 的 behavior 從 'height' 改為 undefined: 嘗試修正，還是有這個錯誤
+4. 記住這個問題與歷程，先不處理
+5. 已解決: 刪除 node_modules 所有 apps\mobile\android 重開就好了
 
 ### F0010 實作 Google OAuth 登入
 1. @react-native-google-signin/google-signin (原生整合)

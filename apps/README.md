@@ -2,14 +2,13 @@
 
 ## 專案結構
 
-Cacao 使用 **pnpm workspace** 管理 monorepo 結構：
+Cacao 使用 **npm workspace** 管理 monorepo 結構：
 
 ```
 Cacao/ (root)
-├── pnpm-workspace.yaml  # Workspace 配置
-├── pnpm-lock.yaml       # 統一 lock file
-├── node_modules/        # 共享依賴（.pnpm virtual store）
 ├── package.json         # Root workspace scripts
+├── package-lock.json    # 統一 lock file
+├── node_modules/        # 共享依賴
 ├── apps/
 │   ├── mobile/          # Expo React Native App
 │   └── web-admin/       # React Web 管理後台
@@ -22,11 +21,11 @@ Cacao/ (root)
 
 ## 套件管理規範
 
-### 為什麼使用 pnpm workspace？
+### 為什麼使用 npm workspace？
 
-1. **節省磁碟空間**：使用 content-addressable store，相同版本的套件只儲存一次
-2. **嚴格依賴管理**：避免 phantom dependencies（未宣告的依賴）
-3. **快速安裝**：parallel + 硬連結機制，比 npm/yarn 快 2-3 倍
+1. **統一依賴管理**：使用單一 lock file 管理所有依賴
+2. **簡化安裝流程**：一次 `npm install` 安裝所有 workspace 依賴
+3. **內建支援**：npm 7+ 內建 workspace 功能，無需額外工具
 4. **CI 友善**：lock file 穩定，減少 diff 衝突
 
 ### 常用指令
@@ -35,39 +34,39 @@ Cacao/ (root)
 
 ```bash
 # 安裝所有 workspace 依賴
-pnpm install
+npm install
 
 # 在特定 workspace 執行指令
-pnpm --filter mobile start           # 啟動 Expo
-pnpm --filter mobile add expo-camera # 在 mobile 安裝套件
+npm start --workspace=apps/mobile              # 啟動 Expo
+npm install expo-camera --workspace=apps/mobile # 在 mobile 安裝套件
 
-# 在所有 workspace 執行指令（recursive）
-pnpm -r run typecheck  # 全部 TypeScript 型別檢查
-pnpm -r run lint       # 全部 ESLint 檢查
-pnpm -r run test       # 執行所有測試
+# 在所有 workspace 執行指令
+npm run typecheck --workspaces  # 全部 TypeScript 型別檢查
+npm run lint --workspaces       # 全部 ESLint 檢查
+npm run test --workspaces       # 執行所有測試
 
 # Root scripts（已配置在 package.json）
-pnpm dev:mobile   # = pnpm --filter mobile start
-pnpm typecheck    # = pnpm -r run typecheck
-pnpm lint         # = pnpm -r run lint
+npm run dev:mobile   # 啟動 mobile app
+npm run typecheck    # 執行型別檢查
+npm run lint         # 執行 lint
 
-# Adnriod Debug
+# Android Debug
 # 啟動模擬器
 npm start --workspace=apps/mobile
-cd D:\Cacao\apps\mobile\android                                                        
+cd apps\mobile\android                                                        
 .\gradlew.bat assembleDebug     
 ```
 
 #### Workspace 內操作（不推薦）
 
 ```bash
-# ❌ 避免在子目錄直接 pnpm install
+# ❌ 避免在子目錄直接 npm install
 cd apps/mobile
-pnpm install  # 會破壞 workspace 結構!
+npm install  # 會破壞 workspace 結構!
 
-# ✅ 應該在根目錄使用 --filter
+# ✅ 應該在根目錄使用 --workspace
 cd ../..  # 回到根目錄
-pnpm --filter mobile install
+npm install --workspace=apps/mobile
 ```
 
 ### Launch.json 設定優化
@@ -77,11 +76,9 @@ Debug 配置已優化為 4 個核心選項:
 - **`Expo: Web`** - 啟動開發伺服器(自動清除快取)
   - 使用 `npm start --workspace=apps/mobile -- --clear`
   - 清除 Metro bundler 快取,確保乾淨啟動
-  - 不考慮使用
 - **`Expo: Web (No Cache Clear)`** - 快速啟動(不清快取)
   - 使用 `npm start --workspace=apps/mobile`
   - 適合程式碼小改動時使用
-  - 不考慮使用
 - **`Expo: Android`** - 啟動 Android 平台
   - 使用 `npm run android --workspace=apps/mobile`
 - **`Expo: iOS`** - 啟動 iOS 平台
@@ -92,40 +89,25 @@ Debug 配置已優化為 4 個核心選項:
 1. **在根目錄操作**（強制）:
    ```bash
    # ✅ 正確
-   pnpm --filter mobile add @nozbe/watermelondb
+   npm install @nozbe/watermelondb --workspace=apps/mobile
    
    # ❌ 錯誤
    cd apps/mobile
-   pnpm add @nozbe/watermelondb  # 會產生獨立 lock file!
+   npm install @nozbe/watermelondb  # 會產生獨立 lock file!
    ```
 
 2. **devDependencies 安裝在哪？**
    - 專案專屬的放子 workspace（如 `eslint-config-expo` → mobile）
    - 通用工具放 root（如 `prettier`, `husky`）
 
-3. **Peer dependencies 處理**：
+3. **安裝開發依賴套件**：
    ```bash
-   # pnpm 會自動提示 peer deps，照指示安裝即可
-   pnpm --filter mobile add react-native-svg
-   # 若提示缺 react，執行：
-   pnpm --filter mobile add -D react@^19.1.0
+   # 安裝 devDependencies
+   npm install -D typescript --workspace=apps/mobile
+   
+   # 安裝一般依賴
+   npm install react-native-svg --workspace=apps/mobile
    ```
-
-### Workspace 依賴引用
-
-在 `apps/mobile/package.json` 引用 shared workspace：
-
-```json
-{
-  "dependencies": {
-    "@cacao/client-sdk": "workspace:*",  // 引用 shared/client-sdk
-    "@cacao/ui-kit": "workspace:^"       // 引用 shared/ui-kit
-  }
-}
-```
-
-- `workspace:*`：使用 workspace 內當前版本
-- `workspace:^`：使用 workspace 內兼容版本（發布時轉換為 ^x.y.z）
 
 ## Expo 開發流程
 
@@ -133,13 +115,13 @@ Debug 配置已優化為 4 個核心選項:
 
 ```bash
 # 根目錄執行（推薦）
-pnpm dev:mobile
+npm run dev:mobile
 
-# 或使用 --filter
-pnpm --filter mobile start
+# 或直接使用 workspace
+npm start --workspace=apps/mobile
 
 # 清除快取啟動
-pnpm --filter mobile start -- -c
+npm start --workspace=apps/mobile -- --clear
 ```
 
 ### 在實體裝置測試
@@ -152,30 +134,30 @@ pnpm --filter mobile start -- -c
 
 ```bash
 # iOS 模擬器（需要 Xcode）
-pnpm --filter mobile run ios
+npm run ios --workspace=apps/mobile
 
 # Android 模擬器（需要 Android Studio）
-pnpm --filter mobile run android
+npm run android --workspace=apps/mobile
 ```
 
 ### TypeScript 型別檢查
 
 ```bash
 # 檢查 mobile app
-pnpm --filter mobile typecheck
+npm run typecheck --workspace=apps/mobile
 
 # 檢查所有 workspace
-pnpm typecheck
+npm run typecheck --workspaces
 ```
 
 ### ESLint 檢查
 
 ```bash
 # Lint mobile app
-pnpm --filter mobile lint
+npm run lint --workspace=apps/mobile
 
 # Lint 所有 workspace
-pnpm lint
+npm run lint --workspaces
 ```
 
 ## 常見問題
@@ -187,34 +169,30 @@ pnpm lint
 ```gitignore
 # Root
 node_modules/
-pnpm-lock.yaml  # ❌ 錯誤！lock file 要提交
+package-lock.json  # ❌ 錯誤！lock file 要提交
 ```
 
 正確版本：
 ```gitignore
 node_modules/
-# pnpm-lock.yaml 不應該被忽略!
+# package-lock.json 不應該被忽略!
 ```
 
-### Q2: 為什麼不能在子目錄執行 pnpm install？
+### Q2: 為什麼不能在子目錄執行 npm install？
 
-**A**: pnpm workspace 使用根目錄的 `pnpm-lock.yaml` 管理所有依賴。在子目錄執行會產生獨立的 lock file，破壞 workspace 結構。
+**A**: npm workspace 使用根目錄的 `package-lock.json` 管理所有依賴。在子目錄執行會產生獨立的 lock file，破壞 workspace 結構。
 
-### Q3: package-lock.json 還需要嗎？
-
-**A**: 不需要！已刪除所有 `package-lock.json`，統一使用 `pnpm-lock.yaml`。
-
-### Q4: 如何清理並重新安裝？
+### Q3: 如何清理並重新安裝？
 
 ```bash
-# 清理所有 node_modules 和 lock file
-rm -rf node_modules apps/*/node_modules shared/*/node_modules
+# 清理所有 node_modules
+Remove-Item -Recurse -Force node_modules, apps\mobile\node_modules, apps\web-admin\node_modules
 
 # 重新安裝（只在根目錄）
-pnpm install
+npm install
 ```
 
-### Q5: Windows 長路徑問題怎麼辦？
+### Q4: Windows 長路徑問題怎麼辦？
 
 如果遇到 "找不到路徑" 錯誤（通常是 React Native 深層目錄）：
 
@@ -226,18 +204,18 @@ Remove-Item node_modules -Force
 Remove-Item empty_temp -Force
 ```
 
-### Q6: Expo 警告 peer dependency 不符怎麼辦？
+### Q5: Expo 警告 peer dependency 不符怎麼辦？
 
 ```bash
 # 範例：react-dom 要求 react@^19.2.1 但目前是 19.1.0
-pnpm --filter mobile add react@^19.2.1
+npm install react@^19.2.1 --workspace=apps/mobile
 
 # 若 Expo SDK 54 不支援，可暫時忽略（Expo 會處理）
 ```
 
 ## 相關資源
 
-- [pnpm workspace 文件](https://pnpm.io/workspaces)
+- [npm workspace 文件](https://docs.npmjs.com/cli/v8/using-npm/workspaces)
 - [Expo 官方文件](https://docs.expo.dev/)
 - [Expo Router 文件](https://docs.expo.dev/router/introduction/)
 - [專案 Commander 規則](../commander.md)
