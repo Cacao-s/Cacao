@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,15 +13,22 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/contexts/AuthContext';
+import { configureGoogleSignIn, loginWithGoogle } from '../src/services/authService';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, setUser } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  useEffect(() => {
+    // Configure Google Sign-In when component mounts
+    configureGoogleSignIn();
+  }, []);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -64,6 +71,27 @@ export default function LoginScreen() {
       console.error('Login error:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const result = await loginWithGoogle();
+      
+      if (result.success && result.user) {
+        // Update auth context with the user
+        setUser(result.user);
+        // Navigate to home
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Google 登入失敗', result.error || '無法使用 Google 登入');
+      }
+    } catch (error) {
+      Alert.alert('錯誤', 'Google 登入過程發生錯誤,請稍後再試');
+      console.error('Google login error:', error);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -136,9 +164,24 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity
+            style={[styles.googleButton, isGoogleLoading && styles.googleButtonDisabled]}
+            onPress={handleGoogleLogin}
+            disabled={isLoading || isGoogleLoading}
+          >
+            {isGoogleLoading ? (
+              <ActivityIndicator color="#1a1a1a" />
+            ) : (
+              <>
+                <Text style={styles.googleIcon}>G</Text>
+                <Text style={styles.googleButtonText}>使用 Google 登入</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.registerButton}
             onPress={() => router.push('/register')}
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
           >
             <Text style={styles.registerButtonText}>建立新帳號</Text>
           </TouchableOpacity>
@@ -229,6 +272,31 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     color: '#666',
     fontSize: 14,
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  googleButtonDisabled: {
+    opacity: 0.6,
+  },
+  googleIcon: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4285F4',
+    marginRight: 12,
+  },
+  googleButtonText: {
+    color: '#1a1a1a',
+    fontSize: 16,
+    fontWeight: '600',
   },
   registerButton: {
     borderWidth: 1,

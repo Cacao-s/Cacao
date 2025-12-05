@@ -71,6 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = async (newUser: User | null) => {
+    setUser(newUser);
+    if (newUser) {
+      await AsyncStorage.setItem(AUTH_USER_ID_KEY, newUser.id);
+    } else {
+      await AsyncStorage.removeItem(AUTH_USER_ID_KEY);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -79,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         logout,
-        setUser,
+        setUser: updateUser,
       }}
     >
       {children}

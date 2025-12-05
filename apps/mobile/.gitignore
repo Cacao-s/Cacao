@@ -32,6 +32,14 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+
+# Google OAuth
+GoogleService-Info.plist
+google-services.json
+
+# Android keystore
+*.keystore
 
 # typescript
 *.tsbuildinfo

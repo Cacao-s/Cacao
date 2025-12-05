@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { database } from '../database';
 import User from '../models/User';
 import { Q } from '@nozbe/watermelondb';
@@ -7,7 +8,22 @@ import { Q } from '@nozbe/watermelondb';
  * Local authentication service (no API integration)
  * Handles user registration and login using local SQLite database
  * Uses expo-crypto for password hashing (SHA256)
+ * Supports Google OAuth login
  */
+
+/**
+ * Configure Google Sign-In
+ * Call this once when app starts
+ */
+export function configureGoogleSignIn() {
+  GoogleSignin.configure({
+    // Web Client ID from Google Cloud Console
+    // You need to create OAuth 2.0 credentials in Google Cloud Console
+    // and add both Android and iOS apps with their respective SHA-1 fingerprints
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    offlineAccess: false,
+  });
+}
 
 export interface RegisterInput {
   email: string;
@@ -223,5 +239,92 @@ export async function changePassword(
   } catch (error) {
     console.error('❌ Change password failed:', error);
     return { success: false, error: '變更密碼失敗，請稍後再試' };
+  }
+}
+
+/**
+ * Login with Google OAuth
+ */
+export async function loginWithGoogle(): Promise<AuthResult> {
+  try {
+    // Check if Google Play Services are available
+    await GoogleSignin.hasPlayServices();
+
+    // Sign in with Google
+    const userInfo = await GoogleSignin.signIn();
+    
+    if (!userInfo.data?.user) {
+      return { success: false, error: 'Google 登入失敗：無法取得使用者資訊' };
+    }
+
+    const googleUser = userInfo.data.user;
+    const email = googleUser.email;
+    const displayName = googleUser.name || googleUser.givenName || 'Google User';
+    const googleId = googleUser.id;
+    const photoUrl = googleUser.photo || undefined;
+
+    // Check if user already exists
+    const usersCollection = database.get<User>('users');
+    const existingUsers = await usersCollection
+      .query(Q.where('email', email))
+      .fetch();
+
+    let user: User;
+
+    if (existingUsers.length > 0) {
+      // User exists, update OAuth info if needed
+      user = existingUsers[0];
+      await database.write(async () => {
+        await user.update((u) => {
+          if (!u.googleId) u.googleId = googleId;
+          if (photoUrl && !u.photoUrl) u.photoUrl = photoUrl;
+          if (u.status !== 'active') u.status = 'active';
+        });
+      });
+      console.log('✅ Existing user logged in with Google:', user.id);
+    } else {
+      // Create new user
+      user = await database.write(async () => {
+        return await usersCollection.create((newUser) => {
+          newUser.email = email;
+          newUser.displayName = displayName;
+          newUser.googleId = googleId;
+          newUser.photoUrl = photoUrl;
+          newUser.locale = 'zh-TW';
+          newUser.theme = 'default';
+          newUser.role = 'baby'; // Default role
+          newUser.status = 'active';
+          // No passwordHash for OAuth users
+        });
+      });
+      console.log('✅ New user created via Google:', user.id);
+    }
+
+    return { success: true, user };
+  } catch (error: any) {
+    console.error('❌ Google login failed:', error);
+    
+    // Handle specific error codes
+    if (error.code === 'SIGN_IN_CANCELLED') {
+      return { success: false, error: '使用者取消登入' };
+    } else if (error.code === 'IN_PROGRESS') {
+      return { success: false, error: '登入進行中，請稍候' };
+    } else if (error.code === 'PLAY_SERVICES_NOT_AVAILABLE') {
+      return { success: false, error: 'Google Play Services 不可用' };
+    }
+    
+    return { success: false, error: 'Google 登入失敗，請稍後再試' };
+  }
+}
+
+/**
+ * Sign out from Google
+ */
+export async function signOutGoogle(): Promise<void> {
+  try {
+    await GoogleSignin.signOut();
+    console.log('✅ Signed out from Google');
+  } catch (error) {
+    console.error('❌ Google sign out failed:', error);
   }
 }

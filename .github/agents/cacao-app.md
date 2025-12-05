@@ -35,6 +35,9 @@
 - **國際化**：i18n (繁體中文、英文)
 
 ## 工作原則
+1. 套件安裝，記得使用 cd d:\Cacao\apps\mobile; npm install <package-name>，避免破壞 workspace 結構
+
+### 套件
 
 ### 程式碼規範
 1. **命名慣例**：
