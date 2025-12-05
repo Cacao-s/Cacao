@@ -15,10 +15,7 @@ import {
   AuditLog,
 } from '../models';
 
-// Fallback implementation (mobile default)
-// Expo will automatically use:
-// - index.native.ts for iOS/Android
-// - index.web.ts for Web
+// Mobile (iOS/Android): SQLiteAdapter with full model classes
 const adapter = new SQLiteAdapter({
   schema,
   dbName: 'cacao',

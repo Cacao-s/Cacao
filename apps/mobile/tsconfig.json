@@ -4,6 +4,7 @@
     "strict": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
+    "target": "ES2022",
     "paths": {
       "@/*": [
         "./*"

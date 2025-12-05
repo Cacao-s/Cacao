@@ -1,5 +1,6 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
+const { nodeOnlyModules, nodeOnlyPackages } = require('./metro.blocklist');
 
 // Find the project and workspace directories
 const projectRoot = __dirname;
@@ -18,6 +19,19 @@ config.resolver.nodeModulesPaths = [
 
 // 3. Resolve symlinks to prevent issues with pnpm
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Block Node.js-only modules on web
+  if (platform === 'web') {
+    // Check if module is in blocklist
+    if (nodeOnlyModules.includes(moduleName)) {
+      return { type: 'empty' };
+    }
+    
+    // Check if module path includes blocked packages
+    if (nodeOnlyPackages.some(pkg => moduleName.includes(pkg))) {
+      return { type: 'empty' };
+    }
+  }
+
   // Special handling for expo-router entry
   if (moduleName === 'expo-router/entry') {
     const expoRouterPath = require.resolve('expo-router/entry', {

@@ -1,6 +1,5 @@
 ## Tasks
 
-
 ### F0010 實作 Google OAuth 登入
 1. @react-native-google-signin/google-signin (原生整合)
 2. 在 app.json 設定 scheme 和 OAuth redirect URI
@@ -18,14 +17,31 @@
    1. 確認 已授權的 JavaScript 來源
    2. 確認 已授權的重新導向 URI
 
-
 6. 確認三個環境都執行無礙
 
----
+### F0010 EXPO web db
+
+1. EXPO web 執行無法使用 WatermelonDB 
+2. 修正 Expo: Web 執行 正常且不影響  Expo: Android 原本的做法
+3. 確認修正方案先給我，我先看過可行性
+4. 核心問題：
+   1. WatermelonDB 的 SQLiteAdapter 使用 React Native 原生模組
+   2. 在 Web 平台無法使用 SQLite（沒有原生橋接）
+   3. 當前 index.ts 直接初始化 SQLiteAdapter，導致 Web 平台崩潰
+
+方案一：Platform-aware Database Initialization（推薦）
+策略：根據平台動態選擇 Adapter
+
+Mobile (iOS/Android): 使用 SQLiteAdapter
+Web: 使用 Dexie + IndexedDB 作為 WatermelonDB Web 端 自製 Adapter
+
+缺點：
+1. Web 資料存在 IndexedDB/localStorage，重整瀏覽器會保留資料
+2. LokiJS 方案捨棄，效能略遜於 SQLite（但 Web 通常資料量較小）
+3. Dexie 方案選用，需要自己維護 Adapter
+
 
 ### F0009 實作帳號密碼註冊/登入 UI
-
-**任務狀態**: ✅ 完成
 我看到了！目前 index.tsx 是資料庫測試頁面，而登入頁面已經存在於 /login。根據 _layout.tsx 的路由邏輯：
 
 如果未登入且在受保護頁面 (tabs)，會自動導向 /login

@@ -22,10 +22,8 @@ export default class User extends Model {
   @field('theme') theme!: string;
   @field('role') role!: UserRole;
   @field('status') status!: UserStatus;
-
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
-
   @children('families') families!: any;
   @children('family_members') familyMembers!: any;
   @children('notifications') notifications!: any;
