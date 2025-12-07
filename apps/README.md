@@ -30,7 +30,57 @@ Cacao/ (root)
 
 ### 常用指令
 
-#### 根目錄操作（推薦）
+### 快速開始
+
+1. Clone 專案
+2. 安裝 nvm (Node Version Manager)
+   - Windows: <https://github.com/coreybutler/nvm-windows/releases>
+3. 安裝 Node.js
+
+   ```bash
+   nvm install 24.11.0
+   nvm use 24.11.0
+   ```
+
+4. 安裝專案依賴
+
+   ```bash
+   npm install
+   ```
+
+5. 安裝 Java JDK 17 (Android 開發必需)
+   - 下載: <https://adoptium.net/temurin/releases/?version=17>
+   - winget install Microsoft.OpenJDK.17
+   - 選擇 JDK 17 LTS,作業系統選 Windows x64
+   - 安裝時**勾選** "Set JAVA_HOME variable" 和 "Add to PATH"
+   - 安裝後重啟 VS Code 使環境變數生效
+   - 驗證安裝:
+
+     ```bash
+     java -version  # 應顯示 openjdk version "17.x.x"
+     echo %JAVA_HOME%  # 應顯示 JDK 安裝路徑
+     $env:JAVA_HOME # 應顯示 JDK 安裝路徑
+     ```
+
+6. 下載 Android Studio (包含 Android SDK + 模擬器)
+   - 下載: <https://developer.android.com/studio>
+   - 安裝 Android Studio
+   - 開啟後安裝 Android SDK (跟隨安裝精靈)
+   - 建議安裝 Android 13 (API 33) 或更新版本
+7. Android SDK 並設定 ANDROID_HOME 環境變數
+  - winget install Google.AndroidStudio
+  - set env
+  ```bash
+  $androidSdkPath = "C:\Users\$env:USERNAME\AppData\Local\Android\Sdk"; [System.Environment]::SetEnvironmentVariable('ANDROID_HOME', $androidSdkPath, 'User'); $env:ANDROID_HOME = $androidSdkPath; Write-Host "ANDROID_HOME set to: $androidSdkPath"
+  ```
+8. 啟動 Android 模擬器
+   - 開啟 Android Studio > Device Manager
+   - 建立一個虛擬裝置 (推薦: Pixel 5 + Android 13)
+   - 啟動模擬器
+9. VS Code 執行除錯: **Expo: Android**
+   - 按 F5 或點選左側除錯面板選擇 "Expo: Android"
+
+#### 根目錄操作(推薦)
 
 ```bash
 # 安裝所有 workspace 依賴
@@ -54,7 +104,11 @@ npm run lint         # 執行 lint
 # 啟動模擬器
 npm start --workspace=apps/mobile
 cd apps\mobile\android                                                        
-.\gradlew.bat assembleDebug     
+.\gradlew.bat assembleDebug
+
+# 查看詳細執行錯誤原因
+cd apps\mobile\android
+.\gradlew.bat app:assembleDebug --stacktrace
 ```
 
 #### Workspace 內操作（不推薦）

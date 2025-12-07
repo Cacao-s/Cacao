@@ -145,9 +145,13 @@ tmp/
 # =========================
 # .vscode 目錄的設定檔應該版控,只忽略個人化設定
 .vscode/*
+# 專案共用的編輯器設定(格式化、縮排等)
 !.vscode/settings.json
+# 團隊建議安裝的擴充套件清單
 !.vscode/extensions.json
+# 程式除錯啟動配置(Run and Debug)
 !.vscode/launch.json
+# 自動化任務設定(編譯、測試等)
 !.vscode/tasks.json
 
 .idea/

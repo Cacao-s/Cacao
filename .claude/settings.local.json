@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java:*)",
+      "Bash(start https://adoptium.net/temurin/releases/?version=17)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
