@@ -13,12 +13,17 @@
 ### 2. Android 憑證生成
 - ✅ 已生成 `release.keystore` (位置: `apps/mobile/android/app/release.keystore`)
 - ✅ 密碼: `cacao2025`
-- ✅ 別名: `cacao-release`
+- ✅ 別名: `cacao`
 - ✅ 套件名稱: `com.cacao.app`
 
 **SHA-1 指紋 (dev、release 共用):**
 ```
-0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3
+DA:8B:A6:4F:2C:9B:18:17:2A:CF:AF:C6:BE:51:B2:8A:C2:61:12:C8
+```
+
+**SHA-256 指紋:**
+```
+15:F4:1C:2F:F6:BA:54:B1:36:0E:23:06:F9:89:EF:78:6B:FC:12:A9:CE:A2:34:BB:02:9F:1D:21:08:E6:01:98
 ```
 
 **重要:** 請將 `release.keystore` 加入 `.gitignore`，不要提交到版本控制！
@@ -74,7 +79,7 @@
 3. Name: `Cacao Android`
 4. Package name: `com.cacao.app`
 5. SHA-1 certificate fingerprint (dev、release 共用):
-   - `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
+   - `DA:8B:A6:4F:2C:9B:18:17:2A:CF:AF:C6:BE:51:B2:8A:C2:61:12:C8`
 6. 點擊 **Create**
 
    **重要**: 只需要建立**一個** Android Client，dev、release 共用同一個 SHA-1 指紋

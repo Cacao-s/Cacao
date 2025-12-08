@@ -9,8 +9,9 @@ Package Name: com.cacao.app
 Release Keystore (dev、release 共用):
   Path: apps/mobile/android/app/release.keystore
   Password: cacao2025
-  Alias: cacao-release
-  SHA-1: 0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3
+  Alias: cacao
+  SHA-1: DA:8B:A6:4F:2C:9B:18:17:2A:CF:AF:C6:BE:51:B2:8A:C2:61:12:C8
+  SHA-256: 15:F4:1C:2F:F6:BA:54:B1:36:0E:23:06:F9:89:EF:78:6B:FC:12:A9:CE:A2:34:BB:02:9F:1D:21:08:E6:01:98
 ```
 
 ### iOS 配置

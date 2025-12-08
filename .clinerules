@@ -320,6 +320,41 @@ export const lightTheme = {
 ### 語言切換
 在 Settings 頁面提供語言選項，儲存到 AsyncStorage
 
+## 危險指令警告
+
+### 會清除 android/ 目錄的指令（會刪除 keystore！）
+
+以下指令會**刪除整個 `android/` 目錄**，包括 `release.keystore`，**絕對不要輕易執行**：
+
+| 危險指令 | 影響 |
+|----------|------|
+| `npx expo prebuild --clean` | 清除並重建整個 `android/` 和 `ios/` 目錄 |
+| `npx expo prebuild --platform android --clean` | 清除並重建整個 `android/` 目錄 |
+| `rm -rf android/` | 直接刪除 android 目錄 |
+| `Remove-Item -Recurse -Force android/` | PowerShell 刪除 android 目錄 |
+
+### 安全指令（不會影響 keystore）
+
+| 安全指令 | 說明 |
+|----------|------|
+| `expo start` | 啟動開發伺服器 |
+| `expo start --clear` | 清除 Metro 快取（不影響 android/） |
+| `expo run:android` | 編譯並執行 Android app |
+| `expo prebuild` | 生成 native 專案（**不帶 --clean**） |
+| `gradlew clean` | 清除 Gradle build 快取（不影響 keystore） |
+
+### 如果必須執行 `expo prebuild --clean`
+
+1. **先備份 keystore**：
+   ```bash
+   cp apps/mobile/android/app/release.keystore ./release.keystore.backup
+   ```
+2. 執行 prebuild --clean
+3. **還原 keystore**：
+   ```bash
+   cp ./release.keystore.backup apps/mobile/android/app/release.keystore
+   ```
+
 ## 常見問題
 
 ### Expo 相依性衝突
