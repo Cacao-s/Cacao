@@ -14,14 +14,19 @@ import { Q } from '@nozbe/watermelondb';
 /**
  * Configure Google Sign-In
  * Call this once when app starts
+ *
+ * Android: 只需要在 Google Cloud Console 設定 Android Client，
+ *          程式碼中不需要設定 webClientId
+ * iOS: 需要設定 iosClientId (未來實作)
+ * webClientId: 只有在需要後端驗證 idToken 時才需要
+ * 本地 SQLite + 純前端 Google 登入不需要 webClientId
  */
 export function configureGoogleSignIn() {
   GoogleSignin.configure({
-    // Web Client ID from Google Cloud Console
-    // You need to create OAuth 2.0 credentials in Google Cloud Console
-    // and add both Android and iOS apps with their respective SHA-1 fingerprints
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+    // Android 不需要 webClientId，直接使用 Google Cloud Console 設定的 Android Client
+    // 如果未來需要後端驗證 idToken，再加入 webClientId
     offlineAccess: false,
+    // scopes: ['profile', 'email'], // 預設已包含
   });
 }
 

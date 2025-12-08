@@ -1,5 +1,25 @@
 ## Tasks
 
+### F0012 完善 Google OAuth 登入
+1. Andriod OAth ClientId
+  - 1000659951821-58mk8aabsdtfjbq1pbh7tcevhca4al6s.apps.googleusercontent.com
+  - 完善 F0011 剩下未完成的動作
+
+1. ✅ 修正 Google Sign-In 配置錯誤
+   - **問題**: 原本誤以為 Android 不需要 webClientId
+   - **正確**: webClientId 是必須的（來自 Web Application 類型的 Client ID）
+   - Android Client ID 只用於 Console 配對 SHA-1，不需要寫在程式碼中
+   - 已修正 `configureGoogleSignIn()` 函式，加入 `webClientId` 參數驗證
+   - 已創建 `.env.example` 說明正確的環境變數配置
+
+3. Android OAuth ClientId (已完成)
+   - 1000659951821-58mk8aabsdtfjbq1pbh7tcevhca4al6s.apps.googleusercontent.com
+
+4. ⏳ 待完成項目
+   - 需要在 Google Cloud Console 取得 Web Client ID
+   - 創建 `.env` 文件並填入 `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+   - 測試 Google 登入流程
+
 ### F0011 實作 Google OAuth 登入
 1. @react-native-google-signin/google-signin (原生整合)
 2. 在 app.json 設定 scheme 和 OAuth redirect URI

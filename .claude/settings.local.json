@@ -22,7 +22,9 @@
       "Bash(gcloud auth list:*)",
       "Bash(curl:*)",
       "Bash(dir \"d:\\git\\github\\Cacao-s\\Cacao\\nul\")",
-      "Bash(npx expo prebuild:*)"
+      "Bash(npx expo prebuild:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
