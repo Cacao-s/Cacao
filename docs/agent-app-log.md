@@ -13,32 +13,22 @@
 1. 在 `expo prebuild` **之後**重新生成 keystore
 2. 使用正確的命令: `keytool -keystore release.keystore -list -v -storepass cacao2025`
 
-**正確的 SHA-1 指紋**:
-- **Release** (正式發布): `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
-- **Debug** (開發測試): `FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C`
+**正確的 SHA-1 指紋**: dev、release 共用，只需要建立一個 Android Client
+- **Release** (dev、release 共用): `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
 
-**重要**: Google Cloud Console 需要建立**兩個** Android Client (Debug + Release)
+**重要**: Google Cloud Console 只需要建立**一個** Android Client，dev、release 共用
 
 **任務狀態**: ✅ 完成
 
----
-
-### F0011 解決 一直有 Cannot assign to read-only property 'NONE'
-1. 配置缺少 @babel/plugin-proposal-class-properties loose true插件: 嘗試新增，還是有這個錯誤
-2. @babel/plugin-transform-class-properties loose true: 嘗試新增，還是有這個錯誤
-3. 已修正 register.tsx 的 KeyboardAvoidingView 已修正將 Android 的 behavior 從 'height' 改為 undefined: 嘗試修正，還是有這個錯誤
-4. 記住這個問題與歷程，先不處理
-5. 已解決: 刪除 node_modules 所有 apps\mobile\android 重開就好了
-
-### F0010 實作 Google OAuth 登入
+### F0011 實作 Google OAuth 登入
 1. @react-native-google-signin/google-signin (原生整合)
 2. 在 app.json 設定 scheme 和 OAuth redirect URI
-3. Android 
+3. Android 只要一個 dev、release 共用
    1. 確認套件名稱= com.cacao.app
    2. 生成 SHA-1 憑證指紋 使用 release.keystore
    3. password cacao2025
 
-4. IOS 
+4. IOS 只要一個 dev、release 共用
    1. 確認套件名稱= com.cacao.app
    2. 生成 SHA-1 憑證指紋 使用 release.keystore
    3. password cacao2025
@@ -57,9 +47,8 @@
 - 密碼: `cacao2025`
 - 別名: `cacao-release`
 - 套件名稱: `com.cacao.app`
-- **Release SHA-1 指紋** (正式發布): `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
-- **Debug SHA-1 指紋** (開發測試): `FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C`
-- **重要**: Google Cloud Console 需要建立**兩個** Android Client (Debug + Release)
+- **SHA-1 指紋** (dev、release 共用): `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
+- **重要**: Google Cloud Console 只需要建立**一個** Android Client，dev、release 共用
 
 **3. 程式碼實作** ✅
 - 新增 `authService.ts`:
@@ -132,7 +121,12 @@
 3. 在 Android 裝置/模擬器上測試 Google 登入
 4. (未來) 配置 iOS Google 登入
 
----
+### F0010 解決 一直有 Cannot assign to read-only property 'NONE'
+1. 配置缺少 @babel/plugin-proposal-class-properties loose true插件: 嘗試新增，還是有這個錯誤
+2. @babel/plugin-transform-class-properties loose true: 嘗試新增，還是有這個錯誤
+3. 已修正 register.tsx 的 KeyboardAvoidingView 已修正將 Android 的 behavior 從 'height' 改為 undefined: 嘗試修正，還是有這個錯誤
+4. 記住這個問題與歷程，先不處理
+5. 已解決: 刪除 node_modules 所有 apps\mobile\android 重開就好了
 
 ### F0009 實作帳號密碼註冊/登入 UI
 

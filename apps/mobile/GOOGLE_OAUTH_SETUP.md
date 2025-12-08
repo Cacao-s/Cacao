@@ -16,14 +16,9 @@
 - ✅ 別名: `cacao-release`
 - ✅ 套件名稱: `com.cacao.app`
 
-**Release Keystore SHA-1 指紋 (正式發布用):**
+**SHA-1 指紋 (dev、release 共用):**
 ```
 0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3
-```
-
-**Debug Keystore SHA-1 指紋 (開發測試用):**
-```
-FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C
 ```
 
 **重要:** 請將 `release.keystore` 加入 `.gitignore`，不要提交到版本控制！
@@ -78,14 +73,11 @@ FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66
 2. Application type: **Android**
 3. Name: `Cacao Android`
 4. Package name: `com.cacao.app`
-5. SHA-1 certificate fingerprint (開發時使用 Debug，發布時使用 Release): 
-   - **Debug (開發測試)**: `FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C`
-   - **Release (正式發布)**: `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
+5. SHA-1 certificate fingerprint (dev、release 共用):
+   - `0C:3F:3A:72:15:15:8B:EB:E7:43:BF:A9:CF:A7:CB:D9:4A:33:76:7B:50:38:58:2F:2B:1E:93:0E:C0:AC:1B:E3`
 6. 點擊 **Create**
 
-   **重要**: 在 Google Cloud Console 中，你需要建立**兩個** Android Client:
-   - 一個使用 Debug SHA-1 (開發時使用)
-   - 一個使用 Release SHA-1 (發布 APK/AAB 時使用)
+   **重要**: 只需要建立**一個** Android Client，dev、release 共用同一個 SHA-1 指紋
 
 #### 4.3 iOS Client (未來需要)
 

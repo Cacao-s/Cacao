@@ -6,13 +6,7 @@
 ```
 Package Name: com.cacao.app
 
-Debug Keystore (開發用):
-  Path: apps/mobile/android/app/debug.keystore
-  Password: android
-  Alias: androiddebugkey
-  SHA-1: FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C
-
-Release Keystore (發布用):
+Release Keystore (dev、release 共用):
   Path: apps/mobile/android/app/release.keystore
   Password: cacao2025
   Alias: cacao-release
@@ -30,8 +24,7 @@ Bundle ID: com.cacao.app
 2. **啟用 Google Sign-In API**
 3. **建立 OAuth Clients**:
    - ✅ Web Client (複製 Client ID)
-   - ✅ Android Client - Debug (貼上 Debug SHA-1)
-   - ✅ Android Client - Release (貼上 Release SHA-1)
+   - ✅ Android Client (貼上 SHA-1，dev、release 共用)
    - ⏳ iOS Client (貼上 Bundle ID)
 4. **建立 .env 檔案**:
    ```bash

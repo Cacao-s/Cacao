@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(java:*)",
-      "Bash(start https://adoptium.net/temurin/releases/?version=17)"
+      "Bash(start https://adoptium.net/temurin/releases/?version=17)",
+      "Bash(git config:*)",
+      "Bash(git credential-manager:*)",
+      "Bash(git push:*)",
+      "Bash(cmdkey /list:*)",
+      "Bash(findstr:*)",
+      "Bash(git remote:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
