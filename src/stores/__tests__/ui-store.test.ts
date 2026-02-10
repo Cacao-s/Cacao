@@ -41,4 +41,37 @@ describe("useUiStore", () => {
     useUiStore.getState().setTheme("light");
     expect(useUiStore.getState().theme).toBe("light");
   });
+
+  it("setTheme dark adds dark class to documentElement", () => {
+    useUiStore.getState().setTheme("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(document.documentElement.classList.contains("high-contrast")).toBe(false);
+  });
+
+  it("setTheme high-contrast adds high-contrast class to documentElement", () => {
+    useUiStore.getState().setTheme("high-contrast");
+    expect(document.documentElement.classList.contains("high-contrast")).toBe(true);
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
+  it("switching dark to high-contrast removes dark class", () => {
+    useUiStore.getState().setTheme("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    useUiStore.getState().setTheme("high-contrast");
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(document.documentElement.classList.contains("high-contrast")).toBe(true);
+  });
+
+  it("setTheme light removes all theme classes", () => {
+    useUiStore.getState().setTheme("dark");
+    useUiStore.getState().setTheme("light");
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(document.documentElement.classList.contains("high-contrast")).toBe(false);
+  });
+
+  it("setLocale does not affect theme", () => {
+    useUiStore.getState().setTheme("dark");
+    useUiStore.getState().setLocale("en");
+    expect(useUiStore.getState().theme).toBe("dark");
+  });
 });

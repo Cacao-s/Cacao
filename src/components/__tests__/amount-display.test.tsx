@@ -47,9 +47,7 @@ describe("AmountDisplay", () => {
   });
 
   it("applies custom className", () => {
-    const { container } = render(
-      <AmountDisplay cents={100} className="text-xl font-bold" />,
-    );
+    const { container } = render(<AmountDisplay cents={100} className="text-xl font-bold" />);
     const span = container.querySelector("span");
     expect(span?.className).toContain("text-xl");
     expect(span?.className).toContain("font-bold");

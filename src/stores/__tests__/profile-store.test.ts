@@ -59,10 +59,36 @@ describe("useProfileStore", () => {
     const mockFamily = { name: "Test" } as never;
     useProfileStore.setState({ family: mockFamily });
 
-    useProfileStore
-      .getState()
-      .setProfile({ display_name: "Alice" } as never);
+    useProfileStore.getState().setProfile({ display_name: "Alice" } as never);
 
     expect(useProfileStore.getState().family).toEqual(mockFamily);
+  });
+
+  it("overwriting profile replaces previous value", () => {
+    useProfileStore.getState().setProfile({ display_name: "Alice" } as never);
+    useProfileStore.getState().setProfile({ display_name: "Bob" } as never);
+    expect((useProfileStore.getState().profile as { display_name: string }).display_name).toBe(
+      "Bob",
+    );
+  });
+
+  it("clear then set works correctly", () => {
+    useProfileStore.getState().setProfile({ display_name: "Alice" } as never);
+    useProfileStore.getState().clear();
+    expect(useProfileStore.getState().profile).toBeNull();
+
+    useProfileStore.getState().setProfile({ display_name: "Bob" } as never);
+    expect((useProfileStore.getState().profile as { display_name: string }).display_name).toBe(
+      "Bob",
+    );
+  });
+
+  it("setting family does not affect profile", () => {
+    const mockProfile = { display_name: "Alice" } as never;
+    useProfileStore.setState({ profile: mockProfile });
+
+    useProfileStore.getState().setFamily({ name: "Smith" } as never);
+
+    expect(useProfileStore.getState().profile).toEqual(mockProfile);
   });
 });

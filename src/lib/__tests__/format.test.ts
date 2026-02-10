@@ -114,3 +114,47 @@ describe("formatDateTime edge cases", () => {
     expect(dateTime.length).toBeGreaterThanOrEqual(dateOnly.length);
   });
 });
+
+// ── R7: Format Currency Parameter ───────────────────────────
+
+describe("formatAmount with currency parameter", () => {
+  it("uses TWD by default", () => {
+    const result = formatAmount(10000);
+    expect(result).toMatch(/\$|NT/);
+  });
+
+  it("accepts USD currency", () => {
+    const result = formatAmount(10000, "USD");
+    expect(result).toContain("100");
+  });
+
+  it("accepts JPY currency", () => {
+    const result = formatAmount(10000, "JPY");
+    expect(result).toContain("100");
+  });
+
+  it("consistent output for same input", () => {
+    const a = formatAmount(5000);
+    const b = formatAmount(5000);
+    expect(a).toBe(b);
+  });
+});
+
+describe("formatDate robustness", () => {
+  it("handles ISO string without timezone", () => {
+    const result = formatDate("2024-06-15");
+    expect(result).toContain("2024");
+  });
+
+  it("handles SQLite datetime format", () => {
+    // SQLite datetime('now') returns "YYYY-MM-DD HH:MM:SS"
+    const result = formatDate("2024-06-15 14:30:00");
+    expect(result).toContain("2024");
+  });
+
+  it("handles January 1st", () => {
+    const result = formatDate("2024-01-01T00:00:00.000Z");
+    expect(result).toContain("2024");
+    expect(result).toMatch(/1/);
+  });
+});

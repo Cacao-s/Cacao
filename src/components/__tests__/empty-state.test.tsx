@@ -20,12 +20,7 @@ describe("EmptyState", () => {
   });
 
   it("renders icon when provided", () => {
-    render(
-      <EmptyState
-        title="Empty"
-        icon={<span data-testid="test-icon">icon</span>}
-      />,
-    );
+    render(<EmptyState title="Empty" icon={<span data-testid="test-icon">icon</span>} />);
     expect(screen.getByTestId("test-icon")).toBeDefined();
   });
 
@@ -38,12 +33,7 @@ describe("EmptyState", () => {
   });
 
   it("renders action when provided", () => {
-    render(
-      <EmptyState
-        title="Empty"
-        action={<button data-testid="action-btn">Add</button>}
-      />,
-    );
+    render(<EmptyState title="Empty" action={<button data-testid="action-btn">Add</button>} />);
     expect(screen.getByTestId("action-btn")).toBeDefined();
     expect(screen.getByText("Add")).toBeDefined();
   });

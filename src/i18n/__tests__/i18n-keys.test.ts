@@ -80,3 +80,65 @@ describe("i18n key completeness", () => {
     }
   });
 });
+
+// ── R7: i18n Value Quality ──────────────────────────────────
+
+describe("i18n value quality", () => {
+  const zhKeys = collectKeys(zhTW);
+  const enKeys = collectKeys(en);
+
+  function getValue(obj: Record<string, unknown>, path: string): unknown {
+    return path.split(".").reduce((o: unknown, k) => {
+      return (o as Record<string, unknown>)?.[k];
+    }, obj);
+  }
+
+  it("all zh-TW values are strings", () => {
+    for (const key of zhKeys) {
+      const value = getValue(zhTW, key);
+      expect(typeof value).toBe("string");
+    }
+  });
+
+  it("all en values are strings", () => {
+    for (const key of enKeys) {
+      const value = getValue(en, key);
+      expect(typeof value).toBe("string");
+    }
+  });
+
+  it("zh-TW values contain CJK characters where expected", () => {
+    // At least most zh-TW values should contain CJK characters
+    const cjkRegex = /[\u4e00-\u9fff]/;
+    let cjkCount = 0;
+    for (const key of zhKeys) {
+      const value = getValue(zhTW, key) as string;
+      if (cjkRegex.test(value)) cjkCount++;
+    }
+    // Most values should be in Chinese
+    expect(cjkCount).toBeGreaterThan(zhKeys.length * 0.5);
+  });
+
+  it("en values do not contain CJK characters", () => {
+    const cjkRegex = /[\u4e00-\u9fff]/;
+    for (const key of enKeys) {
+      const value = getValue(en, key) as string;
+      expect(cjkRegex.test(value)).toBe(false);
+    }
+  });
+
+  it("no values contain only whitespace", () => {
+    for (const key of zhKeys) {
+      const value = getValue(zhTW, key) as string;
+      if (value.length > 0) {
+        expect(value.trim().length).toBeGreaterThan(0);
+      }
+    }
+    for (const key of enKeys) {
+      const value = getValue(en, key) as string;
+      if (value.length > 0) {
+        expect(value.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+});

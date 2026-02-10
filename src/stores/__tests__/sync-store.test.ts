@@ -96,4 +96,59 @@ describe("useSyncStore", () => {
     expect(useSyncStore.getState().status.state).toBe("error");
     expect(useSyncStore.getState().status.error_message).toBe("Connection lost");
   });
+
+  it("triggerSync calls trigger_sync then get_sync_status in order", async () => {
+    const callOrder: string[] = [];
+    mockedInvoke.mockImplementation(async (cmd: string) => {
+      callOrder.push(cmd);
+      if (cmd === "get_sync_status") {
+        return {
+          state: "syncing",
+          last_sync_at: null,
+          peer_device_name: null,
+          error_message: null,
+        };
+      }
+    });
+
+    await useSyncStore.getState().triggerSync();
+
+    expect(callOrder).toEqual(["trigger_sync", "get_sync_status"]);
+  });
+
+  it("fetchStatus does not change state on error", async () => {
+    useSyncStore.setState({
+      status: {
+        state: "connected",
+        last_sync_at: "2024-01-01",
+        peer_device_name: "Device",
+        error_message: null,
+      },
+    });
+    mockedInvoke.mockRejectedValueOnce(new Error("fail"));
+
+    await useSyncStore.getState().fetchStatus();
+
+    expect(useSyncStore.getState().status.state).toBe("connected");
+    expect(useSyncStore.getState().status.peer_device_name).toBe("Device");
+  });
+
+  it("triggerSync when get_sync_status fails preserves previous state", async () => {
+    useSyncStore.setState({
+      status: {
+        state: "connected",
+        last_sync_at: "2024-01-01",
+        peer_device_name: "Peer",
+        error_message: null,
+      },
+    });
+    mockedInvoke
+      .mockResolvedValueOnce(undefined) // trigger_sync ok
+      .mockRejectedValueOnce(new Error("status fail")); // get_sync_status fails
+
+    await useSyncStore.getState().triggerSync();
+
+    // The whole try/catch wraps both calls, so state stays unchanged
+    expect(useSyncStore.getState().status.state).toBe("connected");
+  });
 });
