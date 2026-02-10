@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libavahi-client-dev
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+      - name: Build Android
+        run: cargo tauri android build --release
+        env:
+          NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: src-tauri/gen/android/app/build/outputs/apk/release/
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,aarch64-apple-ios-sim
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+      - name: Build iOS
+        run: cargo tauri ios build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: src-tauri/gen/apple/build/

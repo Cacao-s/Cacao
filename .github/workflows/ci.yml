@@ -1,0 +1,39 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libavahi-client-dev
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+      - name: Clippy
+        run: cargo clippy --all-targets --manifest-path src-tauri/Cargo.toml -- -D warnings
+      - name: Format check
+        run: cargo fmt --check --manifest-path src-tauri/Cargo.toml
+      - name: Tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: TypeScript check
+        run: pnpm tsc --noEmit
+      - name: Build
+        run: pnpm build
