@@ -59,3 +59,41 @@ describe("AmountDisplay", () => {
     expect(container.textContent).toMatch(/\$|NT/);
   });
 });
+
+// ── R48: AmountDisplay Extended ─────────────────────────────
+
+describe("AmountDisplay extended", () => {
+  it("renders USD currency symbol", () => {
+    const { container } = render(<AmountDisplay cents={10000} currency="USD" />);
+    expect(container.textContent).toMatch(/\$|US/);
+  });
+
+  it("renders JPY currency", () => {
+    const { container } = render(<AmountDisplay cents={10000} currency="JPY" />);
+    expect(container.textContent).toContain("100");
+  });
+
+  it("does not apply destructive class for zero cents", () => {
+    const { container } = render(<AmountDisplay cents={0} />);
+    const span = container.querySelector("span");
+    expect(span?.className).not.toContain("text-destructive");
+  });
+
+  it("formats large negative value with sign and destructive", () => {
+    const { container } = render(<AmountDisplay cents={-9999999} showSign />);
+    expect(container.textContent).toContain("-");
+    const span = container.querySelector("span");
+    expect(span?.className).toContain("text-destructive");
+  });
+
+  it("formats 1 cent amount", () => {
+    const { container } = render(<AmountDisplay cents={1} />);
+    expect(container.textContent).toBeDefined();
+  });
+
+  it("renders without sign for negative when showSign false", () => {
+    const { container } = render(<AmountDisplay cents={-5000} showSign={false} />);
+    // Uses Math.abs for the formatted value, so no explicit sign added
+    expect(container.textContent).not.toMatch(/^-/);
+  });
+});

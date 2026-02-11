@@ -77,3 +77,44 @@ describe("MonthlySummary", () => {
     expect(container.textContent).toContain("共 0 筆交易");
   });
 });
+
+// ── R47: MonthlySummary Extended ────────────────────────────
+
+describe("MonthlySummary extended", () => {
+  it("renders January correctly", () => {
+    render(<MonthlySummary summary={makeSummary()} year={2024} month={1} />);
+    expect(screen.getByText("2024 年 1 月 統計")).toBeDefined();
+  });
+
+  it("renders negative net change with sign", () => {
+    const { container } = render(
+      <MonthlySummary summary={makeSummary({ net_change_cents: -50000 })} year={2024} month={6} />,
+    );
+    expect(container.textContent).toContain("-");
+  });
+
+  it("renders positive net change with + sign", () => {
+    const { container } = render(
+      <MonthlySummary summary={makeSummary({ net_change_cents: 50000 })} year={2024} month={6} />,
+    );
+    expect(container.textContent).toContain("+");
+  });
+
+  it("renders large transaction count", () => {
+    render(
+      <MonthlySummary summary={makeSummary({ transaction_count: 999 })} year={2024} month={1} />,
+    );
+    expect(screen.getByText("共 999 筆交易")).toBeDefined();
+  });
+
+  it("renders very large amounts", () => {
+    const { container } = render(
+      <MonthlySummary
+        summary={makeSummary({ total_credit_cents: 99999900 })}
+        year={2024}
+        month={1}
+      />,
+    );
+    expect(container.textContent).toContain("999,999");
+  });
+});

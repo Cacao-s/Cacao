@@ -41,3 +41,35 @@ describe("REQUEST_CATEGORIES", () => {
     }
   });
 });
+
+// ── R46: Type definitions validation ────────────────────────
+
+describe("REQUEST_CATEGORIES ordering and labels", () => {
+  it("first category is food", () => {
+    expect(REQUEST_CATEGORIES[0].value).toBe("food");
+  });
+
+  it("last category is other", () => {
+    expect(REQUEST_CATEGORIES[REQUEST_CATEGORIES.length - 1].value).toBe("other");
+  });
+
+  it("all labels are in Chinese", () => {
+    // Chinese characters are in CJK range
+    const cjkPattern = /[\u4e00-\u9fff]/;
+    for (const cat of REQUEST_CATEGORIES) {
+      expect(cjkPattern.test(cat.label)).toBe(true);
+    }
+  });
+
+  it("labels have 1-4 characters", () => {
+    for (const cat of REQUEST_CATEGORIES) {
+      expect(cat.label.length).toBeGreaterThanOrEqual(1);
+      expect(cat.label.length).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("no duplicate labels", () => {
+    const labels = REQUEST_CATEGORIES.map((c) => c.label);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+});

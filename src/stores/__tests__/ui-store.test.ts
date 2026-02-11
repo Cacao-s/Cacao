@@ -75,3 +75,44 @@ describe("useUiStore", () => {
     expect(useUiStore.getState().theme).toBe("dark");
   });
 });
+
+// ── R43: UiStore Extended ───────────────────────────────────
+
+describe("useUiStore extended", () => {
+  beforeEach(() => {
+    useUiStore.setState({ locale: "zh-TW", theme: "light" });
+    document.documentElement.classList.remove("dark", "high-contrast");
+  });
+
+  it("setTheme does not affect locale", () => {
+    useUiStore.getState().setLocale("en");
+    useUiStore.getState().setTheme("dark");
+    expect(useUiStore.getState().locale).toBe("en");
+  });
+
+  it("rapid theme switching ends with correct state", () => {
+    useUiStore.getState().setTheme("dark");
+    useUiStore.getState().setTheme("high-contrast");
+    useUiStore.getState().setTheme("light");
+    useUiStore.getState().setTheme("dark");
+    expect(useUiStore.getState().theme).toBe("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(document.documentElement.classList.contains("high-contrast")).toBe(false);
+  });
+
+  it("rapid locale switching ends with correct state", () => {
+    useUiStore.getState().setLocale("en");
+    useUiStore.getState().setLocale("zh-TW");
+    useUiStore.getState().setLocale("en");
+    expect(useUiStore.getState().locale).toBe("en");
+  });
+
+  it("setting same theme twice is idempotent for DOM", () => {
+    useUiStore.getState().setTheme("dark");
+    useUiStore.getState().setTheme("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    // Should not have duplicate classes
+    const darkCount = [...document.documentElement.classList].filter((c) => c === "dark").length;
+    expect(darkCount).toBe(1);
+  });
+});

@@ -53,3 +53,30 @@ describe("EmptyState", () => {
     expect(screen.getByText("Create")).toBeDefined();
   });
 });
+
+// ── R47: EmptyState Extended ────────────────────────────────
+
+describe("EmptyState extended", () => {
+  it("renders Chinese title", () => {
+    render(<EmptyState title="沒有錢包" />);
+    expect(screen.getByText("沒有錢包")).toBeDefined();
+  });
+
+  it("renders Chinese description", () => {
+    render(<EmptyState title="空" description="建立你的第一個錢包" />);
+    expect(screen.getByText("建立你的第一個錢包")).toBeDefined();
+  });
+
+  it("renders with long title", () => {
+    const longTitle = "A very long title that goes on and on";
+    render(<EmptyState title={longTitle} />);
+    expect(screen.getByText(longTitle)).toBeDefined();
+  });
+
+  it("has centered layout", () => {
+    const { container } = render(<EmptyState title="Test" />);
+    const wrapper = container.firstElementChild;
+    expect(wrapper?.className).toContain("items-center");
+    expect(wrapper?.className).toContain("text-center");
+  });
+});

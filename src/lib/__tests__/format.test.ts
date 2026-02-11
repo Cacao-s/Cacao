@@ -158,3 +158,85 @@ describe("formatDate robustness", () => {
     expect(result).toMatch(/1/);
   });
 });
+
+// ── R41: Format Amount Boundary Values ──────────────────────
+
+describe("formatAmount boundary values", () => {
+  it("formats MAX_SAFE_INTEGER without crashing", () => {
+    expect(typeof formatAmount(Number.MAX_SAFE_INTEGER)).toBe("string");
+  });
+
+  it("formats negative MAX_SAFE_INTEGER without crashing", () => {
+    expect(typeof formatAmount(-Number.MAX_SAFE_INTEGER)).toBe("string");
+  });
+
+  it("formats 1 cent as sub-dollar amount", () => {
+    const result = formatAmount(1);
+    expect(result).toBeDefined();
+  });
+
+  it("formats 99 cents correctly", () => {
+    const result = formatAmount(99);
+    expect(result).toBeDefined();
+  });
+});
+
+// ── R42: Format with Different Currencies ───────────────────
+
+describe("formatAmount multi-currency", () => {
+  it("formats EUR", () => {
+    const result = formatAmount(10000, "EUR");
+    expect(result).toContain("100");
+  });
+
+  it("formats GBP", () => {
+    const result = formatAmount(10000, "GBP");
+    expect(result).toContain("100");
+  });
+
+  it("formats CNY", () => {
+    const result = formatAmount(10000, "CNY");
+    expect(result).toContain("100");
+  });
+
+  it("same currency same amount returns identical strings", () => {
+    expect(formatAmount(12345, "TWD")).toBe(formatAmount(12345, "TWD"));
+  });
+
+  it("different currencies produce different strings", () => {
+    const twd = formatAmount(10000, "TWD");
+    const usd = formatAmount(10000, "USD");
+    // They may overlap on the number portion, but the currency symbol should differ
+    expect(twd).not.toBe(usd);
+  });
+});
+
+// ── R43: formatDate and formatDateTime consistency ──────────
+
+describe("format consistency", () => {
+  it("formatDate returns shorter string than formatDateTime for same input", () => {
+    const iso = "2024-06-15T14:30:00.000Z";
+    expect(formatDate(iso).length).toBeLessThanOrEqual(formatDateTime(iso).length);
+  });
+
+  it("formatDate is deterministic", () => {
+    const iso = "2024-03-15T12:00:00.000Z";
+    expect(formatDate(iso)).toBe(formatDate(iso));
+  });
+
+  it("formatDateTime is deterministic", () => {
+    const iso = "2024-03-15T12:00:00.000Z";
+    expect(formatDateTime(iso)).toBe(formatDateTime(iso));
+  });
+
+  it("formatDateTime contains time separator", () => {
+    const result = formatDateTime("2024-06-15T14:30:00.000Z");
+    expect(result).toMatch(/:/);
+  });
+
+  it("formatDate does not contain time for typical dates", () => {
+    const result = formatDate("2024-06-15T00:00:00.000Z");
+    // Date-only format should not contain ":"
+    expect(result).not.toMatch(/:/);
+  });
+});

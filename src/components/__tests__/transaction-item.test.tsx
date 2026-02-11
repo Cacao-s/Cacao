@@ -71,3 +71,47 @@ describe("TransactionItem", () => {
     expect(container.textContent).toContain("30");
   });
 });
+
+// ── R45: TransactionItem Extended ───────────────────────────
+
+describe("TransactionItem credit vs debit styling", () => {
+  it("shows green color class for credit direction icon", () => {
+    const { container } = render(<TransactionItem transaction={makeTx({ type: "credit" })} />);
+    const greenIcon = container.querySelector(".text-green-500");
+    expect(greenIcon).not.toBeNull();
+  });
+
+  it("shows destructive color class for debit direction icon", () => {
+    const { container } = render(<TransactionItem transaction={makeTx({ type: "debit" })} />);
+    const redIcon = container.querySelector(".text-destructive");
+    expect(redIcon).not.toBeNull();
+  });
+
+  it("shows + sign for credit amount", () => {
+    const { container } = render(
+      <TransactionItem transaction={makeTx({ type: "credit", amount_cents: 5000 })} />,
+    );
+    expect(container.textContent).toContain("+");
+  });
+
+  it("shows - sign for debit amount", () => {
+    const { container } = render(
+      <TransactionItem transaction={makeTx({ type: "debit", amount_cents: 5000 })} />,
+    );
+    expect(container.textContent).toContain("-");
+  });
+
+  it("renders zero amount transaction", () => {
+    const { container } = render(
+      <TransactionItem transaction={makeTx({ type: "credit", amount_cents: 0 })} />,
+    );
+    expect(container.textContent).toContain("0");
+  });
+
+  it("renders very large amount", () => {
+    const { container } = render(
+      <TransactionItem transaction={makeTx({ type: "credit", amount_cents: 99999999 })} />,
+    );
+    expect(container.textContent).toContain("999,999");
+  });
+});

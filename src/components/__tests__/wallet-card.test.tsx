@@ -108,3 +108,53 @@ describe("WalletCard", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/wallets/42");
   });
 });
+
+// ── R44: WalletCard Extended ────────────────────────────────
+
+describe("WalletCard wallet type icons", () => {
+  beforeEach(() => {
+    mockNavigate.mockClear();
+  });
+
+  it("renders bank type wallet", () => {
+    render(<WalletCard wallet={makeWallet({ type: "bank" })} />);
+    expect(screen.getByText("Main Wallet")).toBeDefined();
+  });
+
+  it("renders card type wallet", () => {
+    render(<WalletCard wallet={makeWallet({ type: "card" })} />);
+    expect(screen.getByText("Main Wallet")).toBeDefined();
+  });
+
+  it("renders virtual type wallet", () => {
+    render(<WalletCard wallet={makeWallet({ type: "virtual" })} />);
+    expect(screen.getByText("Main Wallet")).toBeDefined();
+  });
+
+  it("falls back to cash for unknown wallet type", () => {
+    render(<WalletCard wallet={makeWallet({ type: "unknown_type" })} />);
+    expect(screen.getByText("Main Wallet")).toBeDefined();
+  });
+
+  it("renders zero balance", () => {
+    const { container } = render(<WalletCard wallet={makeWallet({ balance_cents: 0 })} />);
+    expect(container.textContent).toContain("0");
+  });
+
+  it("renders large balance with grouping", () => {
+    const { container } = render(<WalletCard wallet={makeWallet({ balance_cents: 10000000 })} />);
+    expect(container.textContent).toContain("100,000");
+  });
+
+  it("shows low balance warning at threshold minus 1", () => {
+    render(
+      <WalletCard
+        wallet={makeWallet({
+          balance_cents: 999,
+          warning_threshold_cents: 1000,
+        })}
+      />,
+    );
+    expect(screen.getByText("餘額偏低")).toBeDefined();
+  });
+});

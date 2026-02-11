@@ -54,3 +54,36 @@ describe("cn (class name utility)", () => {
     expect(result).toBe("bg-red-500");
   });
 });
+
+// ── R50: cn utility extended ────────────────────────────────
+
+describe("cn tailwind-merge edge cases", () => {
+  it("resolves margin conflicts", () => {
+    const result = cn("m-4", "m-8");
+    expect(result).toBe("m-8");
+  });
+
+  it("preserves responsive variants", () => {
+    const result = cn("p-4", "md:p-8");
+    expect(result).toContain("p-4");
+    expect(result).toContain("md:p-8");
+  });
+
+  it("handles deeply nested conditionals", () => {
+    const a = true;
+    const b = false;
+    const result = cn(a && "visible", b && "hidden", "base");
+    expect(result).toBe("visible base");
+  });
+
+  it("handles boolean false values", () => {
+    const result = cn("a", false, "b");
+    expect(result).toBe("a b");
+  });
+
+  it("handles number 0 as falsy", () => {
+    const flag = 0 as number;
+    const result = cn("a", flag && "hidden", "b");
+    expect(result).toBe("a b");
+  });
+});

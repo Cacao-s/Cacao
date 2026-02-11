@@ -161,3 +161,45 @@ describe("AllowanceCard", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 });
+
+// ── R48: AllowanceCard Extended ─────────────────────────────
+
+describe("AllowanceCard extended", () => {
+  it("renders frequency text for active allowance", () => {
+    render(<AllowanceCard allowance={makeAllowance({ frequency: "weekly" })} isGiver={false} />);
+    expect(screen.getByText("每週")).toBeDefined();
+  });
+
+  it("renders status badge for paused with correct label", () => {
+    render(<AllowanceCard allowance={makeAllowance({ status: "paused" })} isGiver={false} />);
+    expect(screen.getByText("已暫停")).toBeDefined();
+  });
+
+  it("renders interval count > 1 for custom frequency", () => {
+    const { container } = render(
+      <AllowanceCard
+        allowance={makeAllowance({ frequency: "custom", interval_count: 3 })}
+        isGiver={false}
+      />,
+    );
+    expect(container.textContent).toContain("3");
+  });
+
+  it("renders zero amount", () => {
+    const { container } = render(
+      <AllowanceCard allowance={makeAllowance({ amount_cents: 0 })} isGiver={false} />,
+    );
+    expect(container.textContent).toContain("0");
+  });
+
+  it("renders last_run_at when available", () => {
+    const { container } = render(
+      <AllowanceCard
+        allowance={makeAllowance({ last_run_at: "2024-06-15T10:00:00.000Z", status: "active" })}
+        isGiver={false}
+      />,
+    );
+    // Should contain some date text
+    expect(container.textContent).toContain("2024");
+  });
+});

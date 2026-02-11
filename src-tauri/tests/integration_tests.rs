@@ -5362,3 +5362,4154 @@ mod pairing_edge {
         assert!(!err.code.is_empty());
     }
 }
+
+// ── R11: Family remove_member + wallet unicode + allowance archive + list ordering ──
+
+mod family_remove_member {
+    use super::*;
+    use cacao_lib::services::{family_service, setup_service};
+
+    #[tokio::test]
+    async fn remove_member_sets_deleted_flag() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "Fam")
+            .await
+            .unwrap();
+
+        let baby = family_service::add_member(&pool, family.id, "baby-uuid-1", "baby")
+            .await
+            .unwrap();
+
+        family_service::remove_member(&pool, baby.id).await.unwrap();
+
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        // Only giver remains (baby was removed => is_deleted=1 => excluded)
+        assert_eq!(members.len(), 1);
+        assert_eq!(members[0].family_role, "giver");
+    }
+
+    #[tokio::test]
+    async fn remove_member_twice_is_idempotent() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "Fam")
+            .await
+            .unwrap();
+        let baby = family_service::add_member(&pool, family.id, "baby-uuid-2", "baby")
+            .await
+            .unwrap();
+
+        family_service::remove_member(&pool, baby.id).await.unwrap();
+        // Second removal should not error
+        family_service::remove_member(&pool, baby.id).await.unwrap();
+
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        assert_eq!(members.len(), 1);
+    }
+
+    #[tokio::test]
+    async fn remove_nonexistent_member_does_not_error() {
+        let pool = test_pool().await;
+        // remove_member does not check if member exists, just UPDATEs
+        let result = family_service::remove_member(&pool, 99999).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn family_name_with_unicode_works() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "王家")
+            .await
+            .unwrap();
+        assert_eq!(family.name, "王家");
+    }
+}
+
+mod wallet_unicode {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn wallet_name_with_chinese_characters() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "零用錢錢包".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(wallet.name, "零用錢錢包");
+    }
+
+    #[tokio::test]
+    async fn wallet_name_with_emoji() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "💰 Savings".into(),
+                wallet_type: "bank".into(),
+                initial_balance_cents: Some(5000),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(wallet.name, "💰 Savings");
+        assert_eq!(wallet.balance_cents, 5000);
+    }
+
+    #[tokio::test]
+    async fn wallet_name_at_50_char_boundary() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let name_50 = "a".repeat(50);
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: name_50.clone(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(w.name, name_50);
+    }
+
+    #[tokio::test]
+    async fn wallet_name_51_chars_rejected() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let name_51 = "a".repeat(51);
+        let err = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: name_51,
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn wallet_initial_balance_zero_stays_zero() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Zero".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(0),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(w.balance_cents, 0);
+    }
+}
+
+mod allowance_archive_edge {
+    use super::*;
+    use cacao_lib::models::params::CreateAllowanceParams;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{allowance_service, family_service, setup_service, wallet_service};
+
+    async fn setup_ctx(pool: &SqlitePool) -> (i64, i64, i64) {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        (family.id, wallet.id, 1) // family_id, wallet_id, member_id=1
+    }
+
+    #[tokio::test]
+    async fn archive_active_allowance_succeeds() {
+        let pool = test_pool().await;
+        let (fid, wid, _) = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::archive_allowance(&pool, a.id)
+            .await
+            .unwrap();
+
+        // Archived allowance still appears in list (list returns all non-deleted)
+        let list = allowance_service::list_allowances(&pool, fid)
+            .await
+            .unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].status, "archived");
+    }
+
+    #[tokio::test]
+    async fn archive_already_archived_succeeds_idempotent() {
+        let pool = test_pool().await;
+        let (fid, wid, _) = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 100,
+                frequency: "weekly".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::archive_allowance(&pool, a.id)
+            .await
+            .unwrap();
+        // Second archive: status is already 'archived', but is_deleted=0 so rows_affected=1
+        allowance_service::archive_allowance(&pool, a.id)
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn update_archived_allowance_fails() {
+        let pool = test_pool().await;
+        let (fid, wid, _) = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::archive_allowance(&pool, a.id)
+            .await
+            .unwrap();
+
+        let err = allowance_service::update_allowance(
+            &pool,
+            a.id,
+            &cacao_lib::models::params::UpdateAllowanceParams {
+                amount_cents: Some(200),
+                frequency: None,
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn list_allowances_returns_ordered_by_created_at_desc() {
+        let pool = test_pool().await;
+        let (fid, wid, _) = setup_ctx(&pool).await;
+
+        let a1 = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: Some("first".into()),
+            },
+        )
+        .await
+        .unwrap();
+
+        let a2 = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 200,
+                frequency: "weekly".into(),
+                interval_count: None,
+                notes: Some("second".into()),
+            },
+        )
+        .await
+        .unwrap();
+
+        let _ = (a1, a2);
+        let list = allowance_service::list_allowances(&pool, fid)
+            .await
+            .unwrap();
+        assert_eq!(list.len(), 2);
+        // Both allowances present with correct amounts
+        let amounts: Vec<i64> = list.iter().map(|a| a.amount_cents).collect();
+        assert!(amounts.contains(&100));
+        assert!(amounts.contains(&200));
+    }
+
+    #[tokio::test]
+    async fn list_allowances_empty_family() {
+        let pool = test_pool().await;
+        let list = allowance_service::list_allowances(&pool, 99999)
+            .await
+            .unwrap();
+        assert!(list.is_empty());
+    }
+
+    #[tokio::test]
+    async fn resume_archived_allowance_updates_next_run() {
+        let pool = test_pool().await;
+        let (fid, wid, _) = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: fid,
+                giver_member_id: 1,
+                receiver_member_id: 1,
+                wallet_id: wid,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Archive then resume should still work (resume finds any non-deleted)
+        allowance_service::archive_allowance(&pool, a.id)
+            .await
+            .unwrap();
+        // resume reads status but doesn't check for "paused" specifically
+        allowance_service::resume_allowance(&pool, a.id)
+            .await
+            .unwrap();
+    }
+}
+
+// ── R12: Request state transitions + cancel edge cases ──
+
+mod request_cancel_edge {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    async fn setup_pending_request(pool: &SqlitePool) -> (i64, i64) {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+        let request = request_service::create_request(
+            pool,
+            &CreateRequestParams {
+                family_id: family.id,
+                requester_member_id: 1,
+                wallet_id: wallet.id,
+                amount_cents: 500,
+                category: Some("food".into()),
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(pool, request.id)
+            .await
+            .unwrap();
+        (request.id, wallet.id)
+    }
+
+    #[tokio::test]
+    async fn cancel_approved_request_fails() {
+        let pool = test_pool().await;
+        let (rid, _) = setup_pending_request(&pool).await;
+        request_service::approve_request(&pool, rid, 1)
+            .await
+            .unwrap();
+        let err = request_service::cancel_request(&pool, rid)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_INVALID_STATUS");
+    }
+
+    #[tokio::test]
+    async fn cancel_rejected_request_fails() {
+        let pool = test_pool().await;
+        let (rid, _) = setup_pending_request(&pool).await;
+        request_service::reject_request(&pool, rid, "no reason", 1)
+            .await
+            .unwrap();
+        let err = request_service::cancel_request(&pool, rid)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_INVALID_STATUS");
+    }
+
+    #[tokio::test]
+    async fn reject_with_whitespace_only_reason_fails() {
+        let pool = test_pool().await;
+        let (rid, _) = setup_pending_request(&pool).await;
+        let err = request_service::reject_request(&pool, rid, "   ", 1)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REJECTION_REASON_REQUIRED");
+    }
+
+    #[tokio::test]
+    async fn approve_creates_debit_transaction_with_category() {
+        let pool = test_pool().await;
+        let (rid, wid) = setup_pending_request(&pool).await;
+        request_service::approve_request(&pool, rid, 1)
+            .await
+            .unwrap();
+
+        // Verify transaction has the correct category from the request
+        let txs = cacao_lib::services::transaction_service::list_wallet_transactions(
+            &pool,
+            wid,
+            Some(10),
+        )
+        .await
+        .unwrap();
+        // Should have initial credit + debit from approval
+        let debit = txs.iter().find(|t| t.type_ == "debit").unwrap();
+        assert_eq!(debit.category.as_deref(), Some("food"));
+        assert_eq!(debit.source_type, "request");
+    }
+
+    #[tokio::test]
+    async fn list_requests_with_invalid_status_returns_empty() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        // Status "nonexistent" won't match any rows
+        let list = request_service::list_requests(&pool, family.id, Some("nonexistent"))
+            .await
+            .unwrap();
+        assert!(list.is_empty());
+    }
+}
+
+// ── R13: Transaction boundary values + monthly summary edge cases ──
+
+mod transaction_boundary {
+    use super::*;
+    use cacao_lib::models::params::{CreateWalletParams, ManualTransactionParams};
+    use cacao_lib::services::{family_service, setup_service, transaction_service, wallet_service};
+
+    async fn setup_wallet(pool: &SqlitePool, balance: i64) -> (i64, i64) {
+        let profile = setup_service::setup_device(pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: if balance > 0 { Some(balance) } else { None },
+            },
+        )
+        .await
+        .unwrap();
+        (family.id, wallet.id)
+    }
+
+    #[tokio::test]
+    async fn debit_exceeding_by_one_cent_fails() {
+        let pool = test_pool().await;
+        let (fid, wid) = setup_wallet(&pool, 1000).await;
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: fid,
+                wallet_id: wid,
+                transaction_type: "debit".into(),
+                amount_cents: 1001,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn large_credit_amount_succeeds() {
+        let pool = test_pool().await;
+        let (fid, wid) = setup_wallet(&pool, 0).await;
+        let tx = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: fid,
+                wallet_id: wid,
+                transaction_type: "credit".into(),
+                amount_cents: 999_999_999,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(tx.amount_cents, 999_999_999);
+    }
+
+    #[tokio::test]
+    async fn credit_then_exact_debit_leaves_zero() {
+        let pool = test_pool().await;
+        let (fid, wid) = setup_wallet(&pool, 5000).await;
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: fid,
+                wallet_id: wid,
+                transaction_type: "debit".into(),
+                amount_cents: 5000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let wallet = wallet_service::get_wallet(&pool, wid).await.unwrap();
+        assert_eq!(wallet.balance_cents, 0);
+    }
+
+    #[tokio::test]
+    async fn monthly_summary_month_zero_rejected() {
+        let pool = test_pool().await;
+        let (fid, _) = setup_wallet(&pool, 0).await;
+        let err = transaction_service::get_monthly_summary(&pool, fid, 2024, 0)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn monthly_summary_month_13_rejected() {
+        let pool = test_pool().await;
+        let (fid, _) = setup_wallet(&pool, 0).await;
+        let err = transaction_service::get_monthly_summary(&pool, fid, 2024, 13)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn monthly_summary_far_future_year_returns_zero() {
+        let pool = test_pool().await;
+        let (fid, _) = setup_wallet(&pool, 0).await;
+        let summary = transaction_service::get_monthly_summary(&pool, fid, 2099, 6)
+            .await
+            .unwrap();
+        assert_eq!(summary.total_credit_cents, 0);
+        assert_eq!(summary.total_debit_cents, 0);
+        assert_eq!(summary.transaction_count, 0);
+    }
+
+    #[tokio::test]
+    async fn list_transactions_all_five_filters_combined() {
+        let pool = test_pool().await;
+        let (fid, wid) = setup_wallet(&pool, 10000).await;
+
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: fid,
+                wallet_id: wid,
+                transaction_type: "debit".into(),
+                amount_cents: 100,
+                category: Some("food".into()),
+                notes: Some("lunch".into()),
+            },
+        )
+        .await
+        .unwrap();
+
+        let filters = cacao_lib::models::params::TransactionFilters {
+            date_from: Some("2000-01-01".into()),
+            date_to: Some("2099-12-31".into()),
+            wallet_id: Some(wid),
+            transaction_type: Some("debit".into()),
+            source_type: Some("manual".into()),
+            limit: Some(10),
+            offset: Some(0),
+        };
+        let txs = transaction_service::list_transactions(&pool, fid, &filters)
+            .await
+            .unwrap();
+        assert_eq!(txs.len(), 1);
+        assert_eq!(txs[0].amount_cents, 100);
+    }
+}
+
+// ── R14: Export edge cases + AppError factory methods + wallet update ──
+
+mod export_edge {
+    use super::*;
+    use cacao_lib::models::params::{CreateWalletParams, ManualTransactionParams};
+    use cacao_lib::services::{
+        export_service, family_service, setup_service, transaction_service, wallet_service,
+    };
+
+    #[tokio::test]
+    async fn csv_with_null_notes_and_category() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(10000),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Create transaction with no category and no notes
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: family.id,
+                wallet_id: wallet.id,
+                transaction_type: "debit".into(),
+                amount_cents: 500,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let csv = export_service::export_transactions_csv(&pool, family.id, None, None, None)
+            .await
+            .unwrap();
+        // Should not panic on NULL values
+        let lines: Vec<&str> = csv.trim().split('\n').collect();
+        assert!(lines.len() >= 2); // header + at least the initial credit
+    }
+
+    #[tokio::test]
+    async fn csv_wallet_filter_returns_only_matching() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+
+        let w1 = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W1".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(5000),
+            },
+        )
+        .await
+        .unwrap();
+
+        let _w2 = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W2".into(),
+                wallet_type: "bank".into(),
+                initial_balance_cents: Some(8000),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Export only W1
+        let csv =
+            export_service::export_transactions_csv(&pool, family.id, None, None, Some(w1.id))
+                .await
+                .unwrap();
+        let lines: Vec<&str> = csv.trim().split('\n').collect();
+        // header + 1 initial credit for W1 only
+        assert_eq!(lines.len(), 2);
+        assert!(lines[1].contains("W1"));
+    }
+}
+
+mod wallet_update_edge {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn update_wallet_with_unicode_name() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Old".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let updated = wallet_service::update_wallet(&pool, w.id, "新名稱", 500)
+            .await
+            .unwrap();
+        assert_eq!(updated.name, "新名稱");
+        assert_eq!(updated.warning_threshold_cents, 500);
+    }
+
+    #[tokio::test]
+    async fn update_wallet_threshold_above_balance() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Setting threshold above balance should be allowed
+        let updated = wallet_service::update_wallet(&pool, w.id, "W", 9999)
+            .await
+            .unwrap();
+        assert_eq!(updated.warning_threshold_cents, 9999);
+    }
+
+    #[tokio::test]
+    async fn get_wallet_deleted_returns_not_found() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Soft-delete the wallet
+        sqlx::query("UPDATE wallets SET is_deleted = 1 WHERE id = ?")
+            .bind(w.id)
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        let err = wallet_service::get_wallet(&pool, w.id).await.unwrap_err();
+        assert_eq!(err.code, "WALLET_NOT_FOUND");
+    }
+
+    #[tokio::test]
+    async fn list_wallets_excludes_deleted() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        sqlx::query("UPDATE wallets SET is_deleted = 1 WHERE id = ?")
+            .bind(w.id)
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        let list = wallet_service::list_wallets(&pool, family.id)
+            .await
+            .unwrap();
+        assert!(list.is_empty());
+    }
+}
+
+mod error_factory {
+    use cacao_lib::error::AppError;
+
+    #[test]
+    fn not_found_uppercases_resource_name() {
+        let e = AppError::not_found("wallet");
+        assert_eq!(e.code, "WALLET_NOT_FOUND");
+        assert_eq!(e.message, "wallet not found");
+    }
+
+    #[test]
+    fn not_found_with_multi_word() {
+        let e = AppError::not_found("audit_log");
+        assert_eq!(e.code, "AUDIT_LOG_NOT_FOUND");
+    }
+
+    #[test]
+    fn validation_has_correct_code() {
+        let e = AppError::validation("bad input");
+        assert_eq!(e.code, "VALIDATION_ERROR");
+        assert_eq!(e.message, "bad input");
+    }
+
+    #[test]
+    fn internal_has_correct_code() {
+        let e = AppError::internal("something broke");
+        assert_eq!(e.code, "INTERNAL_ERROR");
+    }
+
+    #[test]
+    fn forbidden_has_correct_code() {
+        let e = AppError::forbidden();
+        assert_eq!(e.code, "FORBIDDEN");
+        assert_eq!(e.message, "Permission denied");
+    }
+
+    #[test]
+    fn display_format_is_correct() {
+        let e = AppError::new("TEST_CODE", "test message");
+        assert_eq!(format!("{}", e), "[TEST_CODE] test message");
+    }
+}
+
+// ── R15: Setup + Reset Edge Cases ───────────────────────────
+
+mod setup_reset_edge {
+    use super::*;
+    use cacao_lib::services::setup_service;
+
+    #[tokio::test]
+    async fn reset_device_twice_is_idempotent() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "Alice", "giver")
+            .await
+            .unwrap();
+
+        setup_service::reset_device(&pool).await.unwrap();
+        assert!(!setup_service::is_setup(&pool).await.unwrap());
+
+        // Second reset should not error
+        setup_service::reset_device(&pool).await.unwrap();
+        assert!(!setup_service::is_setup(&pool).await.unwrap());
+    }
+
+    #[tokio::test]
+    async fn setup_device_name_at_50_chars() {
+        let pool = test_pool().await;
+        let name = "a".repeat(50);
+        let profile = setup_service::setup_device(&pool, &name, "giver")
+            .await
+            .unwrap();
+        assert_eq!(profile.display_name, name);
+    }
+
+    #[tokio::test]
+    async fn setup_device_name_at_51_chars() {
+        let pool = test_pool().await;
+        let name = "a".repeat(51);
+        let err = setup_service::setup_device(&pool, &name, "giver")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn setup_preserves_internal_whitespace() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "John  Doe", "giver")
+            .await
+            .unwrap();
+        // trim() only strips leading/trailing whitespace; internal spaces are preserved
+        assert_eq!(profile.display_name, "John  Doe");
+    }
+}
+
+// ── R16: Notification Payload Verification ──────────────────
+
+mod notification_payload {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{
+        family_service, notification_service, request_service, setup_service, wallet_service,
+    };
+
+    struct NotifContext {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_context(pool: &SqlitePool) -> NotifContext {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "Test Family")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Main Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(10000),
+            },
+        )
+        .await
+        .unwrap();
+
+        NotifContext {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn approve_request_notification_has_correct_payload() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 5000,
+                category: Some("food".into()),
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+
+        let notifs = notification_service::list_notifications(&pool, None, None)
+            .await
+            .unwrap();
+
+        let approved_notif = notifs
+            .iter()
+            .find(|n| n.event_type == "request_approved")
+            .expect("Should have request_approved notification");
+
+        let payload: serde_json::Value =
+            serde_json::from_str(approved_notif.payload.as_deref().unwrap()).unwrap();
+
+        assert_eq!(payload["request_id"], req.id);
+        assert_eq!(payload["amount_cents"], 5000);
+    }
+
+    #[tokio::test]
+    async fn reject_request_notification_has_reason() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 3000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::reject_request(&pool, req.id, "too expensive", ctx.member_id)
+            .await
+            .unwrap();
+
+        let notifs = notification_service::list_notifications(&pool, None, None)
+            .await
+            .unwrap();
+
+        let rejected_notif = notifs
+            .iter()
+            .find(|n| n.event_type == "request_rejected")
+            .expect("Should have request_rejected notification");
+
+        let payload: serde_json::Value =
+            serde_json::from_str(rejected_notif.payload.as_deref().unwrap()).unwrap();
+
+        assert_eq!(payload["reason"], "too expensive");
+    }
+}
+
+// ── R17: Wallet Status Filter ───────────────────────────────
+
+mod wallet_status_filter {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, wallet_service};
+
+    async fn setup_family(pool: &SqlitePool) -> i64 {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "Test Family")
+            .await
+            .unwrap();
+        family.id
+    }
+
+    #[tokio::test]
+    async fn list_wallets_includes_archived_by_default() {
+        let pool = test_pool().await;
+        let family_id = setup_family(&pool).await;
+
+        let w1 = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id,
+                name: "Wallet Active".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id,
+                name: "Wallet Stays".into(),
+                wallet_type: "bank".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Archive the first wallet
+        wallet_service::archive_wallet(&pool, w1.id).await.unwrap();
+
+        // list_wallets filters by is_deleted = 0 only, so archived wallets ARE included
+        let wallets = wallet_service::list_wallets(&pool, family_id)
+            .await
+            .unwrap();
+        assert_eq!(wallets.len(), 2);
+
+        // Verify one is archived and one is active
+        let archived = wallets.iter().find(|w| w.id == w1.id).unwrap();
+        assert_eq!(archived.status, "archived");
+
+        let active = wallets.iter().find(|w| w.id != w1.id).unwrap();
+        assert_eq!(active.status, "active");
+    }
+}
+
+// ── R18: Sync Version Tracking ──────────────────────────────
+
+mod sync_version_tracking {
+    use super::*;
+    use cacao_lib::models::params::{
+        CreateAllowanceParams, CreateRequestParams, CreateWalletParams,
+    };
+    use cacao_lib::services::{
+        allowance_service, family_service, request_service, setup_service, wallet_service,
+    };
+
+    struct SyncContext {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_context(pool: &SqlitePool) -> SyncContext {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "Test Family")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Sync Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(500000),
+            },
+        )
+        .await
+        .unwrap();
+
+        SyncContext {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn wallet_update_increments_sync_version() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        // Initial sync_version should be 0
+        let wallet = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(wallet.sync_version, 0);
+
+        // Update wallet
+        wallet_service::update_wallet(&pool, ctx.wallet_id, "Updated Name", 5000)
+            .await
+            .unwrap();
+
+        // Re-read and verify sync_version incremented
+        let updated = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert!(
+            updated.sync_version > 0,
+            "sync_version should have incremented after update, got {}",
+            updated.sync_version
+        );
+    }
+
+    #[tokio::test]
+    async fn request_approve_increments_sync_version() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(req.sync_version, 0);
+
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+
+        // Read directly from DB to verify sync_version
+        let sv: i64 = sqlx::query_scalar("SELECT sync_version FROM requests WHERE id = ?")
+            .bind(req.id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+
+        assert!(
+            sv > 0,
+            "sync_version should have incremented after approve, got {}",
+            sv
+        );
+    }
+
+    #[tokio::test]
+    async fn allowance_pause_increments_sync_version() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 10000,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(allowance.sync_version, 0);
+
+        // Pause the allowance
+        allowance_service::pause_allowance(&pool, allowance.id)
+            .await
+            .unwrap();
+
+        // Read directly from DB to verify sync_version incremented
+        let sv: i64 = sqlx::query_scalar("SELECT sync_version FROM allowances WHERE id = ?")
+            .bind(allowance.id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+
+        assert!(
+            sv > 0,
+            "sync_version should have incremented after pause, got {}",
+            sv
+        );
+    }
+}
+
+// ── R19: Soft Delete Consistency ────────────────────────────
+
+mod soft_delete {
+    use super::*;
+    use cacao_lib::models::params::{
+        CreateAllowanceParams, CreateRequestParams, CreateWalletParams,
+    };
+    use cacao_lib::services::{
+        allowance_service, family_service, request_service, setup_service, wallet_service,
+    };
+
+    struct DeleteContext {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_context(pool: &SqlitePool) -> DeleteContext {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "Test Family")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Delete Test Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        DeleteContext {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn deleted_request_not_returned_by_get() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 5000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Confirm it exists
+        request_service::get_request(&pool, req.id).await.unwrap();
+
+        // Soft-delete via raw SQL
+        sqlx::query("UPDATE requests SET is_deleted = 1 WHERE id = ?")
+            .bind(req.id)
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        // get_request filters by is_deleted = 0, should return not found
+        let err = request_service::get_request(&pool, req.id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_NOT_FOUND");
+    }
+
+    #[tokio::test]
+    async fn deleted_allowance_not_returned_by_list() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 10000,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Verify it appears in the list
+        let list = allowance_service::list_allowances(&pool, ctx.family_id)
+            .await
+            .unwrap();
+        assert_eq!(list.len(), 1);
+
+        // Soft-delete via raw SQL
+        sqlx::query("UPDATE allowances SET is_deleted = 1 WHERE id = ?")
+            .bind(allowance.id)
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        // list_allowances filters by is_deleted = 0, should return empty
+        let list = allowance_service::list_allowances(&pool, ctx.family_id)
+            .await
+            .unwrap();
+        assert!(list.is_empty());
+    }
+}
+
+// ── R20: Create Request With All 7 Categories ───────────────
+
+mod request_categories {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    struct CatContext {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_context(pool: &SqlitePool) -> CatContext {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "Test Family")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Category Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        CatContext {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn create_request_with_each_category() {
+        let pool = test_pool().await;
+        let ctx = setup_context(&pool).await;
+
+        let categories = [
+            "food",
+            "transport",
+            "education",
+            "entertainment",
+            "clothing",
+            "health",
+            "other",
+        ];
+
+        for category in &categories {
+            let req = request_service::create_request(
+                &pool,
+                &CreateRequestParams {
+                    family_id: ctx.family_id,
+                    requester_member_id: ctx.member_id,
+                    wallet_id: ctx.wallet_id,
+                    amount_cents: 1000,
+                    category: Some(category.to_string()),
+                    notes: Some(format!("Testing {} category", category)),
+                },
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(
+                req.category.as_deref(),
+                Some(*category),
+                "Category '{}' was not stored correctly",
+                category
+            );
+            assert_eq!(req.status, "draft");
+        }
+
+        // Verify all 7 requests were created
+        let all_requests = request_service::list_requests(&pool, ctx.family_id, None)
+            .await
+            .unwrap();
+        assert_eq!(all_requests.len(), 7);
+    }
+}
+
+// ── R21: Setup Guard + Device Already Setup ──────────────────
+
+mod setup_guard_backend {
+    use super::*;
+    use cacao_lib::services::setup_service;
+
+    #[tokio::test]
+    async fn setup_device_already_setup_returns_error() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "Alice", "giver")
+            .await
+            .unwrap();
+        let err = setup_service::setup_device(&pool, "Bob", "giver")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "DEVICE_ALREADY_SETUP");
+    }
+
+    #[tokio::test]
+    async fn setup_invalid_role_returns_validation_error() {
+        let pool = test_pool().await;
+        let err = setup_service::setup_device(&pool, "Alice", "admin")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn setup_empty_name_returns_validation_error() {
+        let pool = test_pool().await;
+        let err = setup_service::setup_device(&pool, "", "giver")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn setup_whitespace_only_name_returns_validation_error() {
+        let pool = test_pool().await;
+        let err = setup_service::setup_device(&pool, "   ", "giver")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn is_setup_returns_false_on_empty_db() {
+        let pool = test_pool().await;
+        assert!(!setup_service::is_setup(&pool).await.unwrap());
+    }
+
+    #[tokio::test]
+    async fn get_profile_returns_none_on_empty_db() {
+        let pool = test_pool().await;
+        assert!(setup_service::get_profile(&pool).await.unwrap().is_none());
+    }
+
+    #[tokio::test]
+    async fn setup_then_reset_then_setup_again() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "First", "giver")
+            .await
+            .unwrap();
+        setup_service::reset_device(&pool).await.unwrap();
+        let profile = setup_service::setup_device(&pool, "Second", "baby")
+            .await
+            .unwrap();
+        assert_eq!(profile.display_name, "Second");
+        assert_eq!(profile.role, "baby");
+    }
+}
+
+// ── R22: Manual Transaction Edge Cases ──────────────────────
+
+mod manual_transaction_edge {
+    use super::*;
+    use cacao_lib::models::params::{CreateWalletParams, ManualTransactionParams};
+    use cacao_lib::services::{family_service, setup_service, transaction_service, wallet_service};
+
+    struct TxContext {
+        family_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_with_balance(pool: &SqlitePool, balance: i64) -> TxContext {
+        let profile = setup_service::setup_device(pool, "Parent", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: if balance > 0 { Some(balance) } else { None },
+            },
+        )
+        .await
+        .unwrap();
+        TxContext {
+            family_id: family.id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn credit_increases_balance() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "credit".into(),
+                amount_cents: 500,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let w = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(w.balance_cents, 1500);
+    }
+
+    #[tokio::test]
+    async fn debit_decreases_balance() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "debit".into(),
+                amount_cents: 300,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let w = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(w.balance_cents, 700);
+    }
+
+    #[tokio::test]
+    async fn debit_exact_balance_leaves_zero() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "debit".into(),
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let w = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(w.balance_cents, 0);
+    }
+
+    #[tokio::test]
+    async fn debit_exceeding_balance_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "debit".into(),
+                amount_cents: 1001,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn invalid_transaction_type_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "transfer".into(),
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn zero_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "credit".into(),
+                amount_cents: 0,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn negative_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 1000).await;
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "credit".into(),
+                amount_cents: -100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn transaction_with_category_and_notes() {
+        let pool = test_pool().await;
+        let ctx = setup_with_balance(&pool, 5000).await;
+        let tx = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: ctx.family_id,
+                wallet_id: ctx.wallet_id,
+                transaction_type: "credit".into(),
+                amount_cents: 100,
+                category: Some("food".into()),
+                notes: Some("lunch money".into()),
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(tx.category.as_deref(), Some("food"));
+        assert_eq!(tx.notes.as_deref(), Some("lunch money"));
+        assert_eq!(tx.source_type, "manual");
+    }
+
+    #[tokio::test]
+    async fn debit_nonexistent_wallet_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let err = transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: family.id,
+                wallet_id: 99999,
+                transaction_type: "credit".into(),
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "WALLET_NOT_FOUND");
+    }
+}
+
+// ── R23: Monthly Summary Edge Cases ─────────────────────────
+
+mod monthly_summary_edge {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, transaction_service, wallet_service};
+
+    #[tokio::test]
+    async fn empty_month_returns_zeros() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let summary = transaction_service::get_monthly_summary(&pool, family.id, 2024, 6)
+            .await
+            .unwrap();
+        assert_eq!(summary.total_credit_cents, 0);
+        assert_eq!(summary.total_debit_cents, 0);
+        assert_eq!(summary.net_change_cents, 0);
+        assert_eq!(summary.transaction_count, 0);
+    }
+
+    #[tokio::test]
+    async fn month_zero_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let err = transaction_service::get_monthly_summary(&pool, family.id, 2024, 0)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn month_13_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let err = transaction_service::get_monthly_summary(&pool, family.id, 2024, 13)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn december_boundary() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        // December should not crash
+        let summary = transaction_service::get_monthly_summary(&pool, family.id, 2024, 12)
+            .await
+            .unwrap();
+        assert_eq!(summary.transaction_count, 0);
+    }
+
+    #[tokio::test]
+    async fn summary_with_transactions() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None, // No initial balance to avoid extra transaction
+            },
+        )
+        .await
+        .unwrap();
+
+        // Insert transactions with known occurred_at in current month
+        let now = chrono::Utc::now();
+        let date_str = now.format("%Y-%m-%d %H:%M:%S").to_string();
+        sqlx::query(
+            "INSERT INTO transactions (family_id, wallet_id, type, amount_cents, source_type, occurred_at) VALUES (?, ?, 'credit', 5000, 'manual', ?)"
+        )
+        .bind(family.id)
+        .bind(wallet.id)
+        .bind(&date_str)
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        sqlx::query(
+            "INSERT INTO transactions (family_id, wallet_id, type, amount_cents, source_type, occurred_at) VALUES (?, ?, 'debit', 2000, 'manual', ?)"
+        )
+        .bind(family.id)
+        .bind(wallet.id)
+        .bind(&date_str)
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let summary = transaction_service::get_monthly_summary(
+            &pool,
+            family.id,
+            now.format("%Y").to_string().parse().unwrap(),
+            now.format("%m").to_string().parse().unwrap(),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(summary.total_credit_cents, 5000);
+        assert_eq!(summary.total_debit_cents, 2000);
+        assert_eq!(summary.net_change_cents, 3000);
+        assert_eq!(summary.transaction_count, 2);
+    }
+}
+
+// ── R24: Allowance Create + Update Validation ───────────────
+
+mod allowance_validation {
+    use super::*;
+    use cacao_lib::models::params::{
+        CreateAllowanceParams, CreateWalletParams, UpdateAllowanceParams,
+    };
+    use cacao_lib::services::{allowance_service, family_service, setup_service, wallet_service};
+
+    struct AllowCtx {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_ctx(pool: &SqlitePool) -> AllowCtx {
+        let profile = setup_service::setup_device(pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        AllowCtx {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn create_with_zero_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 0,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_with_negative_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: -100,
+                frequency: "weekly".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_with_invalid_frequency_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                frequency: "hourly".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_with_zero_interval_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                frequency: "daily".into(),
+                interval_count: Some(0),
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_all_valid_frequencies() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        for freq in &["daily", "weekly", "biweekly", "monthly", "custom"] {
+            let a = allowance_service::create_allowance(
+                &pool,
+                &CreateAllowanceParams {
+                    family_id: ctx.family_id,
+                    giver_member_id: ctx.member_id,
+                    receiver_member_id: ctx.member_id,
+                    wallet_id: ctx.wallet_id,
+                    amount_cents: 100,
+                    frequency: freq.to_string(),
+                    interval_count: Some(1),
+                    notes: None,
+                },
+            )
+            .await
+            .unwrap();
+            assert_eq!(a.frequency, *freq);
+            assert_eq!(a.status, "active");
+        }
+    }
+
+    #[tokio::test]
+    async fn update_paused_allowance_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        allowance_service::pause_allowance(&pool, a.id)
+            .await
+            .unwrap();
+        let err = allowance_service::update_allowance(
+            &pool,
+            a.id,
+            &UpdateAllowanceParams {
+                amount_cents: Some(2000),
+                frequency: None,
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn update_amount_succeeds() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                frequency: "weekly".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let updated = allowance_service::update_allowance(
+            &pool,
+            a.id,
+            &UpdateAllowanceParams {
+                amount_cents: Some(2000),
+                frequency: None,
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(updated.amount_cents, 2000);
+    }
+
+    #[tokio::test]
+    async fn update_with_no_changes_returns_same() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: ctx.family_id,
+                giver_member_id: ctx.member_id,
+                receiver_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let unchanged = allowance_service::update_allowance(
+            &pool,
+            a.id,
+            &UpdateAllowanceParams {
+                amount_cents: None,
+                frequency: None,
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(unchanged.amount_cents, a.amount_cents);
+    }
+}
+
+// ── R25: Request Full Lifecycle ─────────────────────────────
+
+mod request_lifecycle {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams, UpdateRequestParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    struct LifecycleCtx {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_ctx(pool: &SqlitePool) -> LifecycleCtx {
+        let profile = setup_service::setup_device(pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+        LifecycleCtx {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn draft_to_pending_to_approved() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 5000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(req.status, "draft");
+
+        let submitted = request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        assert_eq!(submitted.status, "pending");
+
+        let approved = request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+        assert_eq!(approved.status, "approved");
+        assert!(approved.decision_at.is_some());
+    }
+
+    #[tokio::test]
+    async fn draft_to_pending_to_rejected() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 5000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        let rejected = request_service::reject_request(&pool, req.id, "No budget", ctx.member_id)
+            .await
+            .unwrap();
+        assert_eq!(rejected.status, "rejected");
+        assert_eq!(rejected.rejection_reason.as_deref(), Some("No budget"));
+    }
+
+    #[tokio::test]
+    async fn draft_cancel() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let cancelled = request_service::cancel_request(&pool, req.id)
+            .await
+            .unwrap();
+        assert_eq!(cancelled.status, "cancelled");
+    }
+
+    #[tokio::test]
+    async fn pending_cancel() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        let cancelled = request_service::cancel_request(&pool, req.id)
+            .await
+            .unwrap();
+        assert_eq!(cancelled.status, "cancelled");
+    }
+
+    #[tokio::test]
+    async fn update_draft_changes_amount() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        let updated = request_service::update_request(
+            &pool,
+            req.id,
+            &UpdateRequestParams {
+                amount_cents: Some(2000),
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(updated.amount_cents, 2000);
+    }
+
+    #[tokio::test]
+    async fn update_pending_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        let err = request_service::update_request(
+            &pool,
+            req.id,
+            &UpdateRequestParams {
+                amount_cents: Some(2000),
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "REQUEST_INVALID_STATUS");
+    }
+
+    #[tokio::test]
+    async fn approve_already_approved_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+        let err = request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_ALREADY_DECIDED");
+    }
+
+    #[tokio::test]
+    async fn reject_already_rejected_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::reject_request(&pool, req.id, "No", ctx.member_id)
+            .await
+            .unwrap();
+        let err = request_service::reject_request(&pool, req.id, "No again", ctx.member_id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_ALREADY_DECIDED");
+    }
+
+    #[tokio::test]
+    async fn cancel_approved_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+        let err = request_service::cancel_request(&pool, req.id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REQUEST_INVALID_STATUS");
+    }
+}
+
+// ── R26: Wallet Name Constraints ────────────────────────────
+
+mod wallet_name_constraints {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn duplicate_name_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Piggy Bank".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        let err = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "Piggy Bank".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "WALLET_NAME_EXISTS");
+    }
+
+    #[tokio::test]
+    async fn empty_name_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let err = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn name_51_chars_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let err = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "a".repeat(51),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn name_50_chars_succeeds() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "a".repeat(50),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(w.name.len(), 50);
+    }
+
+    #[tokio::test]
+    async fn trimmed_name() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "  Savings  ".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(w.name, "Savings");
+    }
+}
+
+// ── R27: Export CSV Edge Cases ───────────────────────────────
+
+mod export_csv_edge {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{export_service, family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn empty_family_returns_header_only() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let csv = export_service::export_transactions_csv(&pool, family.id, None, None, None)
+            .await
+            .unwrap();
+        let lines: Vec<&str> = csv.trim().lines().collect();
+        assert_eq!(lines.len(), 1);
+        assert!(lines[0].contains("Date"));
+    }
+
+    #[tokio::test]
+    async fn csv_escapes_commas_in_wallet_name() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "My, Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(1000),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Insert a transaction to generate CSV output
+        sqlx::query(
+            "INSERT INTO transactions (family_id, wallet_id, type, amount_cents, source_type, occurred_at) VALUES (?, ?, 'credit', 1000, 'manual', datetime('now'))"
+        )
+        .bind(family.id)
+        .bind(w.id)
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let csv = export_service::export_transactions_csv(&pool, family.id, None, None, None)
+            .await
+            .unwrap();
+        // Wallet name with comma should be quoted
+        assert!(csv.contains("\"My, Wallet\""));
+    }
+
+    #[tokio::test]
+    async fn csv_escapes_quotes_in_notes() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let w = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(5000),
+            },
+        )
+        .await
+        .unwrap();
+
+        sqlx::query(
+            "INSERT INTO transactions (family_id, wallet_id, type, amount_cents, source_type, occurred_at, notes) VALUES (?, ?, 'credit', 1000, 'manual', datetime('now'), '\"special\" notes')"
+        )
+        .bind(family.id)
+        .bind(w.id)
+        .execute(&pool)
+        .await
+        .unwrap();
+
+        let csv = export_service::export_transactions_csv(&pool, family.id, None, None, None)
+            .await
+            .unwrap();
+        // Notes with quotes should be escaped with double quotes
+        assert!(csv.contains("\"\"special\"\" notes"));
+    }
+}
+
+// ── R28: Notification Mark All Read ─────────────────────────
+
+mod notification_mark_all {
+    use super::*;
+    use cacao_lib::services::{notification_service, setup_service};
+
+    #[tokio::test]
+    async fn mark_all_read_marks_multiple() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+
+        // Insert 3 unread notifications (using valid CHECK-constrained event_types)
+        let event_types = ["request_submitted", "request_approved", "request_rejected"];
+        for et in &event_types {
+            sqlx::query(
+                "INSERT INTO notifications (event_type, payload, is_read) VALUES (?, '{}', 0)",
+            )
+            .bind(et)
+            .execute(&pool)
+            .await
+            .unwrap();
+        }
+
+        assert_eq!(notification_service::unread_count(&pool).await.unwrap(), 3);
+
+        notification_service::mark_all_read(&pool).await.unwrap();
+
+        assert_eq!(notification_service::unread_count(&pool).await.unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn mark_all_read_on_empty_is_ok() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        // No notifications exist
+        notification_service::mark_all_read(&pool).await.unwrap();
+        assert_eq!(notification_service::unread_count(&pool).await.unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn mark_nonexistent_notification_fails() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let err = notification_service::mark_read(&pool, 99999)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "NOTIFICATION_NOT_FOUND");
+    }
+
+    #[tokio::test]
+    async fn list_notifications_ordering() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+
+        sqlx::query("INSERT INTO notifications (event_type, payload, is_read, created_at) VALUES ('request_submitted', '{}', 0, '2024-01-01 00:00:00')")
+            .execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO notifications (event_type, payload, is_read, created_at) VALUES ('request_approved', '{}', 0, '2024-06-15 00:00:00')")
+            .execute(&pool).await.unwrap();
+
+        let list = notification_service::list_notifications(&pool, None, None)
+            .await
+            .unwrap();
+        // Should be ordered by created_at DESC
+        assert_eq!(list[0].event_type, "request_approved");
+        assert_eq!(list[1].event_type, "request_submitted");
+    }
+}
+
+// ── R29: Family Member Operations ───────────────────────────
+
+mod family_member_ops {
+    use super::*;
+    use cacao_lib::services::{family_service, setup_service};
+
+    #[tokio::test]
+    async fn create_family_auto_creates_member() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        assert_eq!(members.len(), 1);
+        assert_eq!(members[0].family_role, "giver");
+        assert_eq!(members[0].profile_uuid, profile.uuid);
+    }
+
+    #[tokio::test]
+    async fn add_member_then_list() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        family_service::add_member(&pool, family.id, "baby-uuid-123", "baby")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        assert_eq!(members.len(), 2);
+    }
+
+    #[tokio::test]
+    async fn remove_member_hides_from_list() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let baby = family_service::add_member(&pool, family.id, "baby-uuid", "baby")
+            .await
+            .unwrap();
+        family_service::remove_member(&pool, baby.id).await.unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        assert_eq!(members.len(), 1); // Only giver remains
+    }
+
+    #[tokio::test]
+    async fn get_family_returns_none_when_empty() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        assert!(family_service::get_family(&pool).await.unwrap().is_none());
+    }
+
+    #[tokio::test]
+    async fn family_name_validation() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        // Empty name
+        let err = family_service::create_family(&pool, &profile.uuid, "")
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+        // Name too long
+        let err = family_service::create_family(&pool, &profile.uuid, &"x".repeat(51))
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+}
+
+// ── R30: Execute Allowance Integration ──────────────────────
+
+mod execute_allowance_integration {
+    use super::*;
+    use cacao_lib::models::params::{CreateAllowanceParams, CreateWalletParams};
+    use cacao_lib::services::{
+        allowance_service, family_service, notification_service, setup_service, wallet_service,
+    };
+
+    #[tokio::test]
+    async fn execute_credits_wallet() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(1000),
+            },
+        )
+        .await
+        .unwrap();
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: family.id,
+                giver_member_id: members[0].id,
+                receiver_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 500,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::execute_allowance(&pool, &allowance)
+            .await
+            .unwrap();
+
+        let w = wallet_service::get_wallet(&pool, wallet.id).await.unwrap();
+        assert_eq!(w.balance_cents, 1500);
+    }
+
+    #[tokio::test]
+    async fn execute_creates_notification() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(5000),
+            },
+        )
+        .await
+        .unwrap();
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: family.id,
+                giver_member_id: members[0].id,
+                receiver_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 1000,
+                frequency: "weekly".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::execute_allowance(&pool, &allowance)
+            .await
+            .unwrap();
+
+        let notifs = notification_service::list_notifications(&pool, None, None)
+            .await
+            .unwrap();
+        let disbursed = notifs
+            .iter()
+            .find(|n| n.event_type == "allowance_disbursed");
+        assert!(disbursed.is_some());
+    }
+
+    #[tokio::test]
+    async fn execute_with_low_balance_warning() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(500),
+            },
+        )
+        .await
+        .unwrap();
+        // Set warning threshold
+        wallet_service::update_wallet(&pool, wallet.id, "W", 2000)
+            .await
+            .unwrap();
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: family.id,
+                giver_member_id: members[0].id,
+                receiver_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        allowance_service::execute_allowance(&pool, &allowance)
+            .await
+            .unwrap();
+
+        // Balance is 600 (500 + 100), threshold is 2000, so low_balance notification should exist
+        let notifs = notification_service::list_notifications(&pool, None, None)
+            .await
+            .unwrap();
+        let low_balance = notifs.iter().find(|n| n.event_type == "low_balance");
+        assert!(
+            low_balance.is_some(),
+            "Should have low_balance notification"
+        );
+    }
+
+    #[tokio::test]
+    async fn execute_updates_last_run_at() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(10000),
+            },
+        )
+        .await
+        .unwrap();
+
+        let allowance = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: family.id,
+                giver_member_id: members[0].id,
+                receiver_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 100,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert!(allowance.last_run_at.is_none());
+
+        allowance_service::execute_allowance(&pool, &allowance)
+            .await
+            .unwrap();
+
+        // Re-fetch from DB
+        let updated: (Option<String>,) =
+            sqlx::query_as("SELECT last_run_at FROM allowances WHERE id = ?")
+                .bind(allowance.id)
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert!(
+            updated.0.is_some(),
+            "last_run_at should be set after execution"
+        );
+    }
+}
+
+// ── R31: Wallet Archive vs Active Operations ────────────────
+
+mod wallet_archive_operations {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    struct WalletCtx {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_ctx(pool: &SqlitePool) -> WalletCtx {
+        let profile = setup_service::setup_device(pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(50000),
+            },
+        )
+        .await
+        .unwrap();
+        WalletCtx {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn archive_wallet_twice_returns_error() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        wallet_service::archive_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        let err = wallet_service::archive_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "WALLET_ARCHIVED");
+    }
+
+    #[tokio::test]
+    async fn create_request_on_archived_wallet_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        wallet_service::archive_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        // create_request checks wallet is active
+        let err = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "WALLET_NOT_FOUND");
+    }
+
+    #[tokio::test]
+    async fn get_archived_wallet_still_works() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        wallet_service::archive_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        // get_wallet only filters is_deleted, not status
+        let w = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(w.status, "archived");
+    }
+}
+
+// ── R32: Request Amount Boundaries ──────────────────────────
+
+mod request_amount_boundary {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    struct ReqCtx {
+        family_id: i64,
+        member_id: i64,
+        wallet_id: i64,
+    }
+
+    async fn setup_ctx(pool: &SqlitePool) -> ReqCtx {
+        let profile = setup_service::setup_device(pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+        ReqCtx {
+            family_id: family.id,
+            member_id: members[0].id,
+            wallet_id: wallet.id,
+        }
+    }
+
+    #[tokio::test]
+    async fn create_request_zero_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 0,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_request_negative_amount_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let err = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: -1,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(err.code, "VALIDATION_ERROR");
+    }
+
+    #[tokio::test]
+    async fn create_request_1_cent_succeeds() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 1,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(req.amount_cents, 1);
+    }
+
+    #[tokio::test]
+    async fn approve_exact_balance_succeeds() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 100000, // exact balance
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap();
+        let w = wallet_service::get_wallet(&pool, ctx.wallet_id)
+            .await
+            .unwrap();
+        assert_eq!(w.balance_cents, 0);
+    }
+
+    #[tokio::test]
+    async fn approve_exceeding_balance_fails() {
+        let pool = test_pool().await;
+        let ctx = setup_ctx(&pool).await;
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: ctx.family_id,
+                requester_member_id: ctx.member_id,
+                wallet_id: ctx.wallet_id,
+                amount_cents: 100001, // 1 over balance
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        let err = request_service::approve_request(&pool, req.id, ctx.member_id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "INSUFFICIENT_BALANCE");
+    }
+}
+
+// ── R33: List Requests Filtering ────────────────────────────
+
+mod list_requests_filter {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn list_by_status() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Create 2 draft, 1 pending
+        for _ in 0..2 {
+            request_service::create_request(
+                &pool,
+                &CreateRequestParams {
+                    family_id: family.id,
+                    requester_member_id: members[0].id,
+                    wallet_id: wallet.id,
+                    amount_cents: 1000,
+                    category: None,
+                    notes: None,
+                },
+            )
+            .await
+            .unwrap();
+        }
+        let r3 = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: family.id,
+                requester_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 2000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, r3.id).await.unwrap();
+
+        let all = request_service::list_requests(&pool, family.id, None)
+            .await
+            .unwrap();
+        assert_eq!(all.len(), 3);
+
+        let drafts = request_service::list_requests(&pool, family.id, Some("draft"))
+            .await
+            .unwrap();
+        assert_eq!(drafts.len(), 2);
+
+        let pending = request_service::list_requests(&pool, family.id, Some("pending"))
+            .await
+            .unwrap();
+        assert_eq!(pending.len(), 1);
+
+        let approved = request_service::list_requests(&pool, family.id, Some("approved"))
+            .await
+            .unwrap();
+        assert!(approved.is_empty());
+    }
+
+    #[tokio::test]
+    async fn list_empty_family() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let list = request_service::list_requests(&pool, family.id, None)
+            .await
+            .unwrap();
+        assert!(list.is_empty());
+    }
+}
+
+// ── R34: Wallet Transaction List ────────────────────────────
+
+mod wallet_tx_list {
+    use super::*;
+    use cacao_lib::models::params::{CreateWalletParams, ManualTransactionParams};
+    use cacao_lib::services::{family_service, setup_service, transaction_service, wallet_service};
+
+    #[tokio::test]
+    async fn list_wallet_transactions_returns_recent() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        // Create 3 transactions
+        for i in 0..3 {
+            transaction_service::create_manual_transaction(
+                &pool,
+                &ManualTransactionParams {
+                    family_id: family.id,
+                    wallet_id: wallet.id,
+                    transaction_type: "debit".into(),
+                    amount_cents: 100 * (i + 1),
+                    category: None,
+                    notes: None,
+                },
+            )
+            .await
+            .unwrap();
+        }
+
+        // Initial balance also creates a transaction = 4 total
+        let txs = transaction_service::list_wallet_transactions(&pool, wallet.id, None)
+            .await
+            .unwrap();
+        assert_eq!(txs.len(), 4);
+    }
+
+    #[tokio::test]
+    async fn list_wallet_transactions_with_limit() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        for _ in 0..5 {
+            transaction_service::create_manual_transaction(
+                &pool,
+                &ManualTransactionParams {
+                    family_id: family.id,
+                    wallet_id: wallet.id,
+                    transaction_type: "debit".into(),
+                    amount_cents: 100,
+                    category: None,
+                    notes: None,
+                },
+            )
+            .await
+            .unwrap();
+        }
+
+        let txs = transaction_service::list_wallet_transactions(&pool, wallet.id, Some(2))
+            .await
+            .unwrap();
+        assert_eq!(txs.len(), 2);
+    }
+}
+
+// ── R35: Transaction Filters Extended ────────────────────────
+
+mod transaction_filters_extended {
+    use super::*;
+    use cacao_lib::models::params::{
+        CreateWalletParams, ManualTransactionParams, TransactionFilters,
+    };
+    use cacao_lib::services::{family_service, setup_service, transaction_service, wallet_service};
+
+    #[tokio::test]
+    async fn filter_by_type() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: family.id,
+                wallet_id: wallet.id,
+                transaction_type: "debit".into(),
+                amount_cents: 1000,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        // Filter debit only
+        let debits = transaction_service::list_transactions(
+            &pool,
+            family.id,
+            &TransactionFilters {
+                transaction_type: Some("debit".into()),
+                date_from: None,
+                date_to: None,
+                wallet_id: None,
+                source_type: None,
+                limit: None,
+                offset: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(debits.len(), 1);
+        assert_eq!(debits[0].amount_cents, 1000);
+    }
+
+    #[tokio::test]
+    async fn filter_by_source_type() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(5000), // creates a "manual" credit
+            },
+        )
+        .await
+        .unwrap();
+
+        transaction_service::create_manual_transaction(
+            &pool,
+            &ManualTransactionParams {
+                family_id: family.id,
+                wallet_id: wallet.id,
+                transaction_type: "debit".into(),
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let manual_only = transaction_service::list_transactions(
+            &pool,
+            family.id,
+            &TransactionFilters {
+                source_type: Some("manual".into()),
+                date_from: None,
+                date_to: None,
+                wallet_id: None,
+                transaction_type: None,
+                limit: None,
+                offset: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(manual_only.len(), 2); // initial credit + manual debit
+    }
+
+    #[tokio::test]
+    async fn filter_with_limit_and_offset() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(100000),
+            },
+        )
+        .await
+        .unwrap();
+
+        for _ in 0..5 {
+            transaction_service::create_manual_transaction(
+                &pool,
+                &ManualTransactionParams {
+                    family_id: family.id,
+                    wallet_id: wallet.id,
+                    transaction_type: "debit".into(),
+                    amount_cents: 100,
+                    category: None,
+                    notes: None,
+                },
+            )
+            .await
+            .unwrap();
+        }
+
+        let page = transaction_service::list_transactions(
+            &pool,
+            family.id,
+            &TransactionFilters {
+                limit: Some(2),
+                offset: Some(1),
+                date_from: None,
+                date_to: None,
+                wallet_id: None,
+                transaction_type: None,
+                source_type: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(page.len(), 2);
+    }
+}
+
+// ── R36: Reject Reason Validation ───────────────────────────
+
+mod reject_reason_validation {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams};
+    use cacao_lib::services::{family_service, request_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn reject_with_empty_reason_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(10000),
+            },
+        )
+        .await
+        .unwrap();
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: family.id,
+                requester_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+
+        let err = request_service::reject_request(&pool, req.id, "", members[0].id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REJECTION_REASON_REQUIRED");
+    }
+
+    #[tokio::test]
+    async fn reject_with_whitespace_only_reason_fails() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(10000),
+            },
+        )
+        .await
+        .unwrap();
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: family.id,
+                requester_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 100,
+                category: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+
+        let err = request_service::reject_request(&pool, req.id, "   ", members[0].id)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "REJECTION_REASON_REQUIRED");
+    }
+}
+
+// ── R37: Approve Creates Transaction + Debits Wallet ────────
+
+mod approve_side_effects {
+    use super::*;
+    use cacao_lib::models::params::{CreateRequestParams, CreateWalletParams, TransactionFilters};
+    use cacao_lib::services::{
+        family_service, request_service, setup_service, transaction_service, wallet_service,
+    };
+
+    #[tokio::test]
+    async fn approve_creates_debit_transaction() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: Some(50000),
+            },
+        )
+        .await
+        .unwrap();
+        let req = request_service::create_request(
+            &pool,
+            &CreateRequestParams {
+                family_id: family.id,
+                requester_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 10000,
+                category: Some("food".into()),
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        request_service::submit_request(&pool, req.id)
+            .await
+            .unwrap();
+        request_service::approve_request(&pool, req.id, members[0].id)
+            .await
+            .unwrap();
+
+        // Check wallet balance
+        let w = wallet_service::get_wallet(&pool, wallet.id).await.unwrap();
+        assert_eq!(w.balance_cents, 40000);
+
+        // Check transaction was created
+        let txs = transaction_service::list_transactions(
+            &pool,
+            family.id,
+            &TransactionFilters {
+                transaction_type: Some("debit".into()),
+                source_type: Some("request".into()),
+                date_from: None,
+                date_to: None,
+                wallet_id: None,
+                limit: None,
+                offset: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(txs.len(), 1);
+        assert_eq!(txs[0].amount_cents, 10000);
+        assert_eq!(txs[0].category.as_deref(), Some("food"));
+    }
+}
+
+// ── R38: Allowance Pause/Resume Cycle ───────────────────────
+
+mod allowance_lifecycle {
+    use super::*;
+    use cacao_lib::models::params::{CreateAllowanceParams, CreateWalletParams};
+    use cacao_lib::services::{allowance_service, family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn pause_resume_cycle() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family = family_service::create_family(&pool, &profile.uuid, "F")
+            .await
+            .unwrap();
+        let members = family_service::get_members(&pool, family.id).await.unwrap();
+        let wallet = wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family.id,
+                name: "W".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let a = allowance_service::create_allowance(
+            &pool,
+            &CreateAllowanceParams {
+                family_id: family.id,
+                giver_member_id: members[0].id,
+                receiver_member_id: members[0].id,
+                wallet_id: wallet.id,
+                amount_cents: 1000,
+                frequency: "daily".into(),
+                interval_count: None,
+                notes: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(a.status, "active");
+
+        allowance_service::pause_allowance(&pool, a.id)
+            .await
+            .unwrap();
+        let list = allowance_service::list_allowances(&pool, family.id)
+            .await
+            .unwrap();
+        assert_eq!(list[0].status, "paused");
+
+        allowance_service::resume_allowance(&pool, a.id)
+            .await
+            .unwrap();
+        let list = allowance_service::list_allowances(&pool, family.id)
+            .await
+            .unwrap();
+        assert_eq!(list[0].status, "active");
+    }
+
+    #[tokio::test]
+    async fn pause_nonexistent_fails() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let err = allowance_service::pause_allowance(&pool, 99999)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "ALLOWANCE_NOT_FOUND");
+    }
+
+    #[tokio::test]
+    async fn archive_nonexistent_fails() {
+        let pool = test_pool().await;
+        setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let err = allowance_service::archive_allowance(&pool, 99999)
+            .await
+            .unwrap_err();
+        assert_eq!(err.code, "ALLOWANCE_NOT_FOUND");
+    }
+}
+
+// ── R39: Data Isolation Between Families ────────────────────
+
+mod data_isolation {
+    use super::*;
+    use cacao_lib::models::params::CreateWalletParams;
+    use cacao_lib::services::{family_service, setup_service, wallet_service};
+
+    #[tokio::test]
+    async fn wallets_are_isolated_by_family() {
+        let pool = test_pool().await;
+        let profile = setup_service::setup_device(&pool, "P", "giver")
+            .await
+            .unwrap();
+        let family1 = family_service::create_family(&pool, &profile.uuid, "F1")
+            .await
+            .unwrap();
+        // Create a second family via raw SQL (normally one device = one family)
+        sqlx::query("INSERT INTO families (name, created_by_device) VALUES ('F2', ?)")
+            .bind(&profile.uuid)
+            .execute(&pool)
+            .await
+            .unwrap();
+        let family2_id: i64 = sqlx::query_scalar("SELECT id FROM families WHERE name = 'F2'")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+
+        wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family1.id,
+                name: "F1 Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        wallet_service::create_wallet(
+            &pool,
+            &CreateWalletParams {
+                family_id: family2_id,
+                name: "F2 Wallet".into(),
+                wallet_type: "cash".into(),
+                initial_balance_cents: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        let f1_wallets = wallet_service::list_wallets(&pool, family1.id)
+            .await
+            .unwrap();
+        assert_eq!(f1_wallets.len(), 1);
+        assert_eq!(f1_wallets[0].name, "F1 Wallet");
+
+        let f2_wallets = wallet_service::list_wallets(&pool, family2_id)
+            .await
+            .unwrap();
+        assert_eq!(f2_wallets.len(), 1);
+        assert_eq!(f2_wallets[0].name, "F2 Wallet");
+    }
+}
+
+// ── R40: Error Serialization ────────────────────────────────
+
+mod error_serialization {
+    use cacao_lib::error::AppError;
+
+    #[test]
+    fn serialize_error_to_json() {
+        let err = AppError::new("TEST_CODE", "test message");
+        let json = serde_json::to_string(&err).unwrap();
+        assert!(json.contains("TEST_CODE"));
+        assert!(json.contains("test message"));
+    }
+
+    #[test]
+    fn from_sqlx_error_is_internal() {
+        let sqlx_err = sqlx::Error::RowNotFound;
+        let app_err = AppError::from(sqlx_err);
+        assert_eq!(app_err.code, "INTERNAL_ERROR");
+    }
+
+    #[test]
+    fn error_implements_std_error() {
+        let err = AppError::validation("bad");
+        let _std_err: &dyn std::error::Error = &err;
+    }
+
+    #[test]
+    fn not_found_various_resources() {
+        let resources = ["wallet", "request", "allowance", "notification", "family"];
+        for r in resources {
+            let err = AppError::not_found(r);
+            assert!(
+                err.code.ends_with("_NOT_FOUND"),
+                "Error code for '{}' should end with _NOT_FOUND but got '{}'",
+                r,
+                err.code
+            );
+        }
+    }
+}

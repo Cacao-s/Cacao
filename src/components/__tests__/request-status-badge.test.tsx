@@ -53,3 +53,34 @@ describe("RequestStatusBadge", () => {
     expect(badge.getAttribute("data-variant")).toBe("destructive");
   });
 });
+
+// ── R50: RequestStatusBadge Extended ────────────────────────
+
+describe("RequestStatusBadge extended", () => {
+  it("applies correct variant for approved (secondary)", () => {
+    render(<RequestStatusBadge status="approved" />);
+    const badge = screen.getByText("已核准");
+    expect(badge.getAttribute("data-variant")).toBe("secondary");
+  });
+
+  it("applies correct variant for cancelled (outline)", () => {
+    render(<RequestStatusBadge status="cancelled" />);
+    const badge = screen.getByText("已取消");
+    expect(badge.getAttribute("data-variant")).toBe("outline");
+  });
+
+  it("renders all 5 valid statuses without error", () => {
+    const statuses = ["draft", "pending", "approved", "rejected", "cancelled"];
+    for (const status of statuses) {
+      const { unmount } = render(<RequestStatusBadge status={status} />);
+      unmount();
+    }
+  });
+
+  it("renders empty string status without crashing", () => {
+    const { container } = render(<RequestStatusBadge status="" />);
+    // Empty string falls through to fallback, badge still renders
+    const badge = container.querySelector("[data-slot='badge']");
+    expect(badge).not.toBeNull();
+  });
+});

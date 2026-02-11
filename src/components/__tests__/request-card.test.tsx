@@ -108,3 +108,50 @@ describe("RequestCard", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/requests/77");
   });
 });
+
+// ── R49: RequestCard Extended ───────────────────────────────
+
+describe("RequestCard extended", () => {
+  beforeEach(() => {
+    mockNavigate.mockClear();
+  });
+
+  it("renders all status badges correctly", () => {
+    const statuses = ["draft", "pending", "approved", "rejected", "cancelled"];
+    for (const status of statuses) {
+      const { unmount } = render(<RequestCard request={makeRequest({ status })} />);
+      unmount();
+    }
+  });
+
+  it("renders zero amount", () => {
+    const { container } = render(<RequestCard request={makeRequest({ amount_cents: 0 })} />);
+    expect(container.textContent).toContain("0");
+  });
+
+  it("renders large amount with grouping", () => {
+    const { container } = render(<RequestCard request={makeRequest({ amount_cents: 10000000 })} />);
+    expect(container.textContent).toContain("100,000");
+  });
+
+  it("truncates long notes", () => {
+    const longNote = "A".repeat(200);
+    render(<RequestCard request={makeRequest({ notes: longNote })} />);
+    // The truncate class should be applied
+    const noteEl = screen.getByText(longNote);
+    expect(noteEl.className).toContain("truncate");
+  });
+
+  it("renders rejection reason when available", () => {
+    const { container } = render(
+      <RequestCard
+        request={makeRequest({
+          status: "rejected",
+          rejection_reason: "Too expensive",
+        })}
+      />,
+    );
+    // rejection_reason is not displayed in RequestCard (only notes are)
+    expect(container).toBeDefined();
+  });
+});

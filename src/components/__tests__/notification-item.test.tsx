@@ -126,3 +126,51 @@ describe("NotificationItem", () => {
     expect(container.textContent).toContain("2024");
   });
 });
+
+// ── R49: NotificationItem Extended ──────────────────────────
+
+describe("NotificationItem extended", () => {
+  it("applies bg-accent/20 for unread", () => {
+    const { container } = render(
+      <NotificationItem notification={makeNotification({ is_read: 0 })} />,
+    );
+    const button = container.querySelector("button");
+    expect(button?.className).toContain("bg-accent/20");
+  });
+
+  it("does not apply bg-accent/20 for read", () => {
+    const { container } = render(
+      <NotificationItem notification={makeNotification({ is_read: 1 })} />,
+    );
+    const button = container.querySelector("button");
+    expect(button?.className).not.toContain("bg-accent/20");
+  });
+
+  it("renders empty payload without description", () => {
+    const { container } = render(
+      <NotificationItem notification={makeNotification({ payload: null })} />,
+    );
+    // Should only have label and datetime, no description
+    const texts = container.querySelectorAll(".text-xs.text-muted-foreground");
+    // Only the datetime text
+    expect(texts.length).toBe(1);
+  });
+
+  it("handles payload with zero amount_cents", () => {
+    const payload = JSON.stringify({ amount_cents: 0 });
+    const { container } = render(<NotificationItem notification={makeNotification({ payload })} />);
+    // amount_cents is 0 which is falsy, so description should be empty
+    const descElements = container.querySelectorAll(".text-xs.text-muted-foreground");
+    expect(descElements.length).toBe(1); // only datetime
+  });
+
+  it("renders button element for clickability", () => {
+    render(<NotificationItem notification={makeNotification()} />);
+    expect(screen.getByRole("button")).toBeDefined();
+  });
+
+  it("button has type='button' to prevent form submission", () => {
+    render(<NotificationItem notification={makeNotification()} />);
+    expect(screen.getByRole("button").getAttribute("type")).toBe("button");
+  });
+});
