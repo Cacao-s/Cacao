@@ -1,6 +1,6 @@
 ---
 name: data-model
-description: 資料模型設計 - 依正式產品規格設計離線優先、只新增不覆蓋的 Drift／SQLite Schema。當需要設計資料結構時使用。
+description: 資料模型設計 - 依正式產品規格設計離線優先、只新增不覆蓋的 SQLite Schema（Android、iOS 共用同一份）。當需要設計資料結構時使用。
 disable-model-invocation: true
 allowed-tools: Read Edit Write
 ---
@@ -11,7 +11,7 @@ allowed-tools: Read Edit Write
 
 - `docs/product/features.md`：功能規則的唯一來源
 - `docs/product/roadmap.md`：第一版範圍，與第二版要預留的設計
-- `docs/tech-decisions.md`：已定案的技術決策（D-03 Drift、D-06 備份檔格式、D-08 驗證碼、D-15 系統產生文字等）
+- `docs/tech-decisions.md`：已定案的技術決策（D-01 純原生、D-16 資料庫、D-06 備份檔格式、D-08 驗證碼、D-15 系統產生文字等）
 - `docs/design.md`：各畫面要顯示的資料，以及「交給下一階段」列出的查詢與欄位；Schema 要能撐起這些畫面
 - `docs/data-model-qa.md`（若存在）：之前提出、已回答或待回答的問題
 
@@ -19,7 +19,7 @@ allowed-tools: Read Edit Write
 
 ## 設計原則
 
-1. **離線優先、完全不用後端**：所有資料只存在手機本機的 SQLite，以 **Drift** 存取（D-03）。
+1. **離線優先、完全不用後端**：所有資料只存在手機本機的 SQLite；Schema 寫成 `shared/db/` 的 SQL，Android SQLDelight、iOS GRDB 共用同一份（D-16），備份可跨平台還原。
 2. **只新增、不覆蓋的流水帳**：金錢異動一律新增一筆紀錄，不修改舊紀錄；更正也用新增一筆反向或調整紀錄表示。
 3. **餘額由流水帳算出**：存款、錢包、已鎖金額、可出金額都由紀錄推算，不另外存一份會失準的餘額欄位（若為效能需要快取，要說明重建方式）。
 4. **為第二版同步預留**：
@@ -30,7 +30,7 @@ allowed-tools: Read Edit Write
 6. **資料庫裡只放家庭資料**：備份是整個 SQLite 檔（D-06），資料庫裡的每張表都會進備份。主題、語言等手機層級的設定**完全不放進 SQLite**，改存手機本機的偏好設定。
 7. **系統產生的文字存代碼**：App 自動產生的紀錄名稱、類型、狀態一律存類型代碼（例如 `wallet_adjustment`），顯示時再依目前語言翻譯；使用者輸入的內容照原文存（D-15）。
 8. **敏感資料**：父母驗證碼只存 Argon2id 加鹽雜湊，存在資料庫裡，跟著備份還原（D-08）。
-9. **Schema 版本號**：用 `PRAGMA user_version` 記錄 schema 版本，由 Drift 的 `schemaVersion` 與 migration 管理；還原時靠它判斷備份能不能還原、要不要升級（D-06）。
+9. **Schema 版本號**：用 `PRAGMA user_version` 記錄 schema 版本，由 migration 管理；還原時靠它判斷備份能不能還原、要不要升級（D-06）。
 10. **描述規則，不預設紀錄形式**：某個規則要不要獨立成一筆紀錄（例如特價時剩餘金額解鎖），依設計判斷；若規格無法推出答案，就列為問題，不要自行決定。
 
 ## 問題怎麼提
@@ -62,7 +62,7 @@ allowed-tools: Read Edit Write
 用文字描述實體之間的關係（1:N、N:N）。
 
 ### 第三步：設計 Schema
-用 Drift 的資料表定義描述每張表：欄位、型別、可空性、預設值、索引、外鍵，以及類型代碼欄位的允許值。
+用 SQL（`CREATE TABLE`）描述每張表：欄位、型別、可空性、預設值、索引、外鍵，以及類型代碼欄位的允許值。
 
 ### 第四步：推算規則
 寫清楚各數值怎麼從流水帳算出：
@@ -80,7 +80,7 @@ allowed-tools: Read Edit Write
 將設計寫入 `docs/data-model.md`，包含：
 
 - 實體清單與關係（文字描述）
-- Drift Schema 定義與 schema 版本
+- SQL Schema 定義與 schema 版本
 - 餘額、瀑布填充、目標狀態的推算規則
 - 「資料庫只放家庭資料」的確認：列出不放進資料庫的手機設定（主題、語言等）及其存放位置
 - 第二版同步預留說明

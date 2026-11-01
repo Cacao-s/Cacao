@@ -1,13 +1,27 @@
 # 技術決策
 
 > 已定案的決策記錄在這裡，`/tech-research` 不再重新比較。
-> 最後更新：2026-10-05（D-15）
+> 最後更新：2026-11-01（D-01 改為原生，D-16～D-23 定案）
+
+> **2026-11-01 D-01 改為純原生（Swift＋Kotlin）**。依附 Flutter 的決策已由新決策取代：
+> D-03 → D-16、D-09 → D-21、D-10 → D-19、D-12 → D-22、D-13 → D-20。新增 D-17 介面、D-18 repo 結構、D-23 自動化測試。
+> D-04～D-08、D-11、D-14、D-15 的決策內容與框架無關，照舊有效；其中提到 Drift 的實作細節改由 D-16 承接。
+>
+> **第一版只實作 Android**（2026-11-01，使用者決定）：D-16～D-23 中 iOS 的部分（GRDB、SwiftUI、iOS 17、swift-snapshot-testing、macOS CI、跨平台還原測試）照規劃保留，在 Phase 2 才實作。第一版要做的是 `shared/` 與 Android。
 
 ---
 
-## D-01 開發框架：Flutter
+## D-01 開發框架：純原生（Swift＋Kotlin）
 
-**狀態**：已定案（2026-10-05）
+**狀態**：已定案（2026-11-01，使用者決定；原本 2026-10-05 選 Flutter）
+
+### 改變的理由（2026-11-01）
+
+- 使用者比較 Flutter、Rust 核心＋原生介面、純原生之後，決定採用純原生：App 最小、操作手感與系統一致、系統新功能最快可用。
+- 接受的代價：4 個主題與所有畫面要在兩個平台各做一次，商業邏輯（帳本、瀑布填充、餘額）也要寫兩次。
+- 對策：規劃自動化測試，用兩個平台共用的測試案例確保計算結果一致（見 `docs/tech-qa.md`）。
+
+### 原本的決策（2026-10-05，已被取代）
 
 ### 決策背景
 
@@ -61,7 +75,7 @@
 
 ## D-03 本地資料庫套件：Drift
 
-**狀態**：已定案（2026-10-05，TQ-01）
+**狀態**：已被 D-16 取代（2026-11-01，D-01 改為原生）；原定案 2026-10-05，TQ-01
 
 ### 決策背景
 
@@ -194,7 +208,7 @@
 
 ## D-09 狀態管理：Riverpod 3
 
-**狀態**：已定案（2026-10-05，TQ-08）
+**狀態**：已被 D-21 取代（2026-11-01，D-01 改為原生）；原定案 2026-10-05，TQ-08
 
 ### 方案比較
 
@@ -212,7 +226,7 @@
 
 ## D-10 主題實作：ThemeData＋ThemeExtension
 
-**狀態**：已定案（2026-10-05，TQ-09）
+**狀態**：已被 D-19 取代（2026-11-01，D-01 改為原生）；原定案 2026-10-05，TQ-09
 
 ### 最終選擇與理由
 
@@ -240,7 +254,7 @@
 
 ## D-12 慶祝動畫與音效：Lottie＋內建動畫，audioplayers
 
-**狀態**：已定案（2026-10-05，TQ-11、TQ-12）
+**狀態**：已被 D-22 取代（2026-11-01，D-01 改為原生）；原定案 2026-10-05，TQ-11、TQ-12
 
 ### 方案比較
 
@@ -258,7 +272,7 @@
 
 ## D-13 多語系：Flutter 官方 gen-l10n
 
-**狀態**：已定案（2026-10-05，TQ-13）
+**狀態**：已被 D-20 取代（2026-11-01，D-01 改為原生）；原定案 2026-10-05，TQ-13
 
 ### 決策背景
 
@@ -308,3 +322,148 @@
 ### 影響
 
 - `/data-model` 的設計原則要納入：系統產生的名稱、類型、狀態一律存代碼，不存顯示文字。
+
+---
+
+## D-16 資料庫：共用 SQL schema，Android SQLDelight、iOS GRDB
+
+**狀態**：已定案（2026-11-01，TQ-16～TQ-18；使用者授權依建議定案）
+
+### 決策背景
+
+- D-06 備份檔是整個 SQLite 檔；家長常在 Android 與 iPhone 之間換手機，備份必須能跨平台還原。
+- 兩個平台各自用 ORM 時，資料表結構由框架決定，無法保證一致。
+
+### 方案比較
+
+| | SQLDelight＋GRDB（SQL 優先） | Room＋SwiftData | Room＋GRDB |
+|---|---|---|---|
+| 兩邊結構一致 | 共用同一份 `.sql` | 不可能 | Room 會加自己的管理表 |
+| 監聽查詢 | 兩邊都有 | 有 | 有 |
+| 跨平台還原 | 直接可用 | 不行 | 要另外處理 |
+
+### 最終選擇與理由
+
+- `shared/db/` 放唯一一份 schema 與 migration SQL；Android 用 **SQLDelight** 產生 Kotlin，iOS 用 **GRDB** 執行同一批 SQL。
+- schema 版本用 `PRAGMA user_version`，兩邊一致；D-06 不用改。
+
+### 風險評估
+
+- 兩邊的查詢程式碼仍是各寫一份，靠 D-23 的共用測試案例保證結果一致。
+
+---
+
+## D-17 介面：Jetpack Compose、SwiftUI；最低 Android 8／iOS 17
+
+**狀態**：已定案（2026-11-01，TQ-19～TQ-21）
+
+- Android **Jetpack Compose**、iOS **SwiftUI**：都是官方主推的宣告式寫法，兩邊對照好維護，寫自訂主題最方便。
+- 最低版本 **Android 8（API 26）／iOS 17**：iOS 17 起有 `@Observable`，資料監聽寫法簡單；Android 8 涵蓋幾乎所有還在用的手機。
+
+---
+
+## D-18 Repo 結構：單一 repo
+
+**狀態**：已定案（2026-11-01，TQ-22）
+
+```text
+android/            Kotlin＋Compose（第一版）
+ios/                Swift＋SwiftUI（Phase 2；第一版只放 README 佔位，目錄先建好）
+shared/             兩平台共用的「資料」
+  db/               schema 與 migration SQL
+  tokens/           4 個主題的 design token JSON
+  i18n/             翻譯來源檔
+  test-cases/       計算的共用測試案例 JSON
+  animations/       Lottie 動畫檔
+tools/              兩平台共用的「工具」
+  codegen/          tokens、i18n → Kotlin／Swift 的產生腳本
+  e2e/              Maestro 端對端流程（同一份兩平台跑）
+  ci/               CI 共用腳本（.github/workflows 呼叫這裡）
+  scripts/          開發用指令（初始化、跑全部測試等）
+.github/workflows/  GitHub Actions 規定的位置，只放觸發設定，邏輯在 tools/ci
+docs/
+```
+
+- `shared/` 放資料、`tools/` 放工具；兩平台只讀不改，改一次兩邊都生效。
+- 產生出來的 Kotlin／Swift 檔放在各平台目錄內（`android/…/generated`、`ios/…/Generated`），不進 `shared/`。
+- `ios/` 第一版就建好目錄，`tools/` 的腳本與 CI 從一開始就以「有兩個平台」來寫，Phase 2 加 iOS 時只要補 `ios/` 內容並打開 CI 的 iOS 工作。
+
+---
+
+## D-19 主題：共用 design token JSON，自動產生 Kotlin／Swift
+
+**狀態**：已定案（2026-11-01，TQ-23；取代 D-10）
+
+- `shared/tokens/` 用一份 JSON 定義 4 個主題的顏色、字型、圓角、陰影等，用產生腳本輸出 Kotlin（Compose）與 Swift（SwiftUI）程式碼。
+- 字型照 D-11：英文數字字型打包成 App 資源，中文用系統字型；每個主題的字型寫在 token 裡，換字型只改 JSON。
+
+---
+
+## D-20 多語系：共用翻譯來源，產生 strings.xml 與 String Catalog
+
+**狀態**：已定案（2026-11-01，TQ-24；取代 D-13）
+
+- `shared/i18n/` 一份來源檔（繁中、英文），產生 Android `strings.xml` 與 iOS String Catalog（`.xcstrings`）。
+- D-14（英文內文用系統字型）、D-15（系統產生的紀錄存類型代碼）照舊。
+
+---
+
+## D-21 狀態管理：各平台官方做法
+
+**狀態**：已定案（2026-11-01，TQ-25；取代 D-09）
+
+- Android：ViewModel＋StateFlow，接 SQLDelight 的 Flow 監聽查詢。
+- iOS：`@Observable`，接 GRDB 的 ValueObservation。
+- 一人開發，官方做法資料最多、依賴最少；不用第三方架構（MVI 套件、TCA）。
+
+---
+
+## D-22 慶祝動畫與音效：Lottie＋系統音效
+
+**狀態**：已定案（2026-11-01，TQ-26；取代 D-12）
+
+- 動畫：兩邊都用官方 Lottie 套件，動畫檔共用一份（`shared/animations/`）。
+- 音效：Android SoundPool、iOS AVAudioPlayer 播短音檔；設定裡提供開關。
+
+---
+
+## D-23 自動化測試
+
+**狀態**：已定案（2026-11-01，TQ-27～TQ-31）
+
+### 測試層級
+
+| 層級 | 範圍 | Android | iOS |
+|---|---|---|---|
+| 單元測試 | 帳本、瀑布填充、餘額、零用錢補記等計算 | JUnit | XCTest／Swift Testing |
+| 資料庫測試 | migration、備份還原（含跨平台還原） | SQLDelight 測試驅動 | GRDB 記憶體資料庫 |
+| 截圖測試 | 每個畫面 × 4 個主題 | Paparazzi | swift-snapshot-testing |
+| 端對端測試 | 首次設定、記收入、任務驗收、目標達成出金 | Maestro | Maestro |
+
+### 兩個平台計算一致
+
+- `shared/test-cases/` 用 JSON 寫「輸入的流水帳 → 預期的存款、錢包、已鎖金額、可出金額、各目標進度」，兩邊的單元測試都跑同一批案例；算錯的那邊直接失敗。
+- 跨平台還原：用 Android 產生的備份檔在 iOS 測試中還原，反之亦然。
+
+### 端對端測試
+
+- **Maestro**：一份 YAML 流程兩邊都能跑；畫面元件加上相同的測試 ID（Android `testTag`、iOS `accessibilityIdentifier`）。
+
+### CI
+
+- **GitHub Actions**：每次 push 跑 Android 全部測試與 iOS 單元測試；iOS 截圖與端對端測試只在合併前跑，控制 macOS 機器用量。
+
+### 風險評估
+
+- 截圖測試在不同機器上可能有像素差異，需要固定字型與渲染環境。
+- macOS CI 免費額度有限，超過要付費或改在本機跑。
+
+---
+
+## D-24 App 名稱與套件 ID
+
+**狀態**：已定案（2026-11-01，使用者決定）
+
+- App 名稱：**Cacao**
+- 套件 ID：**`com.ruru.cacao`**（Android `applicationId`；Phase 2 的 iOS Bundle ID 用同一個）
+- 上架 Google Play 後不能更改。

@@ -1,6 +1,6 @@
 ---
 name: tech-research
-description: 技術研究 - 在已定案的 Flutter、無後端前提下，研究剩下的技術選型（本地資料庫、備份、裝置直連同步、狀態管理、主題）。當需要比較技術方案或做架構決策時使用。
+description: 技術研究 - 在已定案的純原生（Swift＋Kotlin）、無後端前提下，研究剩下的技術選型（本地資料庫、備份、裝置直連同步、狀態管理、主題、自動化測試）。當需要比較技術方案或做架構決策時使用。
 disable-model-invocation: true
 allowed-tools: Read Edit Write WebSearch WebFetch
 ---
@@ -13,17 +13,16 @@ allowed-tools: Read Edit Write WebSearch WebFetch
 
 以 `docs/tech-decisions.md` 為準，目前包含：
 
-- **D-01 開發框架：Flutter**（iOS／Android 單一程式碼）
+- **D-01 開發框架：純原生**（iOS Swift、Android Kotlin；2026-11-01 由 Flutter 改定）
 - **D-02 完全不用後端**：不自建，也不依賴任何第三方後端（Supabase、Firebase、PowerSync 等都不列入）
 
 已定案的項目不重新比較、不列入比較表。若新需求真的動搖了既有決策，先回報衝突與理由，由用戶決定是否重開，不要自行改寫。
 
-## 研究範圍（皆以 Flutter、無後端為前提）
+## 研究範圍（皆以純原生、無後端為前提）
 
 ### 1. 本地資料庫
-- Drift（SQLite）
-- 其他 Flutter SQLite 方案
-- 評估重點：離線、資料遷移（schema migration）、適合「只新增、不覆蓋」的流水帳模型
+- Android、iOS 各自的 SQLite 套件
+- 評估重點：離線、資料遷移（schema migration）、適合「只新增、不覆蓋」的流水帳模型、Android 備份能在 iPhone 還原（反之亦然）
 
 ### 2. 備份與還原
 - 匯出／匯入備份檔（使用者自己保存）
@@ -35,12 +34,16 @@ allowed-tools: Read Edit Write WebSearch WebFetch
 - 評估重點：iOS／Android 互通、兩台各自記帳後的合併方式
 
 ### 4. 狀態管理
-- Riverpod
-- Bloc
+- 各平台官方做法與第三方架構
 
 ### 5. 主題與 Design Token
-- 用 `ThemeData`／`ThemeExtension` 承載 design token，支援多主題切換
+- 4 個主題在兩個平台長得一樣：design token 如何共用
 - 字型策略：中文用系統字型，只打包英文數字字型，控制 App 大小
+
+### 6. 自動化測試
+- 單元、資料庫、截圖、端對端測試的工具與範圍
+- 兩個平台計算結果一致的保證方式
+- CI
 
 ## 評估條件
 

@@ -10,7 +10,7 @@ allowed-tools: Read Edit Write WebSearch
 先讀取以下文件，確認需求與已定案的決策，再設計流程：
 
 - `docs/product/features.md`（〈裝置與身分〉、〈備份與還原〉）
-- `docs/tech-decisions.md`（D-01 Flutter、D-02 完全不用後端，以及 `/tech-research` 後續定案的套件）
+- `docs/tech-decisions.md`（D-01 純原生 Swift＋Kotlin、D-02 完全不用後端，以及 `/tech-research` 後續定案的套件）
 - `docs/product/roadmap.md`（第二版的裝置同步要預留什麼）
 - `docs/design.md`（PIN 驗證點、父母／孩子模式切換、Google 登入與備份的畫面入口）
 

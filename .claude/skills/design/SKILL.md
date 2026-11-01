@@ -12,7 +12,7 @@ allowed-tools: Read Edit Write
 - `docs/product/features.md`：功能規則的唯一來源；〈角色權限〉決定每個角色能看到、能做什麼
 - `docs/product/overview.md`：用戶畫像與年齡分層（幼兒、童年、青少年）
 - `docs/product/roadmap.md`：第一版範圍；第二版的功能不畫
-- `docs/tech-decisions.md`：D-01 Flutter、D-11 主題、D-13～D-15 多語系
+- `docs/tech-decisions.md`：D-01 純原生 Swift＋Kotlin、D-11 主題、D-13～D-15 多語系
 - `docs/data-model-qa.md`（若存在）：已定案的業務規則，畫面要照著呈現
 - `docs/design-qa.md`（若存在）：之前提出、已回答或待回答的問題
 

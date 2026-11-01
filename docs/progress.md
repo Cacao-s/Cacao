@@ -9,10 +9,13 @@
 ## 階段進度
 
 - 階段 1 產品定義：[##########] 100%
-- 階段 2 技術選型：[##########] 100%（D-01～D-15 已定案；同步方案第二版再決定）
+- 階段 2 技術選型：[##########] 100%（2026-11-01 D-01 改為純原生 Swift＋Kotlin，D-16～D-23 定案，含自動化測試）
 - 階段 3 UI/UX 設計：[######----] 60%（畫面清單、UQ、17 個線框完成，字體跟隨主題；剩導覽與流程圖、線框回饋）
 - 階段 4 架構設計：[##--------] 20%（資料模型問題已全部定案；Schema 定稿等 `/design` 完成）
-- 階段 5 開發實作：[----------] 0%
+- 階段 5 開發實作（第一版只做 Android）：[----------] 0%
+  - 5a repo 骨架（`android/`、`ios/` 佔位、`shared/` 資料、`tools/` 工具）＋ codegen ＋ CI
+  - 5b Android 實作＋自動化測試到通
+- Phase 2（下一個迭代，不計入第一版進度）：iOS 版，共用 `shared/`；驗證 Android ↔ iPhone 備份互相還原
 
 | Task | Status | Skill owner | Notes |
 | --- | --- | --- | --- |
@@ -20,11 +23,12 @@
 | 產品探索問答 `docs/product/discover-qa.md` | Done | discover | 待確認已清空（WD-29 語言：預設跟系統、設定可切換） |
 | 產品規格 `docs/product/`（overview／features／roadmap） | Done | discover | 正式規格；`SPEC.md` 降為歷史初稿 |
 | UI 風格與 Logo | Done | — | 主題選定 4 個（手機層級設定切換）、Logo 選定「可可豆存錢筒」 |
-| 技術選型 `docs/tech-decisions.md` | Done | tech-research | D-01～D-15 已定案 |
+| 技術選型 `docs/tech-decisions.md` | Done | tech-research | D-01 改為純原生，D-16～D-23 定案（含自動化測試）；第一版只實作 Android，iOS 在 Phase 2 |
 | UI/UX 設計 `docs/design.md` | In progress | design | 畫面清單完成（21 個畫面）、`docs/design-qa.md` UQ-01～07 已定案；剩導覽、主要流程、低保真線框；產出交給 `/data-model` 與 `/auth-design` |
-| 資料模型 `docs/data-model.md` | In progress | data-model | `docs/data-model-qa.md` 12 題已全部定案；Schema 定稿排在 `/design` 之後；系統產生的名稱存類型代碼（D-15）；skill 已依新規格改寫；資料庫 Drift；流水帳「只新增、不覆蓋」、主鍵用 UUID 且不可為空 |
-| 認證與備份 `docs/auth-design.md` | Pending | auth-design | skill 已改寫為「PIN＋Google 登入＋雲端硬碟備份＋匯出／匯入」；技術決策見 D-05～D-08 |
-| 開發實作 | Pending | — | 依賴階段 1–4；高保真視覺邊開發邊調 |
+| 資料模型 `docs/data-model.md` | In progress | data-model | `docs/data-model-qa.md` 12 題已全部定案；Schema 定稿排在 `/design` 之後；系統產生的名稱存類型代碼（D-15）；skill 已依新規格改寫；資料庫 SQLite 共用 schema SQL（D-16）；流水帳「只新增、不覆蓋」、主鍵用 UUID 且不可為空 |
+| 認證與備份 `docs/auth-design.md` | Pending | auth-design | skill 已改寫為「PIN＋Google 登入＋雲端硬碟備份＋匯出／匯入」；技術決策見 D-05～D-08；產品規則已定（PIN 4 位數、忘記 PIN 由另一位父母或救援碼重設、手動備份為主、超過 30 天自動備份一次、雲端留 7 份、匯入整個覆蓋）；App 名稱 Cacao、套件 ID `com.ruru.cacao`（D-24） |
+| 開發實作（Android） | Pending | — | 依賴階段 1–4；先做 `shared/` 與 CI，再做 Android；高保真視覺邊開發邊調 |
+| iOS 版 | Phase 2 | — | 下一個迭代；共用 `shared/`，不計入第一版進度 |
 | 進度管理 `docs/progress.md` | Done | progress | 本文件 |
 
 ## UI 提案
@@ -38,7 +42,9 @@
 
 ### 已定案
 
-- **開發框架：Flutter**（`docs/tech-decisions.md` D-01）
+- **開發框架：純原生 Swift＋Kotlin**（`docs/tech-decisions.md` D-01，2026-11-01 由 Flutter 改定）：Compose／SwiftUI、最低 Android 8／iOS 17、單一 repo（D-17、D-18）
+- **原生版技術選型（D-16～D-23）**：共用 schema SQL＋SQLDelight／GRDB（備份可跨平台還原）、共用 design token 與翻譯來源自動產生兩邊程式碼、官方狀態管理、Lottie＋系統音效
+- **自動化測試（D-23）**：單元、資料庫、截圖（每畫面 × 4 主題）、端對端 Maestro；共用 JSON 測試案例保證兩平台計算一致；GitHub Actions
 - **完全不用後端**（D-02）：不自建，也不依賴任何第三方後端；唯一例外是使用者自己的 Google 雲端硬碟，只用於備份
 - **資料庫引擎：SQLite**（手機本機）
 - **資料模型原則**：只新增、不覆蓋的流水帳；主鍵用 UUID、不用自動遞增、主鍵不可為空
@@ -47,8 +53,8 @@
 - **備份**：Google 雲端硬碟（第一版必做）＋匯出／匯入備份檔
 - **裝置模式**：第一版全家共用一台手機，不做同步
 - **主題**：4 個主題，用 design token 實作；一台手機一個設定，不屬於家庭資料，也不進備份
-- **多語系（D-13～D-15）**：第一版繁體中文＋英文；預設跟系統、設定可切換；官方 `gen-l10n`；英文內文用系統字型；App 自動產生的紀錄名稱存類型代碼
-- **第一版技術選型（D-03～D-12）**：Drift（本機不加密）、雲端備份放 `appDataFolder`（不加密）、備份檔是整個 SQLite 檔、匯出檔可選擇設密碼、驗證碼 Argon2id 雜湊存資料庫、Riverpod 3、ThemeData＋ThemeExtension、英文數字字型打包＋中文系統字型、Lottie＋audioplayers
+- **多語系（D-20、D-14、D-15）**：第一版繁體中文＋英文；預設跟系統、設定可切換；英文內文用系統字型；App 自動產生的紀錄名稱存類型代碼
+- **與框架無關的決策（D-04～D-08、D-11）**：本機不加密、雲端備份放 `appDataFolder`（不加密）、備份檔是整個 SQLite 檔、匯出檔可選擇設密碼、驗證碼 Argon2id 雜湊存資料庫、英文數字字型打包＋中文系統字型
 
 ### 第二版再決定
 
@@ -58,7 +64,7 @@
 ## ⚠ 別忘了：第二版待辦
 
 - **裝置同步要比較兩條路**（第一版不做，但資料表設計要保留選擇權）：
-  1. **cr-sqlite**：SQLite 擴充套件，用 CRDT 合併兩台手機的資料。缺點是 Flutter 沒有現成套件、iOS 要靜態連結、一人維護、改資料表結構要走專用流程。
+  1. **cr-sqlite**：SQLite 擴充套件，用 CRDT 合併兩台手機的資料。原生可直接載入擴充套件；缺點是 iOS 要靜態連結、一人維護、改資料表結構要走專用流程。
   2. **自己寫**：流水帳聯集（依 UUID 合併）＋少數可修改的資料（目標排序、設定）以最後修改為準。
   - 傳輸方式兩條路都要自己寫：同一個 Wi-Fi 下手機直連。
   - 另一個候選：同一個 Google 帳號的手機透過雲端硬碟交換資料（要求父母共用帳號）。
