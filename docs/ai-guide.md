@@ -28,7 +28,7 @@ Claude 會讀取 SPEC.md，然後引導你回答一系列問題來釐清需求�
 
 ### `/tech-research` - 技術研究
 
-**用途**：框架選型、技術決策
+**用途**：技術選型與架構決策（框架已定案為 Flutter）
 
 **使用時機**：
 - 需要比較不同技術方案時
@@ -43,13 +43,30 @@ Claude 會研究各種技術方案並產出比較報告。
 
 ---
 
+### `/design` - UI/UX 設計
+
+**用途**：整理畫面清單、導覽結構、主要流程與低保真線框
+
+**使用時機**：
+- 產品規格定案後、設計資料模型之前
+- 需要規劃畫面或使用流程時
+
+**範例**：
+```
+/design
+```
+
+Claude 會把有疑問的地方寫進 `docs/design-qa.md`，等你回答後再完成設計。
+
+---
+
 ### `/data-model` - 資料模型設計
 
 **用途**：設計資料庫 Schema
 
 **使用時機**：
 - 定義資料結構時
-- 設計 WatermelonDB Schema 時
+- 設計本地資料庫 Schema 時
 
 **範例**：
 ```
@@ -81,6 +98,7 @@ Claude 會研究各種技術方案並產出比較報告。
 |-------|----------|
 | `/discover` | 更新 `SPEC.md` |
 | `/tech-research` | `docs/tech-decisions.md` |
+| `/design` | `docs/design.md` |
 | `/data-model` | `docs/data-model.md` |
 | `/auth-design` | `docs/auth-design.md` |
 
@@ -90,8 +108,9 @@ Claude 會研究各種技術方案並產出比較報告。
 
 1. **產品定義** → `/discover`
 2. **技術選型** → `/tech-research`
-3. **架構設計** → `/data-model` + `/auth-design`
-4. **開發實作** → 開始寫 code
+3. **UI/UX 設計** → `/design`
+4. **架構設計** → `/data-model` + `/auth-design`
+5. **開發實作** → 開始寫 code
 
 ---
 

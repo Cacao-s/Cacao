@@ -1,5 +1,7 @@
 # Cacao
 
+> ⚠ 本文件是歷史初稿。產品規格以 `docs/product/`（overview.md、features.md、roadmap.md）為準，技術決策以 `docs/tech-decisions.md` 為準；兩者與本文件不一致時，以新文件為準。
+
 ## 產品定義
 
 Cacao 是一個**家庭零用錢管理**行動應用程式，讓家庭甚至家族成員可以一同使用。
@@ -45,13 +47,13 @@ Cacao 是一個**家庭零用錢管理**行動應用程式，讓家庭甚至家�
 ## 技術規格
 
 1. 專案目標是移動 app，可以安裝在 iOS/Android
-2. 需要深入研究開發框架使用哪一套
-3. 移動裝置資料庫，使用 WatermelonDB + SQLite
-4. 不要建構後端，如有必要使用 Supabase
-5. App 完善所有功能，盡量不依賴自建 server
-6. 登入功能：
-   - 帳號密碼註冊/登入
-   - Google 帳號登入
-7. 資料可以備份到 Google 帳號
-8. 換手機時可以從 Google 備份恢復資料
+2. 開發框架使用 Flutter（見 `docs/tech-decisions.md` D-01）
+3. 移動裝置資料庫使用 SQLite＋Drift，第一版不加密（D-03、D-04）
+4. 不自建後端，也不依賴任何第三方後端（見 `docs/tech-decisions.md` D-02）
+5. 所有功能都在手機本機完成
+6. 登入功能：Google 登入（用途是雲端硬碟備份）；是否另做帳號密碼見 `docs/product/discover-qa.md` WD-22
+7. 資料備份到使用者自己的 Google 雲端硬碟 `appDataFolder`（第一版必做，不加密）；另可匯出／匯入備份檔，匯出時可選擇設密碼（D-05～D-07）
+8. 換手機時可以從 Google 備份或備份檔恢復資料
+9. 狀態管理 Riverpod 3；主題用 ThemeData＋ThemeExtension；英文數字字型打包、中文用系統字型；慶祝動畫用 Lottie（D-09～D-12）
+10. 多語系：繁體中文＋英文，Flutter 官方 `gen-l10n`；App 自動產生的紀錄名稱存類型代碼（D-13～D-15）
 

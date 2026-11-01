@@ -1,83 +1,86 @@
 ---
 name: data-model
-description: 資料模型設計 - 設計離線優先的資料庫 Schema。當需要設計資料結構時使用。
+description: 資料模型設計 - 依正式產品規格設計離線優先、只新增不覆蓋的 Drift／SQLite Schema。當需要設計資料結構時使用。
 disable-model-invocation: true
-allowed-tools: Read Edit
+allowed-tools: Read Edit Write
 ---
 
 # 資料模型設計
 
-先讀取 SPEC.md 確認實體和關係，然後設計 Schema。
+先讀取以下文件，確認實體、規則與已定案的技術決策，再設計 Schema：
+
+- `docs/product/features.md`：功能規則的唯一來源
+- `docs/product/roadmap.md`：第一版範圍，與第二版要預留的設計
+- `docs/tech-decisions.md`：已定案的技術決策（D-03 Drift、D-06 備份檔格式、D-08 驗證碼、D-15 系統產生文字等）
+- `docs/design.md`：各畫面要顯示的資料，以及「交給下一階段」列出的查詢與欄位；Schema 要能撐起這些畫面
+- `docs/data-model-qa.md`（若存在）：之前提出、已回答或待回答的問題
+
+`SPEC.md` 是歷史初稿，與上述文件不一致時以上述文件為準。
 
 ## 設計原則
 
-1. **離線優先** - 所有資料先存本地，網路可用時再同步
-2. **衝突處理** - 多設備同步時的衝突解決策略
-3. **隱私安全** - 敏感資料加密存儲
+1. **離線優先、完全不用後端**：所有資料只存在手機本機的 SQLite，以 **Drift** 存取（D-03）。
+2. **只新增、不覆蓋的流水帳**：金錢異動一律新增一筆紀錄，不修改舊紀錄；更正也用新增一筆反向或調整紀錄表示。
+3. **餘額由流水帳算出**：存款、錢包、已鎖金額、可出金額都由紀錄推算，不另外存一份會失準的餘額欄位（若為效能需要快取，要說明重建方式）。
+4. **為第二版同步預留**：
+   - 主鍵一律用 UUID，不用自動遞增，主鍵不可為空。
+   - 會被修改的資料（目標排序、設定、任務內容等）保留最後修改時間，第二版可用「最後修改為準」合併。
+   - 刪除用軟刪除標記，不實際刪除資料列。
+5. **金額為整數**，單位新台幣，不存小數。
+6. **資料庫裡只放家庭資料**：備份是整個 SQLite 檔（D-06），資料庫裡的每張表都會進備份。主題、語言等手機層級的設定**完全不放進 SQLite**，改存手機本機的偏好設定。
+7. **系統產生的文字存代碼**：App 自動產生的紀錄名稱、類型、狀態一律存類型代碼（例如 `wallet_adjustment`），顯示時再依目前語言翻譯；使用者輸入的內容照原文存（D-15）。
+8. **敏感資料**：父母驗證碼只存 Argon2id 加鹽雜湊，存在資料庫裡，跟著備份還原（D-08）。
+9. **Schema 版本號**：用 `PRAGMA user_version` 記錄 schema 版本，由 Drift 的 `schemaVersion` 與 migration 管理；還原時靠它判斷備份能不能還原、要不要升級（D-06）。
+10. **描述規則，不預設紀錄形式**：某個規則要不要獨立成一筆紀錄（例如特價時剩餘金額解鎖），依設計判斷；若規格無法推出答案，就列為問題，不要自行決定。
+
+## 問題怎麼提
+
+設計過程中遇到「規格沒講清楚、會影響資料結構」的地方，**不在對話裡逐題提問**，而是寫進 `docs/data-model-qa.md`，格式照 `docs/product/discover-qa.md`：
+
+- 分「已確認」與「待確認」兩區，題號 `DQ-01`、`DQ-02`…，往後接、不重用
+- 一題只問一件事，附編號選項與建議（含理由）；需要比較時附比較表
+- 對話只回報：新增了哪幾題、建議先回答哪一題
+- 用戶說「已回答」時：重新讀取 `docs/data-model-qa.md`，把有明確答案的題目移到「已確認」並落實到設計；回答有疑慮或引出新問題時，重新查證後留在或新增到「待確認」，不要自行拍板
+- 若答案改變了產品規則，同步更新 `docs/product/features.md`
+- 「待確認」清空、設計寫入 `docs/data-model.md` 後，`docs/data-model-qa.md` 可以刪除（先問用戶）
 
 ## 執行步驟
 
 ### 第一步：識別實體
-根據 SPEC.md 識別核心實體：
-- User（用戶帳號）
-- Family（家庭/家族）
-- Parent（父母 - 可出金的長輩）
-- Elder（長輩 - 可設任務但不能出金）
-- Child（孩子）
-- Task（任務）
-- Allowance（零用錢記錄）
-- Goal（儲蓄目標）
-- Transaction（交易記錄）
+從 `features.md` 逐節識別實體，**不要沿用舊版清單**。至少要涵蓋：
+
+- 父母（含驗證碼雜湊）、長輩（虛擬身份，不登入）、孩子
+- 金錢異動：收入（常態零用錢、一次性、長輩、任務獎勵、父母加碼，含指定給目標的錢）、出金（含目標出金）、錢包支出、錢包校正
+- 常態零用錢的排程（金額、週期、暫停、來源是父母或長輩）
+- 任務與任務完成／驗證紀錄
+- 儲蓄目標：優先順序、是否參與填充、目標金額修改、狀態變化
+- 互動相關的資料：長輩給錢時附的一句話等
+
+識別完成後，把有疑義的地方寫進 `docs/data-model-qa.md`，等用戶回答後再往下做。
 
 ### 第二步：定義關係
-```
-Family 1:N Parent
-Family 1:N Elder
-Family 1:N Child
-Parent/Elder 1:N Task
-Child N:N Task
-Child 1:N Goal
-Child 1:N Transaction
-Task 1:1 Allowance (獎勵型)
-```
+用文字描述實體之間的關係（1:N、N:N）。
 
 ### 第三步：設計 Schema
-使用 WatermelonDB 格式：
+用 Drift 的資料表定義描述每張表：欄位、型別、可空性、預設值、索引、外鍵，以及類型代碼欄位的允許值。
 
-```javascript
-tableSchema({
-  name: 'children',
-  columns: [
-    { name: 'name', type: 'string' },
-    { name: 'family_id', type: 'string', isIndexed: true },
-    { name: 'balance', type: 'number' },  // 目前餘額
-    { name: 'created_at', type: 'number' },
-    { name: 'updated_at', type: 'number' },
-  ]
-})
+### 第四步：推算規則
+寫清楚各數值怎麼從流水帳算出：
 
-tableSchema({
-  name: 'tasks',
-  columns: [
-    { name: 'title', type: 'string' },
-    { name: 'reward_amount', type: 'number' },
-    { name: 'creator_id', type: 'string' },  // Parent 或 Elder
-    { name: 'child_id', type: 'string' },
-    { name: 'verify_password_hash', type: 'string' },  // 驗證密碼
-    { name: 'status', type: 'string' },  // pending/completed/verified
-    { name: 'created_at', type: 'number' },
-  ]
-})
-```
+- 存款、錢包餘額、已鎖金額、可出金額（不支援預支，存款不為負數）
+- 瀑布式填充：依優先順序分配存款，排除取消勾選的目標與指定給目標的錢
+- 目標狀態轉換的規則與對金額的影響（鎖錢、出金、退回、目標金額修改、特價時剩餘金額解鎖）
+- 成長紀錄（簡單版）的加總方式
 
-### 第四步：同步策略
-- 哪些資料需要雲端備份？
-- 備份頻率？
-- 衝突解決規則？
+### 第五步：第二版同步預留
+說明這份 Schema 如何支援第二版的兩條同步方案（cr-sqlite，或「流水帳聯集＋可修改資料以最後修改為準」），列出目前的設計是否符合各自的限制。
 
 ## 完成後
 
 將設計寫入 `docs/data-model.md`，包含：
-- ER Diagram（文字描述）
-- WatermelonDB Schema 定義
-- 同步策略說明
+
+- 實體清單與關係（文字描述）
+- Drift Schema 定義與 schema 版本
+- 餘額、瀑布填充、目標狀態的推算規則
+- 「資料庫只放家庭資料」的確認：列出不放進資料庫的手機設定（主題、語言等）及其存放位置
+- 第二版同步預留說明
