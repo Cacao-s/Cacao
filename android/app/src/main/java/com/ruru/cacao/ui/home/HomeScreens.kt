@@ -27,6 +27,7 @@ import com.ruru.cacao.ui.PinPurpose
 import com.ruru.cacao.ui.Screen
 import com.ruru.cacao.ui.components.Avatar
 import com.ruru.cacao.ui.components.Body
+import com.ruru.cacao.ui.components.CuteLock
 import com.ruru.cacao.ui.components.ScreenColumn
 import com.ruru.cacao.ui.components.Title
 import com.ruru.cacao.ui.theme.Cacao
@@ -74,7 +75,7 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Title(stringResource(R.string.child_greeting, child.name), Modifier.weight(1f).testTag("child_home_title"))
             TextButton(onClick = { vm.go(Screen.Pin(PinPurpose.AnyParent)) }, modifier = Modifier.testTag("child_lock")) {
-                Text("🔒 " + stringResource(R.string.switch_to_parent), color = Cacao.colors.primary, fontSize = 13.sp)
+                CuteLock(28.dp, stringResource(R.string.switch_to_parent))
             }
         }
         Spacer(Modifier.weight(1f))

@@ -39,6 +39,7 @@ import com.ruru.cacao.ui.PinPurpose
 import com.ruru.cacao.ui.Screen
 import com.ruru.cacao.ui.components.Avatar
 import com.ruru.cacao.ui.components.Body
+import com.ruru.cacao.ui.components.CuteLock
 import com.ruru.cacao.ui.components.ErrorText
 import com.ruru.cacao.ui.components.PinPad
 import com.ruru.cacao.ui.components.PlainField
@@ -202,13 +203,14 @@ private fun MemberGroup(label: String, members: List<Member>, vm: AppViewModel) 
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Avatar(member.name, member.avatar_color)
-                    Text(
-                        member.name + if (member.password_hash != null) " 🔒" else "",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Cacao.colors.onSurface,
+                    Row(
                         modifier = Modifier.padding(top = 6.dp),
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(member.name, fontSize = 17.sp, fontWeight = FontWeight.Medium, color = Cacao.colors.onSurface)
+                        if (member.password_hash != null) CuteLock(18.dp, stringResource(R.string.child_password_title))
+                    }
                 }
             }
             if (row.size == 1) Spacer(Modifier.weight(1f))
