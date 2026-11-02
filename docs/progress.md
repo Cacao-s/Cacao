@@ -54,16 +54,19 @@
 
 ### Phase 1
 
-- 產品規格：`docs/product/`（overview／features／roadmap〈第一版〉）
-- 技術決策：`docs/tech-decisions.md`
-- UI/UX 設計：`docs/design.md`（線框 <https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>）
-- 資料模型：`docs/data-model.md`
-- 身分與備份：`docs/auth-design.md`
+- 產品規格（建立）：`docs/product/`（overview／features／roadmap）
+- 技術決策（建立）：`docs/tech-decisions.md`
+- UI/UX 設計（建立）：`docs/design.md`（線框 <https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>）
+- 資料模型（建立）：`docs/data-model.md`
+- 身分與備份（建立）：`docs/auth-design.md`
 
 ### Phase 2
 
-- 範圍：`docs/product/roadmap.md`〈第二版以後〉
-- 其他文件（技術選型、UI/UX、裝置同步設計）在 Phase 2 各階段開始時建立
+- 產品規格（修改）：`docs/product/`，範圍見 roadmap〈第二版以後〉
+- 技術決策（修改）：`docs/tech-decisions.md`，加入裝置同步方案、iOS 細節、CD
+- UI/UX 設計（修改）：`docs/design.md`，加入同步、進階任務、報表的畫面
+- 資料模型（修改）：`docs/data-model.md`，加入同步需要的欄位與規則
+- 身分與備份（修改）：`docs/auth-design.md`，加入 iOS 與跨平台還原
 
 ## Blockers
 
