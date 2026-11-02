@@ -234,9 +234,11 @@ fun PinScreen(vm: AppViewModel, purpose: PinPurpose) {
         is PinPurpose.Parent -> stringResource(R.string.pin_title_parent, vm.member(purpose.parentId)?.name.orEmpty())
         PinPurpose.AnyParent -> stringResource(R.string.pin_title_any_parent)
         is PinPurpose.Child -> stringResource(R.string.pin_title_child, vm.member(purpose.childId)?.name.orEmpty())
+        is PinPurpose.VerifyTask -> stringResource(R.string.task_verify_title, vm.tasks.task(purpose.taskId)?.title.orEmpty())
     }
+    val backTo = if (purpose is PinPurpose.VerifyTask) Screen.ChildTasks(purpose.childId) else Screen.SelectUser
     ScreenColumn {
-        TextButton(onClick = { vm.go(Screen.SelectUser) }, modifier = Modifier.testTag("pin_back")) {
+        TextButton(onClick = { vm.go(backTo) }, modifier = Modifier.testTag("pin_back")) {
             Text(stringResource(R.string.back), color = Cacao.colors.primary)
         }
         Spacer(Modifier.weight(1f))

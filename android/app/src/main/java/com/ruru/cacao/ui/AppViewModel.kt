@@ -10,6 +10,7 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.ruru.cacao.data.GoalRepository
 import com.ruru.cacao.data.LedgerRepository
 import com.ruru.cacao.data.MemberRepository
+import com.ruru.cacao.data.TaskRepository
 import com.ruru.cacao.data.Role
 import com.ruru.cacao.data.roleEnum
 import com.ruru.cacao.db.CacaoDatabase
@@ -23,6 +24,9 @@ sealed interface PinPurpose {
     data class Parent(val parentId: String) : PinPurpose { override val limiterKey = parentId }
     data object AnyParent : PinPurpose { override val limiterKey = "any_parent" }
     data class Child(val childId: String) : PinPurpose { override val limiterKey = childId }
+
+    /** 孩子按任務「完成」：任一位父母當場驗收（DQ-09） */
+    data class VerifyTask(val taskId: String, val childId: String) : PinPurpose { override val limiterKey = "any_parent" }
 }
 
 sealed interface Screen {
@@ -42,12 +46,15 @@ sealed interface Screen {
     data class Goals(val childId: String, val parentId: String?) : Screen
     data class GoalDetail(val childId: String, val goalId: String, val parentId: String?) : Screen
     data class NewGoal(val childId: String, val parentId: String?) : Screen
+    data class Tasks(val parentId: String) : Screen
+    data class NewTask(val parentId: String) : Screen
+    data class ChildTasks(val childId: String) : Screen
 }
 
 val Screen.isParentMode: Boolean
     get() = when (this) {
         is Screen.ParentHome, is Screen.ForgotPin, is Screen.ChildOverview,
-        is Screen.AddIncome, is Screen.Payout, is Screen.Ledger -> true
+        is Screen.AddIncome, is Screen.Payout, is Screen.Ledger, is Screen.Tasks, is Screen.NewTask -> true
         is Screen.Goals -> parentId != null
         is Screen.GoalDetail -> parentId != null
         is Screen.NewGoal -> parentId != null
@@ -60,6 +67,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val members = MemberRepository(db)
     val goals = GoalRepository(db)
     val ledger = LedgerRepository(db, goals = { goals.states(it) }).also { goals.ledger = it }
+    val tasks = TaskRepository(db, ledger)
 
     /** 每次記帳後遞增，讓畫面重新讀餘額 */
     var ledgerVersion by mutableStateOf(0)
@@ -104,6 +112,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             is PinPurpose.Parent -> if (members.verifyPin(purpose.parentId, pin)) Screen.ParentHome(purpose.parentId) else null
             PinPurpose.AnyParent -> members.parentForPin(pin)?.let { Screen.ParentHome(it.id) }
             is PinPurpose.Child -> if (members.verifyChildPassword(purpose.childId, pin)) Screen.ChildHome(purpose.childId) else null
+            is PinPurpose.VerifyTask -> members.parentForPin(pin)?.let { parent ->
+                tasks.complete(purpose.taskId, parent.id)
+                ledgerChanged()
+                Screen.ChildTasks(purpose.childId)
+            }
         }
         if (next == null) {
             save(purpose, AttemptLimiter.onFailure(attemptState(purpose), nowMillis))

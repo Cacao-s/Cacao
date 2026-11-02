@@ -74,6 +74,9 @@ fun ParentHomeScreen(vm: AppViewModel, parentId: String) {
                 Text("›", color = Cacao.colors.muted, fontSize = 20.sp)
             }
         }
+        TextButton(onClick = { vm.go(Screen.Tasks(parentId)) }, modifier = Modifier.testTag("parent_tasks")) {
+            Text(stringResource(R.string.parent_tasks) + " ›", color = Cacao.colors.primary, fontWeight = FontWeight.Bold)
+        }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { vm.go(Screen.SelectUser) }, modifier = Modifier.testTag("parent_logout")) {
             Text(stringResource(R.string.logout_parent), color = Cacao.colors.primary)
@@ -89,7 +92,7 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
     val topGoal = remember(vm.ledgerVersion, childId) { vm.goals.views(childId).firstOrNull { it.state.status != com.ruru.cacao.domain.GoalStatus.COMPLETED } }
     val names = vm.memberList.associate { it.id to it.name }
     val gift = remember(vm.ledgerVersion, childId) {
-        vm.ledger.entries(childId).firstOrNull { it.voided == 0L && it.kind == "income_onetime" && it.source_id != null }
+        vm.ledger.entries(childId).firstOrNull { it.voided == 0L && it.kind.startsWith("income_") && it.source_id != null }
     }
     ScreenColumn {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -116,7 +119,10 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             val goalSub = topGoal?.let { "${it.goal.name} ${(it.saved * 100 / it.goal.target_amount)}%" } ?: stringResource(R.string.goals_empty)
             Tile(stringResource(R.string.menu_goals), goalSub, Cacao.colors.locked, "tile_goals", Modifier.weight(1f)) { vm.go(Screen.Goals(childId, null)) }
-            Tile(stringResource(R.string.menu_tasks), stringResource(R.string.coming_soon), Cacao.colors.secondary, "tile_tasks", Modifier.weight(1f), null)
+            val pendingTasks = remember(vm.ledgerVersion, childId) { vm.tasks.pending(childId).size }
+            Tile(stringResource(R.string.menu_tasks), stringResource(R.string.tasks_pending_count, pendingTasks), Cacao.colors.secondary, "tile_tasks", Modifier.weight(1f)) {
+                vm.go(Screen.ChildTasks(childId))
+            }
             Tile(stringResource(R.string.menu_wallet), stringResource(R.string.coming_soon), Cacao.colors.primary, "tile_wallet", Modifier.weight(1f), null)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

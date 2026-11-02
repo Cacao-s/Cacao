@@ -1,0 +1,81 @@
+# M4 任務：父母建立（長輩出題）→ 孩子按完成 → 輸錯 PIN 不入帳 → 父母當場驗收 → 獎勵入帳、算長輩給的
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+
+# 先新增長輩 Grandpa（從記收入畫面）
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: add_elder
+- tapOn:
+    id: elder_name
+- inputText: Grandpa
+- hideKeyboard
+- tapOn:
+    id: elder_save
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+
+# 建立任務：Grandpa 出題，給 cacao，獎勵 50
+- tapOn:
+    id: parent_tasks
+- tapOn:
+    id: task_new
+- tapOn:
+    id: task_title
+- inputText: Clean
+- tapOn:
+    id: task_reward
+- inputText: "50"
+- hideKeyboard
+- tapOn:
+    id: task_child_cacao
+- tapOn:
+    id: task_issuer_Grandpa
+- tapOn:
+    id: task_save
+- assertVisible:
+    id: ptask_Clean_cacao
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+
+# 孩子按完成，輸錯 PIN 不入帳
+- tapOn:
+    id: member_cacao
+- tapOn:
+    id: tile_tasks
+- tapOn:
+    id: task_done_Clean
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- tapOn:
+    id: pin_back
+- assertVisible:
+    id: task_done_Clean
+
+# 父母輸入正確 PIN → 任務完成、獎勵入帳
+- tapOn:
+    id: task_done_Clean
+- runFlow: subflows/pin_1234.yaml
+- assertVisible:
+    id: task_completed_Clean
+- assertNotVisible:
+    id: task_done_Clean
+- tapOn:
+    id: back
+- assertVisible:
+    id: child_savings
+    text: "\\$50"
+- assertVisible:
+    text: "Grandpa.*\\$50"

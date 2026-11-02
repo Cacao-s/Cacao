@@ -63,6 +63,7 @@ appId: com.ruru.cacao
 # 孩子模式 → 鎖頭切回父母模式
 - tapOn:
     id: parent_logout
+- waitForAnimationToEnd
 - tapOn:
     id: member_cacao
 - assertVisible:
@@ -79,6 +80,7 @@ appId: com.ruru.cacao
 # 孩子設定密碼後，進入要輸入密碼
 - tapOn:
     id: parent_logout
+- waitForAnimationToEnd
 - tapOn:
     id: member_cacao
 - tapOn:

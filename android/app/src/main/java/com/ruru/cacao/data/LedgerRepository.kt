@@ -67,6 +67,13 @@ class LedgerRepository(
         return LedgerResult.Ok
     }
 
+    /** 任務獎勵入帳存款，來源是出題人；回傳 group_id */
+    internal fun addTaskReward(childId: String, amount: Long, issuerId: String, verifiedBy: String, title: String): String {
+        val group = UUID.randomUUID().toString()
+        insert(group, childId, Account.SAVINGS, "income_task", amount, issuerId, null, title, null, verifiedBy)
+        return group
+    }
+
     /** 目標出金：額度檢查由 GoalRepository 負責（鎖住的錢），回傳 group_id */
     internal fun payoutForGoal(childId: String, amount: Long, recordedBy: String, note: String?, goalId: String): String {
         val group = UUID.randomUUID().toString()

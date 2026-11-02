@@ -67,6 +67,7 @@ appId: com.ruru.cacao
     id: back
 - tapOn:
     id: parent_logout
+- waitForAnimationToEnd
 - tapOn:
     id: member_cacao
 - tapOn:

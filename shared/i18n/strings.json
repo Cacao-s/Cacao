@@ -131,6 +131,23 @@
     "goal_designate_label": { "zh-Hant": "指定給目標（選填）", "en": "Set aside for a goal (optional)" },
     "goal_designate_none": { "zh-Hant": "不指定", "en": "None" },
     "goal_need_more": { "zh-Hant": "再存 %1$s 就達成", "en": "%1$s to go" },
-    "coming_soon": { "zh-Hant": "之後開放", "en": "Coming soon" }
+    "coming_soon": { "zh-Hant": "之後開放", "en": "Coming soon" },
+
+    "tasks_title": { "zh-Hant": "任務", "en": "Tasks" },
+    "parent_tasks": { "zh-Hant": "任務管理", "en": "Manage tasks" },
+    "task_new": { "zh-Hant": "＋新增任務", "en": "+ New task" },
+    "task_title_label": { "zh-Hant": "任務內容", "en": "Task" },
+    "task_reward_label": { "zh-Hant": "獎勵（每人）", "en": "Reward (each)" },
+    "task_issuer_label": { "zh-Hant": "出題人（獎勵算誰給的）", "en": "From (who the reward comes from)" },
+    "task_children_label": { "zh-Hant": "給誰（可多選）", "en": "For (pick one or more)" },
+    "task_need_fields": { "zh-Hant": "請填任務內容、獎勵，並至少選一個孩子", "en": "Fill in the task and reward, and pick at least one kid" },
+    "task_by": { "zh-Hant": "%1$s出的・獎勵 %2$s", "en": "From %1$s · reward %2$s" },
+    "task_for": { "zh-Hant": "給 %1$s", "en": "For %1$s" },
+    "task_pending_empty": { "zh-Hant": "目前沒有任務，問問爸媽吧！", "en": "No tasks right now. Ask your parents!" },
+    "task_done_section": { "zh-Hant": "已完成", "en": "Done" },
+    "task_hint": { "zh-Hant": "做完按「完成」，請爸媽當場輸入 PIN 驗收", "en": "When you're done, tap Done and ask a parent to enter their PIN." },
+    "task_verify_title": { "zh-Hant": "請父母驗收：%1$s", "en": "Parent, approve: %1$s" },
+    "task_delete": { "zh-Hant": "刪除", "en": "Delete" },
+    "tasks_pending_count": { "zh-Hant": "%1$d 個待完成", "en": "%1$d to do" }
   }
 }

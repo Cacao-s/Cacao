@@ -1,0 +1,34 @@
+insert:
+INSERT INTO task(id, batch_id, child_id, title, reward_amount, issuer_id, created_by, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+byId:
+SELECT * FROM task WHERE id = ?;
+
+pendingForChild:
+SELECT t.* FROM task t
+WHERE t.child_id = ? AND t.deleted_at IS NULL
+  AND NOT EXISTS (SELECT 1 FROM task_completion c WHERE c.task_id = t.id)
+ORDER BY t.created_at;
+
+completedForChild:
+SELECT t.*, c.verified_by, c.completed_at FROM task t
+JOIN task_completion c ON c.task_id = t.id
+WHERE t.child_id = ?
+ORDER BY c.completed_at DESC;
+
+pendingAll:
+SELECT t.* FROM task t
+WHERE t.deleted_at IS NULL
+  AND NOT EXISTS (SELECT 1 FROM task_completion c WHERE c.task_id = t.id)
+ORDER BY t.created_at;
+
+isCompleted:
+SELECT COUNT(*) FROM task_completion WHERE task_id = ?;
+
+insertCompletion:
+INSERT INTO task_completion(id, task_id, verified_by, ledger_group_id, completed_at)
+VALUES (?, ?, ?, ?, ?);
+
+softDelete:
+UPDATE task SET deleted_at = ?, updated_at = ? WHERE id = ?;

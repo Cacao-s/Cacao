@@ -18,6 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.ruru.cacao.ui.AppViewModel
+import com.ruru.cacao.ui.PinPurpose
+import com.ruru.cacao.ui.tasks.ChildTasksScreen
+import com.ruru.cacao.ui.tasks.NewTaskScreen
+import com.ruru.cacao.ui.tasks.TasksScreen
 import com.ruru.cacao.ui.Screen
 import com.ruru.cacao.ui.goals.GoalDetailScreen
 import com.ruru.cacao.ui.goals.GoalsScreen
@@ -80,6 +84,10 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.Goals -> vm.go(screen.parentId?.let { Screen.ChildOverview(it, screen.childId) } ?: Screen.ChildHome(screen.childId))
             is Screen.GoalDetail -> vm.go(Screen.Goals(screen.childId, screen.parentId))
             is Screen.NewGoal -> vm.go(Screen.Goals(screen.childId, screen.parentId))
+            is Screen.Tasks -> vm.go(Screen.ParentHome(screen.parentId))
+            is Screen.NewTask -> vm.go(Screen.Tasks(screen.parentId))
+            is Screen.ChildTasks -> vm.go(Screen.ChildHome(screen.childId))
+            is Screen.Pin -> vm.go((screen.purpose as? PinPurpose.VerifyTask)?.let { Screen.ChildTasks(it.childId) } ?: Screen.SelectUser)
             else -> vm.go(Screen.SelectUser)
         }
     }
@@ -99,6 +107,9 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.Goals -> GoalsScreen(vm, screen.childId, screen.parentId)
             is Screen.GoalDetail -> GoalDetailScreen(vm, screen.childId, screen.goalId, screen.parentId)
             is Screen.NewGoal -> NewGoalScreen(vm, screen.childId, screen.parentId)
+            is Screen.Tasks -> TasksScreen(vm, screen.parentId)
+            is Screen.NewTask -> NewTaskScreen(vm, screen.parentId)
+            is Screen.ChildTasks -> ChildTasksScreen(vm, screen.childId)
         }
     }
 }
