@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.ruru.cacao.data.LedgerRepository
 import com.ruru.cacao.data.MemberRepository
 import com.ruru.cacao.data.Role
 import com.ruru.cacao.data.roleEnum
@@ -31,12 +32,29 @@ sealed interface Screen {
     data class ChildHome(val childId: String) : Screen
     data class ForgotPin(val parentId: String) : Screen
     data class ChildPassword(val childId: String) : Screen
+    data class ChildOverview(val parentId: String, val childId: String) : Screen
+    data class AddIncome(val parentId: String, val childId: String) : Screen
+    data class Payout(val parentId: String, val childId: String) : Screen
+    data class Ledger(val parentId: String, val childId: String) : Screen
 }
+
+val Screen.isParentMode: Boolean
+    get() = this is Screen.ParentHome || this is Screen.ForgotPin || this is Screen.ChildOverview ||
+        this is Screen.AddIncome || this is Screen.Payout || this is Screen.Ledger
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = CacaoDatabase(AndroidSqliteDriver(CacaoDatabase.Schema, application, "cacao.db"))
     val members = MemberRepository(db)
+    val ledger = LedgerRepository(db)
+
+    /** 每次記帳後遞增，讓畫面重新讀餘額 */
+    var ledgerVersion by mutableStateOf(0)
+        private set
+
+    fun ledgerChanged() {
+        ledgerVersion++
+    }
     private val prefs = application.getSharedPreferences("cacao_device", Context.MODE_PRIVATE)
     private var backgroundSince = 0L
 
@@ -84,7 +102,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun lockParentMode() {
-        if (screen is Screen.ParentHome || screen is Screen.ForgotPin) go(Screen.SelectUser)
+        if (screen.isParentMode) go(Screen.SelectUser)
     }
 
     fun onBackground(nowMillis: Long) {

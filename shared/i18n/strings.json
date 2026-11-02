@@ -88,6 +88,27 @@
     "recovery_wrong": { "zh-Hant": "救援碼不對", "en": "That recovery code isn't right" },
     "new_pin_title": { "zh-Hant": "設定新的 PIN", "en": "Set a new PIN" },
     "new_recovery_title": { "zh-Hant": "新的救援碼", "en": "Your new recovery code" },
-    "new_recovery_body": { "zh-Hant": "舊的救援碼已經失效。請抄下這組新的。", "en": "Your old recovery code no longer works. Write down this new one." }
+    "new_recovery_body": { "zh-Hant": "舊的救援碼已經失效。請抄下這組新的。", "en": "Your old recovery code no longer works. Write down this new one." },
+
+    "amount_label": { "zh-Hant": "金額", "en": "Amount" },
+    "amount_invalid": { "zh-Hant": "請輸入大於 0 的金額", "en": "Enter an amount above 0" },
+    "income_title": { "zh-Hant": "記收入・%1$s", "en": "Add income · %1$s" },
+    "income_source_label": { "zh-Hant": "誰給的", "en": "From" },
+    "income_add_elder": { "zh-Hant": "＋新增長輩", "en": "+ Add relative" },
+    "elder_name_label": { "zh-Hant": "長輩的稱呼（例如爺爺）", "en": "Relative's name (e.g. Grandpa)" },
+    "note_label": { "zh-Hant": "說明（選填）", "en": "Note (optional)" },
+    "message_label": { "zh-Hant": "想對孩子說的話（選填）", "en": "A message for your kid (optional)" },
+    "cash_to_wallet": { "zh-Hant": "現金留在孩子手上（同時記一筆出金到錢包）", "en": "Cash stays with the kid (also pays it out to the wallet)" },
+    "payout_title": { "zh-Hant": "出金・%1$s", "en": "Pay out · %1$s" },
+    "payout_note_label": { "zh-Hant": "買什麼（選填）", "en": "What's it for? (optional)" },
+    "payout_over": { "zh-Hant": "超過可出金額 %1$s", "en": "More than the available %1$s" },
+    "payout_to_wallet": { "zh-Hant": "錢會進 %1$s 的錢包", "en": "The money goes to %1$s's wallet" },
+    "ledger_title": { "zh-Hant": "存款明細", "en": "Savings history" },
+    "ledger_empty": { "zh-Hant": "還沒有紀錄", "en": "Nothing here yet" },
+    "ledger_voided": { "zh-Hant": "已作廢", "en": "Voided" },
+    "void_confirm_title": { "zh-Hant": "作廢這筆？", "en": "Void this entry?" },
+    "void_confirm_body": { "zh-Hant": "作廢後會劃線保留，不算進餘額。記錯的話，作廢後再記一筆正確的。", "en": "It stays crossed out and no longer counts. If it was a mistake, add the correct one after." },
+    "void_negative": { "zh-Hant": "作廢後存款會變成負數，請先作廢相關的出金", "en": "Voiding this would make savings negative. Void the related payout first." },
+    "overview_history": { "zh-Hant": "存款明細", "en": "Savings history" }
   }
 }

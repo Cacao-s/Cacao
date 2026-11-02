@@ -34,6 +34,8 @@ class MemberRepository(
 
     fun createChild(name: String, birthday: String): String = insert(Role.CHILD, name, birthday, null, null)
 
+    fun createElder(name: String): String = insert(Role.ELDER, name, null, null, null)
+
     fun verifyPin(memberId: String, pin: String): Boolean {
         val hash = member(memberId)?.pin_hash ?: return false
         return PinHasher.verify(pin, hash)

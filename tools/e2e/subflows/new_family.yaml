@@ -1,0 +1,34 @@
+# 共用：清掉資料，建立 Mom（PIN 1234）與孩子 cacao，停在「誰在用？」
+appId: com.ruru.cacao
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: onboarding_new
+- tapOn:
+    id: parent_name
+- inputText: Mom
+- tapOn:
+    id: pin_new
+- inputText: "1234"
+- tapOn:
+    id: pin_confirm
+- inputText: "1234"
+- hideKeyboard
+- tapOn:
+    id: parent_next
+- tapOn:
+    id: recovery_saved
+- tapOn:
+    id: recovery_next
+- tapOn:
+    id: child_name
+- inputText: cacao
+- tapOn:
+    id: child_birthday
+- inputText: 2017-03-12
+- hideKeyboard
+- tapOn:
+    id: child_done
+- assertVisible:
+    id: member_Mom

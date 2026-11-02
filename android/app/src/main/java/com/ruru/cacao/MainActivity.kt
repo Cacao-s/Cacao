@@ -26,6 +26,10 @@ import com.ruru.cacao.ui.identity.ForgotPinScreen
 import com.ruru.cacao.ui.identity.OnboardingScreen
 import com.ruru.cacao.ui.identity.PinScreen
 import com.ruru.cacao.ui.identity.SelectUserScreen
+import com.ruru.cacao.ui.ledger.AddIncomeScreen
+import com.ruru.cacao.ui.ledger.ChildOverviewScreen
+import com.ruru.cacao.ui.ledger.LedgerScreen
+import com.ruru.cacao.ui.ledger.PayoutScreen
 import com.ruru.cacao.ui.theme.CacaoTheme
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +70,10 @@ private fun AppRoot(vm: AppViewModel) {
     BackHandler(enabled = screen !is Screen.SelectUser && screen !is Screen.Onboarding) {
         when (screen) {
             is Screen.ChildPassword -> vm.go(Screen.ChildHome(screen.childId))
+            is Screen.ChildOverview -> vm.go(Screen.ParentHome(screen.parentId))
+            is Screen.AddIncome -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
+            is Screen.Payout -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
+            is Screen.Ledger -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
             else -> vm.go(Screen.SelectUser)
         }
     }
@@ -78,6 +86,10 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.ChildHome -> ChildHomeScreen(vm, screen.childId)
             is Screen.ForgotPin -> ForgotPinScreen(vm, screen.parentId)
             is Screen.ChildPassword -> ChildPasswordScreen(vm, screen.childId)
+            is Screen.ChildOverview -> ChildOverviewScreen(vm, screen.parentId, screen.childId)
+            is Screen.AddIncome -> AddIncomeScreen(vm, screen.parentId, screen.childId)
+            is Screen.Payout -> PayoutScreen(vm, screen.parentId, screen.childId)
+            is Screen.Ledger -> LedgerScreen(vm, screen.parentId, screen.childId)
         }
     }
 }

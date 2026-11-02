@@ -17,3 +17,16 @@ WHERE child_id = ? AND account = ? AND group_id NOT IN (SELECT group_id FROM led
 
 children:
 SELECT * FROM member WHERE role = 'child' AND deleted_at IS NULL ORDER BY sort_order;
+
+entriesForChild:
+SELECT e.*, (SELECT COUNT(*) FROM ledger_void v WHERE v.group_id = e.group_id) AS voided
+FROM ledger_entry e
+WHERE e.child_id = ?
+ORDER BY e.occurred_on DESC, e.created_at DESC;
+
+voidedGroupsForChild:
+SELECT v.group_id FROM ledger_void v
+WHERE v.group_id IN (SELECT group_id FROM ledger_entry WHERE child_id = ?);
+
+groupEntries:
+SELECT * FROM ledger_entry WHERE group_id = ?;

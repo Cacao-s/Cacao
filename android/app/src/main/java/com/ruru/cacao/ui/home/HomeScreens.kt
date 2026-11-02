@@ -2,6 +2,9 @@ package com.ruru.cacao.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.remember
+import com.ruru.cacao.ui.ledger.money
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,21 +46,30 @@ fun ParentHomeScreen(vm: AppViewModel, parentId: String) {
         Body(stringResource(R.string.parent_mode_header, parent?.name.orEmpty()))
         Title(stringResource(R.string.children_title), Modifier.testTag("parent_home_title"))
         children.forEach { child ->
+            val b = remember(vm.ledgerVersion, child.id) { vm.ledger.balances(child.id) }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Cacao.colors.surface, RoundedCornerShape(Cacao.shape.radius))
                     .border(maxOf(Cacao.shape.border, 1.dp), Cacao.colors.outline, RoundedCornerShape(Cacao.shape.radius))
+                    .clickable { vm.go(Screen.ChildOverview(parentId, child.id)) }
                     .padding(16.dp)
                     .testTag("child_row_${child.name}"),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Avatar(child.name, child.avatar_color, 52)
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text(child.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Cacao.colors.onSurface)
                     child.birthday?.let { Body(stringResource(R.string.age_years, ageOf(it))) }
+                    Text(
+                        "${stringResource(R.string.savings)} ${money(b.savings)}・${stringResource(R.string.wallet)} ${money(b.wallet)}",
+                        fontFamily = Cacao.fonts.number,
+                        fontSize = 14.sp,
+                        color = Cacao.colors.muted,
+                    )
                 }
+                Text("›", color = Cacao.colors.muted, fontSize = 20.sp)
             }
         }
         Spacer(Modifier.weight(1f))

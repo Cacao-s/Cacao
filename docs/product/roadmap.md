@@ -20,19 +20,41 @@
 - 多語系：繁體中文、英文
 - 裝置模式：全家共用一台手機
 
-## 第二版以後
+## 第二版以後（Phase 2）
 
-- **CD 自動上架（Phase 2）**：GitHub Actions 打版本標籤時自動編譯簽名的 AAB，透過 Google Play API 送到內部測試軌道；正式版仍在 Play Console 手動發布。需要 Play 開發者帳號、第一版手動上傳、上傳金鑰與服務帳號存 GitHub Secrets（2026-11-02 決定延到 Phase 2）。第一版只有 CI，上架採手動。
-- **iOS 版（Phase 2）**：Swift＋SwiftUI，共用第一版的 `shared/`（schema SQL、主題、翻譯、測試案例）；Android 與 iPhone 備份互相還原在這時驗證。
-- **裝置之間同步**：多台手機在家連同一個 Wi-Fi 時互相同步，不經過任何伺服器
-  - 父母在自己的手機上直接核准任務
-- 進階任務：重複、有期限、可部分完成
-- 定期回顧報表完整版（圖表、趨勢）
-- **預支／借款（待 PM 評估）**：第一版不處理；出金上限是可出金額（2026-10-29 決定，見 `docs/data-model-qa.md` DQ-02）
+### iOS 版
+
+- Xcode 專案（Swift＋SwiftUI，最低 iOS 17），Bundle ID `com.ruru.cacao`。
+- 資料庫 GRDB，直接執行 `shared/db` 的 SQL；Argon2id 用 libsodium，驗證 Android 產生的 PIN 雜湊。
+- `tools/codegen` 加上 Swift 輸出：主題 token、String Catalog。
+- 依線框做完所有畫面（與 Android 同一套）。
+- 測試：單元測試跑 `shared/test-cases`、swift-snapshot-testing（4 主題截圖）、Maestro 同一份流程；CI 打開 iOS 工作（macOS 機器）。
+- 驗證 Android ↔ iPhone 備份互相還原。
+- Apple 開發者帳號（年費 US$99）、TestFlight。
+
+### CD 自動上架
+
+- 打版本標籤 → GitHub Actions 編譯簽名 AAB → Google Play 內部測試軌道；正式版仍在 Play Console 手動發布。
+- 上傳金鑰與服務帳號存 GitHub Secrets；iOS 版完成後同樣接到 TestFlight。
+- 第一版只有 CI、人工上架，讓使用者先熟悉流程（2026-11-02 決定）。
+
+### 裝置之間同步
+
+- 多台手機在家連同一個 Wi-Fi 時互相同步，不經過任何伺服器；父母在自己的手機上直接核准任務。
+- 方案比較兩條路：
+  1. **cr-sqlite**：SQLite 擴充套件，用 CRDT 合併兩台手機的資料；缺點是 iOS 要靜態連結、一人維護、改資料表結構要走專用流程。
+  2. **自己寫**：流水帳依 UUID 聯集＋可修改的資料（目標排序、設定）以最後修改為準。
+- 傳輸：同一個 Wi-Fi 下手機直連；另一個候選是同一個 Google 帳號透過雲端硬碟交換。
+
+### 功能
+
+- 進階任務：重複、有期限、可部分完成。
+- 定期回顧報表完整版（圖表、趨勢）。
+- **預支／借款（待 PM 評估）**：第一版不處理；出金上限是可出金額（2026-10-29 決定，見 `docs/data-model-qa.md` DQ-02）。
 
 ## 第一版就要為第二版預留的設計
 
 - 資料模型採「**只新增、不覆蓋**」的流水帳，第二版加同步時不用重構。
 - 主鍵用 UUID、不用自動遞增、主鍵不可為空。
 - 為 iOS 預留：schema、主題、翻譯、計算的測試案例都放 `shared/`，不寫死在 Android 程式碼裡（D-16、D-18～D-20、D-23）。
-- 同步方案在第二版比較兩條路：cr-sqlite，或自己寫「流水帳聯集＋可修改資料以最後修改為準」（細節見 `docs/progress.md`）。
+- 同步方案在第二版比較兩條路：cr-sqlite，或自己寫「流水帳聯集＋可修改資料以最後修改為準」（見上方〈裝置之間同步〉）。

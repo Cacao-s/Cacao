@@ -1,0 +1,106 @@
+# M2 記帳：記收入（新增長輩、附一句話）→ 出金（超過可出金額會擋）→ 作廢出金 → 現金留在孩子手上
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+
+- tapOn:
+    id: member_Mom
+- tapOn: { id: pin_key_1 }
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_3 }
+- tapOn: { id: pin_key_4 }
+- tapOn:
+    id: child_row_cacao
+- assertVisible:
+    id: overview_savings
+    text: "\\$0"
+
+# 長輩給 500
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: add_elder
+- tapOn:
+    id: elder_name
+- inputText: Grandpa
+- hideKeyboard
+- tapOn:
+    id: elder_save
+- tapOn:
+    id: source_Grandpa
+- tapOn:
+    id: income_amount
+- inputText: "500"
+- tapOn:
+    id: income_note
+- inputText: Lunar
+- tapOn:
+    id: income_message
+- inputText: Happy
+- hideKeyboard
+- tapOn:
+    id: income_save
+- assertVisible:
+    id: overview_savings
+    text: "\\$500"
+
+# 出金超過可出金額會被擋，300 可以
+- tapOn:
+    id: overview_payout
+- tapOn:
+    id: payout_amount
+- inputText: "999"
+- hideKeyboard
+- tapOn:
+    id: payout_save
+- assertNotVisible:
+    id: overview_savings
+- tapOn:
+    id: payout_amount
+- eraseText
+- inputText: "300"
+- hideKeyboard
+- tapOn:
+    id: payout_save
+- assertVisible:
+    id: overview_savings
+    text: "\\$200"
+- assertVisible:
+    id: overview_wallet
+    text: "\\$300"
+
+# 作廢出金：存款與錢包一起撤銷
+- tapOn:
+    id: overview_history
+- assertVisible:
+    id: entry_Lunar_500
+- longPressOn:
+    id: entry_payout_-300
+- tapOn:
+    id: void_confirm
+- tapOn:
+    id: back
+- assertVisible:
+    id: overview_savings
+    text: "\\$500"
+- assertVisible:
+    id: overview_wallet
+    text: "\\$0"
+
+# 現金留在孩子手上：存款不變、錢包 +100
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "100"
+- hideKeyboard
+- tapOn:
+    id: income_cash
+- tapOn:
+    id: income_save
+- assertVisible:
+    id: overview_savings
+    text: "\\$500"
+- assertVisible:
+    id: overview_wallet
+    text: "\\$100"
