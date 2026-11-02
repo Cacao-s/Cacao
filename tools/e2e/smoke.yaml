@@ -1,0 +1,11 @@
+# 冒煙測試：App 能啟動並顯示主題。Android 與 Phase 2 iOS 共用。
+# 執行：maestro test tools/e2e/smoke.yaml（模擬器要先開好、App 已安裝）
+appId: com.ruru.cacao
+---
+- launchApp:
+    clearState: true
+- assertVisible: "可可牛奶"
+- assertVisible: "彩色積木"
+- scrollUntilVisible:
+    element: "星夜金幣"
+- assertVisible: "星夜金幣"

@@ -2,9 +2,9 @@
 
 > 最後更新：2026-11-01
 
-- Current focus: 開發 5a：Android 專案骨架完成（共用 schema 接 SQLDelight、計算邏輯＋7 個共用測試案例、DB 測試），模擬器 poc34 跑起來
-- Next action: 5a 剩下：主題 token＋codegen、翻譯來源、CI；接著 5b 畫面實作
-- Progress: [########--] 82%（五個階段平均）
+- Current focus: 5a 基礎完成：repo 骨架、共用 schema、計算邏輯＋共用案例、主題 token、翻譯、CI、Maestro
+- Next action: 5b M1 身分：首次設定、選擇使用者、PIN（Argon2id、輸錯等待、救援碼）、孩子密碼
+- Progress: [########--] 84%（五個階段平均）
 
 ## 階段進度
 
@@ -12,7 +12,7 @@
 - 階段 2 技術選型：[##########] 100%（2026-11-01 D-01 改為純原生 Swift＋Kotlin，D-16～D-23 定案，含自動化測試）
 - 階段 3 UI/UX 設計：[##########] 100%（21 個線框、導覽與流程圖、交給下一階段清單完成；UQ-01～09 定案）
 - 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md` 定稿）
-- 階段 5 開發實作（第一版只做 Android）：[#---------] 10%（Android 專案可編譯、單元測試通過、模擬器跑起來）
+- 階段 5 開發實作（第一版只做 Android）：[##--------] 20%（5a 基礎完成；接著 5b M1 身分與 PIN）
 
 ### 第一版開發清單（Android）
 
@@ -24,7 +24,7 @@
 - [x] 主題 token JSON＋codegen（4 個主題、字型跟主題）
 - [x] 翻譯來源＋codegen（繁中、英文；預設英文，繁中放 values-b+zh+Hant）
 - [x] CI：GitHub Actions 跑 codegen 檢查、單元測試與編譯（本機已跑通；push 後才會在 GitHub 執行）
-- [ ] Maestro 端對端測試環境
+- [x] Maestro 端對端測試環境（`tools/e2e/smoke.yaml` 在模擬器跑通；Maestro 放 `D:\git\Android\maestro-cli`）
 
 5b 功能（照線框 `docs/design.md`）
 - [ ] M1 身分：首次設定、選擇使用者、PIN（Argon2id、輸錯等待、救援碼）、孩子密碼
