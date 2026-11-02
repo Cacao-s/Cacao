@@ -5,3 +5,8 @@ replay_pid*.log
 # 暫存與本機設定
 .odin/
 .claude/settings.local.json
+
+# 簽名金鑰（不可進 git）
+keystore.properties
+*.jks
+*.keystore
