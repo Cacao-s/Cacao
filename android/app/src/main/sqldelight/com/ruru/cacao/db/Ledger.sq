@@ -1,0 +1,19 @@
+insertMember:
+INSERT INTO member(id, role, name, birthday, avatar_color, pin_hash, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+insertEntry:
+INSERT INTO ledger_entry(id, group_id, child_id, account, kind, amount, occurred_on, source_id, goal_id, note, message, recorded_by, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+voidGroup:
+INSERT INTO ledger_void(id, group_id, voided_by, created_at)
+VALUES (?, ?, ?, ?);
+
+balance:
+SELECT CAST(COALESCE(SUM(amount), 0) AS INTEGER)
+FROM ledger_entry
+WHERE child_id = ? AND account = ? AND group_id NOT IN (SELECT group_id FROM ledger_void);
+
+children:
+SELECT * FROM member WHERE role = 'child' AND deleted_at IS NULL ORDER BY sort_order;

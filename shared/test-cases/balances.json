@@ -1,0 +1,107 @@
+{
+  "description": "餘額、可出金額、瀑布填充的共用測試案例。Android 與 iOS 的單元測試都跑這一份。規則見 docs/data-model.md〈推算規則〉。",
+  "cases": [
+    {
+      "name": "收入、出金、錢包支出",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 1000 },
+        { "group": "g2", "account": "savings", "kind": "payout", "amount": -300 },
+        { "group": "g2", "account": "wallet", "kind": "payout", "amount": 300 },
+        { "group": "g3", "account": "wallet", "kind": "wallet_expense", "amount": -80 }
+      ],
+      "voided": [],
+      "goals": [],
+      "expected": { "savings": 700, "wallet": 220, "locked": 0, "available": 700, "goals": {} }
+    },
+    {
+      "name": "作廢的紀錄不算（DQ-01）",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 500 },
+        { "group": "g2", "account": "savings", "kind": "income_onetime", "amount": 5000 }
+      ],
+      "voided": ["g2"],
+      "goals": [],
+      "expected": { "savings": 500, "wallet": 0, "locked": 0, "available": 500, "goals": {} }
+    },
+    {
+      "name": "已達成的目標鎖錢，其餘填給進行中的目標",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 3450 }
+      ],
+      "voided": [],
+      "goals": [
+        { "id": "lego", "target": 1200, "priority": 1, "fillEnabled": true, "status": "achieved", "locked": 1200 },
+        { "id": "bike", "target": 3000, "priority": 2, "fillEnabled": true, "status": "in_progress" }
+      ],
+      "expected": {
+        "savings": 3450, "wallet": 0, "locked": 1200, "available": 2250,
+        "goals": { "bike": { "designated": 0, "filled": 2250, "achievable": false } }
+      }
+    },
+    {
+      "name": "指定的錢超過目標金額，多的回到存款池（DQ-04）",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 1000 },
+        { "group": "g2", "account": "savings", "kind": "income_onetime", "amount": 500, "goal": "book" }
+      ],
+      "voided": [],
+      "goals": [
+        { "id": "book", "target": 400, "priority": 1, "fillEnabled": true, "status": "in_progress" }
+      ],
+      "expected": {
+        "savings": 1500, "wallet": 0, "locked": 0, "available": 1100,
+        "goals": { "book": { "designated": 400, "filled": 0, "achievable": true } }
+      }
+    },
+    {
+      "name": "指定的錢不能一般出金（DQ-13）",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 500 },
+        { "group": "g2", "account": "savings", "kind": "income_onetime", "amount": 500, "goal": "book" }
+      ],
+      "voided": [],
+      "goals": [
+        { "id": "book", "target": 800, "priority": 1, "fillEnabled": true, "status": "in_progress" },
+        { "id": "bike", "target": 3000, "priority": 2, "fillEnabled": true, "status": "in_progress" }
+      ],
+      "expected": {
+        "savings": 1000, "wallet": 0, "locked": 0, "available": 500,
+        "goals": {
+          "book": { "designated": 500, "filled": 300, "achievable": true },
+          "bike": { "designated": 0, "filled": 200, "achievable": false }
+        }
+      }
+    },
+    {
+      "name": "依優先順序填充，取消勾選的目標不參與",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 1000 }
+      ],
+      "voided": [],
+      "goals": [
+        { "id": "a", "target": 600, "priority": 1, "fillEnabled": true, "status": "in_progress" },
+        { "id": "b", "target": 600, "priority": 2, "fillEnabled": false, "status": "in_progress" },
+        { "id": "c", "target": 600, "priority": 3, "fillEnabled": true, "status": "in_progress" }
+      ],
+      "expected": {
+        "savings": 1000, "wallet": 0, "locked": 0, "available": 1000,
+        "goals": {
+          "a": { "designated": 0, "filled": 600, "achievable": true },
+          "b": { "designated": 0, "filled": 0, "achievable": false },
+          "c": { "designated": 0, "filled": 400, "achievable": false }
+        }
+      }
+    },
+    {
+      "name": "刪除目標後，指定的錢回到存款池（DQ-05）",
+      "entries": [
+        { "group": "g1", "account": "savings", "kind": "income_onetime", "amount": 500, "goal": "gone" }
+      ],
+      "voided": [],
+      "goals": [
+        { "id": "gone", "target": 800, "priority": 1, "fillEnabled": true, "status": "in_progress", "deleted": true }
+      ],
+      "expected": { "savings": 500, "wallet": 0, "locked": 0, "available": 500, "goals": {} }
+    }
+  ]
+}

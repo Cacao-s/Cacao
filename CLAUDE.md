@@ -17,6 +17,10 @@ Cacao 是一個**家庭零用錢管理**行動應用程式，支援 iOS 和 Andr
 Cacao/
 ├── SPEC.md              # 產品規格書
 ├── CLAUDE.md            # AI 指南（本檔案）
+├── android/             # 第一版 App（Kotlin＋Compose）
+├── ios/                 # Phase 2（目前只有 README）
+├── shared/              # 兩平台共用資料：db、tokens、i18n、test-cases、animations
+├── tools/               # 兩平台共用工具：codegen、e2e、ci、scripts
 ├── docs/
 │   ├── ai-guide.md      # 人類可讀的 AI 工具教學
 │   ├── tech-decisions.md

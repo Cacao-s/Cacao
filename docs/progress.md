@@ -2,9 +2,9 @@
 
 > 最後更新：2026-11-01
 
-- Current focus: 架構設計完成（資料模型、身分與備份）；第一版只做 Android
-- Next action: 開發 5a：repo 骨架（android／ios 佔位／shared／tools）、共用 SQL、codegen、CI
-- Progress: [########--] 80%（五個階段平均）
+- Current focus: 開發 5a：Android 專案骨架完成（共用 schema 接 SQLDelight、計算邏輯＋7 個共用測試案例、DB 測試），模擬器 poc34 跑起來
+- Next action: 5a 剩下：主題 token＋codegen、翻譯來源、CI；接著 5b 畫面實作
+- Progress: [########--] 82%（五個階段平均）
 
 ## 階段進度
 
@@ -12,7 +12,7 @@
 - 階段 2 技術選型：[##########] 100%（2026-11-01 D-01 改為純原生 Swift＋Kotlin，D-16～D-23 定案，含自動化測試）
 - 階段 3 UI/UX 設計：[##########] 100%（21 個線框、導覽與流程圖、交給下一階段清單完成；UQ-01～09 定案）
 - 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md` 定稿）
-- 階段 5 開發實作（第一版只做 Android）：[----------] 0%
+- 階段 5 開發實作（第一版只做 Android）：[#---------] 10%（Android 專案可編譯、單元測試通過、模擬器跑起來）
   - 5a repo 骨架（`android/`、`ios/` 佔位、`shared/` 資料、`tools/` 工具）＋ codegen ＋ CI
   - 5b Android 實作＋自動化測試到通
 - Phase 2（下一個迭代，不計入第一版進度）：iOS 版，共用 `shared/`；驗證 Android ↔ iPhone 備份互相還原
