@@ -1,6 +1,6 @@
 # Google Play 商店資訊
 
-> 圖檔：`icon-512.png`、`feature-1024x500.png`（由同目錄 `icon.html`、`feature.html` 用 Chrome headless 截出）；手機截圖在 `screenshots/`。
+> 圖檔：`icon-512.png`、`feature-1024x500.png`（由同目錄 `icon.html`、`feature.html` 用 Chrome headless 截出）；手機截圖在 `screenshots/<語言>/`，用 `pwsh tools/scripts/store-screenshots.ps1 -Locale zh-TW`（或 en-US）重新產生。
 > 隱私權政策：`docs/privacy/index.html`，用 GitHub Pages 公開後填網址。
 
 ## 繁體中文（zh-TW）

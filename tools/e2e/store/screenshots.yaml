@@ -1,0 +1,133 @@
+# 商店截圖：建一個有資料的家庭，逐頁截圖。不屬於回歸測試（e2e.ps1 只跑上一層）。
+# 用法：pwsh tools/scripts/store-screenshots.ps1 -Locale zh-TW   （或 en-US）
+appId: com.ruru.cacao
+---
+- runFlow: ../subflows/new_family.yaml
+- runFlow: ../subflows/parent_login.yaml
+
+# 切 App 語言（-e LANG=zh-Hant 或 en）
+- tapOn:
+    id: parent_settings
+- tapOn:
+    id: lang_${LANG}
+- waitForAnimationToEnd
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+- takeScreenshot: 01_who
+- runFlow: ../subflows/parent_login.yaml
+
+# 長輩 Grandpa
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: add_elder
+- tapOn:
+    id: elder_name
+- inputText: Grandpa
+- hideKeyboard
+- tapOn:
+    id: elder_save
+
+# 存 1500
+- tapOn:
+    id: income_amount
+- inputText: "1500"
+- hideKeyboard
+- tapOn:
+    id: income_save
+
+# 目標：Lego 600、Bike 3000
+- tapOn:
+    id: overview_goals
+- tapOn:
+    id: goal_new
+- tapOn:
+    id: goal_name
+- inputText: Lego
+- tapOn:
+    id: goal_target
+- inputText: "600"
+- hideKeyboard
+- tapOn:
+    id: goal_save
+- tapOn:
+    id: goal_new
+- tapOn:
+    id: goal_name
+- inputText: Bike
+- tapOn:
+    id: goal_target
+- inputText: "3000"
+- hideKeyboard
+- tapOn:
+    id: goal_save
+- waitForAnimationToEnd
+- takeScreenshot: 03_goals
+- tapOn:
+    id: back
+
+# 出金 200 到錢包
+- tapOn:
+    id: overview_payout
+- tapOn:
+    id: payout_amount
+- inputText: "200"
+- hideKeyboard
+- tapOn:
+    id: payout_save
+- waitForAnimationToEnd
+- takeScreenshot: 02_parent_overview
+- tapOn:
+    id: back
+
+# 任務：Grandpa 出題 Clean，獎勵 50
+- tapOn:
+    id: parent_tasks
+- tapOn:
+    id: task_new
+- tapOn:
+    id: task_title
+- inputText: Clean
+- tapOn:
+    id: task_reward
+- inputText: "50"
+- hideKeyboard
+- tapOn:
+    id: task_child_cacao
+- tapOn:
+    id: task_issuer_Grandpa
+- tapOn:
+    id: task_save
+- waitForAnimationToEnd
+- takeScreenshot: 04_tasks
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+
+# 孩子首頁與錢包
+- tapOn:
+    id: member_cacao
+- waitForAnimationToEnd
+- takeScreenshot: 05_child_home
+- tapOn:
+    id: tile_wallet
+- tapOn:
+    id: wallet_expense
+- tapOn:
+    id: expense_amount
+- inputText: "35"
+- tapOn:
+    id: expense_note
+- inputText: Snack
+- hideKeyboard
+- tapOn:
+    id: expense_save
+- waitForAnimationToEnd
+- takeScreenshot: 06_wallet
