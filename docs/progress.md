@@ -2,16 +2,16 @@
 
 > 最後更新：2026-11-01
 
-- Current focus: `/design` 第一步畫面清單完成，UQ-01～UQ-07 已定案（先選人、🔒 切父母模式、孩子密碼選填、孩子畫面只有一套、目標畫面共用、成長紀錄共用）
-- Next action: 看線框畫布 <https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>（17 個畫面）給回饋 → 補導覽與流程圖→ `/data-model` Schema 定稿 → `/auth-design`
-- Progress: [######----] 56%（五個階段平均）
+- Current focus: 架構設計完成（資料模型、身分與備份）；第一版只做 Android
+- Next action: 開發 5a：repo 骨架（android／ios 佔位／shared／tools）、共用 SQL、codegen、CI
+- Progress: [########--] 80%（五個階段平均）
 
 ## 階段進度
 
 - 階段 1 產品定義：[##########] 100%
 - 階段 2 技術選型：[##########] 100%（2026-11-01 D-01 改為純原生 Swift＋Kotlin，D-16～D-23 定案，含自動化測試）
-- 階段 3 UI/UX 設計：[######----] 60%（畫面清單、UQ、17 個線框完成，字體跟隨主題；剩導覽與流程圖、線框回饋）
-- 階段 4 架構設計：[##--------] 20%（資料模型問題已全部定案；Schema 定稿等 `/design` 完成）
+- 階段 3 UI/UX 設計：[##########] 100%（21 個線框、導覽與流程圖、交給下一階段清單完成；UQ-01～09 定案）
+- 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md` 定稿）
 - 階段 5 開發實作（第一版只做 Android）：[----------] 0%
   - 5a repo 骨架（`android/`、`ios/` 佔位、`shared/` 資料、`tools/` 工具）＋ codegen ＋ CI
   - 5b Android 實作＋自動化測試到通
@@ -24,9 +24,9 @@
 | 產品規格 `docs/product/`（overview／features／roadmap） | Done | discover | 正式規格；`SPEC.md` 降為歷史初稿 |
 | UI 風格與 Logo | Done | — | 主題選定 4 個（手機層級設定切換）、Logo 選定「可可豆存錢筒」 |
 | 技術選型 `docs/tech-decisions.md` | Done | tech-research | D-01 改為純原生，D-16～D-23 定案（含自動化測試）；第一版只實作 Android，iOS 在 Phase 2 |
-| UI/UX 設計 `docs/design.md` | In progress | design | 畫面清單完成（21 個畫面）、`docs/design-qa.md` UQ-01～07 已定案；剩導覽、主要流程、低保真線框；產出交給 `/data-model` 與 `/auth-design` |
-| 資料模型 `docs/data-model.md` | In progress | data-model | `docs/data-model-qa.md` 12 題已全部定案；Schema 定稿排在 `/design` 之後；系統產生的名稱存類型代碼（D-15）；skill 已依新規格改寫；資料庫 SQLite 共用 schema SQL（D-16）；流水帳「只新增、不覆蓋」、主鍵用 UUID 且不可為空 |
-| 認證與備份 `docs/auth-design.md` | Pending | auth-design | skill 已改寫為「PIN＋Google 登入＋雲端硬碟備份＋匯出／匯入」；技術決策見 D-05～D-08；產品規則已定（PIN 4 位數、忘記 PIN 由另一位父母或救援碼重設、手動備份為主、超過 30 天自動備份一次、雲端留 7 份、匯入整個覆蓋）；App 名稱 Cacao、套件 ID `com.ruru.cacao`（D-24） |
+| UI/UX 設計 `docs/design.md` | Done | design | 21 個線框、導覽與流程圖、交給 `/data-model`／`/auth-design` 的清單；UQ-01～09 定案 |
+| 資料模型 `docs/data-model.md` | Done | data-model | 共用 SQL schema v1（8 張表）、餘額／瀑布填充／零用錢補記／成長紀錄推算規則、第二版同步預留；DQ-13 指定的錢不能一般出金（使用者決定）；其餘 4 項 AI 決定見文件末 |
+| 認證與備份 `docs/auth-design.md` | Done | auth-design | PIN（驗證點、輸錯等待、救援碼、自動鎖回）、Google 授權 drive.appdata、手動＋30 天自動備份、雲端留 7 份、`.cacao` 備份檔格式、匯入覆蓋、換手機還原；5 項 AI 決定見文件末；線框 S01 待補「從備份還原」 |
 | 開發實作（Android） | Pending | — | 依賴階段 1–4；先做 `shared/` 與 CI，再做 Android；高保真視覺邊開發邊調 |
 | iOS 版 | Phase 2 | — | 下一個迭代；共用 `shared/`，不計入第一版進度 |
 | 進度管理 `docs/progress.md` | Done | progress | 本文件 |
