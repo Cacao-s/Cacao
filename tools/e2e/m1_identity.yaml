@@ -30,7 +30,7 @@ appId: com.ruru.cacao
     id: recovery_next
 - tapOn:
     id: child_name
-- inputText: Ann
+- inputText: cacao
 - tapOn:
     id: child_birthday
 - inputText: 2017-03-12
@@ -42,7 +42,7 @@ appId: com.ruru.cacao
 - assertVisible:
     id: member_Mom
 - assertVisible:
-    id: member_Ann
+    id: member_cacao
 - tapOn:
     id: member_Mom
 - tapOn: { id: pin_key_9 }
@@ -58,13 +58,13 @@ appId: com.ruru.cacao
 - assertVisible:
     id: parent_home_title
 - assertVisible:
-    id: child_row_Ann
+    id: child_row_cacao
 
 # 孩子模式 → 鎖頭切回父母模式
 - tapOn:
     id: parent_logout
 - tapOn:
-    id: member_Ann
+    id: member_cacao
 - assertVisible:
     id: child_home_title
 - tapOn:
@@ -80,7 +80,7 @@ appId: com.ruru.cacao
 - tapOn:
     id: parent_logout
 - tapOn:
-    id: member_Ann
+    id: member_cacao
 - tapOn:
     id: child_set_password
 - tapOn:
@@ -95,7 +95,7 @@ appId: com.ruru.cacao
 - tapOn:
     id: child_back
 - tapOn:
-    id: member_Ann
+    id: member_cacao
 - assertNotVisible:
     id: child_home_title
 - tapOn: { id: pin_key_2 }
