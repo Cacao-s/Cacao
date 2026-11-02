@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自動產生，請勿手改。來源：shared/i18n/strings.json；產生：python tools/codegen/i18n.py -->
+<resources>
+    <string name="action_add_income">Add income</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_done">Done</string>
+    <string name="action_payout">Pay out</string>
+    <string name="action_save">Save</string>
+    <string name="action_void">Void</string>
+    <string name="app_name">Cacao</string>
+    <string name="available">Available</string>
+    <string name="backup_none">No backup yet</string>
+    <string name="gift_from">%1$s gave you %2$s</string>
+    <string name="goal_achievable">Ready</string>
+    <string name="goal_achieved">Reached</string>
+    <string name="goal_completed">Done</string>
+    <string name="goal_confirm">Confirm and lock</string>
+    <string name="goal_in_progress">Saving</string>
+    <string name="kind_income_allowance">Allowance</string>
+    <string name="kind_income_onetime">Income</string>
+    <string name="kind_income_task">Task reward</string>
+    <string name="kind_payout">Payout</string>
+    <string name="kind_wallet_adjustment">Unrecorded spending</string>
+    <string name="kind_wallet_expense">Spending</string>
+    <string name="locked">Locked</string>
+    <string name="menu_goals">Goals</string>
+    <string name="menu_growth">Growth</string>
+    <string name="menu_tasks">Tasks</string>
+    <string name="menu_wallet">Wallet</string>
+    <string name="pin_enter">Enter PIN</string>
+    <string name="pin_forgot">Forgot PIN</string>
+    <string name="pin_wait_seconds">Too many tries. Wait %1$d seconds.</string>
+    <string name="role_child">Kids</string>
+    <string name="role_elder">Relatives</string>
+    <string name="role_parent">Parents</string>
+    <string name="savings">Savings</string>
+    <string name="wallet">Wallet</string>
+    <string name="who_is_using">Who\'s using Cacao?</string>
+</resources>

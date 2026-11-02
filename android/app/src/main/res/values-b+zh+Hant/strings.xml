@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自動產生，請勿手改。來源：shared/i18n/strings.json；產生：python tools/codegen/i18n.py -->
+<resources>
+    <string name="action_add_income">記收入</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_done">完成</string>
+    <string name="action_payout">出金</string>
+    <string name="action_save">記下來</string>
+    <string name="action_void">作廢這筆</string>
+    <string name="app_name">Cacao</string>
+    <string name="available">可出金額</string>
+    <string name="backup_none">目前沒有備份</string>
+    <string name="gift_from">%1$s給你 %2$s</string>
+    <string name="goal_achievable">可達成</string>
+    <string name="goal_achieved">已達成</string>
+    <string name="goal_completed">已完成</string>
+    <string name="goal_confirm">確認達成，鎖起來</string>
+    <string name="goal_in_progress">進行中</string>
+    <string name="kind_income_allowance">常態零用錢</string>
+    <string name="kind_income_onetime">收入</string>
+    <string name="kind_income_task">任務獎勵</string>
+    <string name="kind_payout">出金</string>
+    <string name="kind_wallet_adjustment">未記錄支出</string>
+    <string name="kind_wallet_expense">花費</string>
+    <string name="locked">已鎖</string>
+    <string name="menu_goals">目標</string>
+    <string name="menu_growth">成長</string>
+    <string name="menu_tasks">任務</string>
+    <string name="menu_wallet">錢包</string>
+    <string name="pin_enter">輸入 PIN</string>
+    <string name="pin_forgot">忘記 PIN</string>
+    <string name="pin_wait_seconds">輸錯太多次，請等 %1$d 秒</string>
+    <string name="role_child">孩子</string>
+    <string name="role_elder">長輩</string>
+    <string name="role_parent">父母</string>
+    <string name="savings">存款</string>
+    <string name="wallet">錢包</string>
+    <string name="who_is_using">誰在用？</string>
+</resources>

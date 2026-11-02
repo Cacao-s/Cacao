@@ -1,0 +1,50 @@
+{
+  "description": "翻譯來源（D-20）。每個 key 都要有 zh-Hant 與 en。改這裡後執行 tools/codegen/i18n.py。系統產生的紀錄類型用代碼對應（D-15），key 以 kind_ 開頭。",
+  "languages": ["zh-Hant", "en"],
+  "strings": {
+    "app_name": { "zh-Hant": "Cacao", "en": "Cacao" },
+
+    "who_is_using": { "zh-Hant": "誰在用？", "en": "Who's using Cacao?" },
+    "role_parent": { "zh-Hant": "父母", "en": "Parents" },
+    "role_child": { "zh-Hant": "孩子", "en": "Kids" },
+    "role_elder": { "zh-Hant": "長輩", "en": "Relatives" },
+
+    "pin_enter": { "zh-Hant": "輸入 PIN", "en": "Enter PIN" },
+    "pin_forgot": { "zh-Hant": "忘記 PIN", "en": "Forgot PIN" },
+    "pin_wait_seconds": { "zh-Hant": "輸錯太多次，請等 %1$d 秒", "en": "Too many tries. Wait %1$d seconds." },
+
+    "savings": { "zh-Hant": "存款", "en": "Savings" },
+    "wallet": { "zh-Hant": "錢包", "en": "Wallet" },
+    "locked": { "zh-Hant": "已鎖", "en": "Locked" },
+    "available": { "zh-Hant": "可出金額", "en": "Available" },
+
+    "action_add_income": { "zh-Hant": "記收入", "en": "Add income" },
+    "action_payout": { "zh-Hant": "出金", "en": "Pay out" },
+    "action_void": { "zh-Hant": "作廢這筆", "en": "Void" },
+    "action_cancel": { "zh-Hant": "取消", "en": "Cancel" },
+    "action_save": { "zh-Hant": "記下來", "en": "Save" },
+    "action_done": { "zh-Hant": "完成", "en": "Done" },
+
+    "menu_goals": { "zh-Hant": "目標", "en": "Goals" },
+    "menu_tasks": { "zh-Hant": "任務", "en": "Tasks" },
+    "menu_wallet": { "zh-Hant": "錢包", "en": "Wallet" },
+    "menu_growth": { "zh-Hant": "成長", "en": "Growth" },
+
+    "goal_in_progress": { "zh-Hant": "進行中", "en": "Saving" },
+    "goal_achievable": { "zh-Hant": "可達成", "en": "Ready" },
+    "goal_achieved": { "zh-Hant": "已達成", "en": "Reached" },
+    "goal_completed": { "zh-Hant": "已完成", "en": "Done" },
+    "goal_confirm": { "zh-Hant": "確認達成，鎖起來", "en": "Confirm and lock" },
+
+    "gift_from": { "zh-Hant": "%1$s給你 %2$s", "en": "%1$s gave you %2$s" },
+
+    "kind_income_onetime": { "zh-Hant": "收入", "en": "Income" },
+    "kind_income_allowance": { "zh-Hant": "常態零用錢", "en": "Allowance" },
+    "kind_income_task": { "zh-Hant": "任務獎勵", "en": "Task reward" },
+    "kind_payout": { "zh-Hant": "出金", "en": "Payout" },
+    "kind_wallet_expense": { "zh-Hant": "花費", "en": "Spending" },
+    "kind_wallet_adjustment": { "zh-Hant": "未記錄支出", "en": "Unrecorded spending" },
+
+    "backup_none": { "zh-Hant": "目前沒有備份", "en": "No backup yet" }
+  }
+}

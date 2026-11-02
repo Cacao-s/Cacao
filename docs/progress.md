@@ -22,8 +22,8 @@
 - [x] 計算邏輯（餘額、可出金額、瀑布填充）＋共用測試案例
 - [x] 模擬器跑起來
 - [x] 主題 token JSON＋codegen（4 個主題、字型跟主題）
-- [ ] 翻譯來源＋codegen（繁中、英文）
-- [ ] CI：GitHub Actions 跑單元測試與編譯
+- [x] 翻譯來源＋codegen（繁中、英文；預設英文，繁中放 values-b+zh+Hant）
+- [x] CI：GitHub Actions 跑 codegen 檢查、單元測試與編譯（本機已跑通；push 後才會在 GitHub 執行）
 - [ ] Maestro 端對端測試環境
 
 5b 功能（照線框 `docs/design.md`）
