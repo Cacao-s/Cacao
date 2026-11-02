@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.ruru.cacao.ui.AppViewModel
 import com.ruru.cacao.ui.PinPurpose
+import com.ruru.cacao.ui.allowance.AllowanceScreen
 import com.ruru.cacao.ui.tasks.ChildTasksScreen
 import com.ruru.cacao.ui.tasks.NewTaskScreen
 import com.ruru.cacao.ui.tasks.TasksScreen
@@ -87,6 +88,7 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.Tasks -> vm.go(Screen.ParentHome(screen.parentId))
             is Screen.NewTask -> vm.go(Screen.Tasks(screen.parentId))
             is Screen.ChildTasks -> vm.go(Screen.ChildHome(screen.childId))
+            is Screen.Allowance -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
             is Screen.Pin -> vm.go((screen.purpose as? PinPurpose.VerifyTask)?.let { Screen.ChildTasks(it.childId) } ?: Screen.SelectUser)
             else -> vm.go(Screen.SelectUser)
         }
@@ -110,6 +112,7 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.Tasks -> TasksScreen(vm, screen.parentId)
             is Screen.NewTask -> NewTaskScreen(vm, screen.parentId)
             is Screen.ChildTasks -> ChildTasksScreen(vm, screen.childId)
+            is Screen.Allowance -> AllowanceScreen(vm, screen.parentId, screen.childId)
         }
     }
 }

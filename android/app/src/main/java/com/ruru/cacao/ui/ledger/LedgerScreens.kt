@@ -105,6 +105,7 @@ fun ChildOverviewScreen(vm: AppViewModel, parentId: String, childId: String) {
         }
         MenuRow(stringResource(R.string.goals_title), "overview_goals") { vm.go(Screen.Goals(childId, parentId)) }
         MenuRow(stringResource(R.string.overview_history), "overview_history") { vm.go(Screen.Ledger(parentId, childId)) }
+        MenuRow(stringResource(R.string.allowance_title), "overview_allowance") { vm.go(Screen.Allowance(parentId, childId)) }
     }
 }
 

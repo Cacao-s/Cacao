@@ -148,6 +148,26 @@
     "task_hint": { "zh-Hant": "做完按「完成」，請爸媽當場輸入 PIN 驗收", "en": "When you're done, tap Done and ask a parent to enter their PIN." },
     "task_verify_title": { "zh-Hant": "請父母驗收：%1$s", "en": "Parent, approve: %1$s" },
     "task_delete": { "zh-Hant": "刪除", "en": "Delete" },
-    "tasks_pending_count": { "zh-Hant": "%1$d 個待完成", "en": "%1$d to do" }
+    "tasks_pending_count": { "zh-Hant": "%1$d 個待完成", "en": "%1$d to do" },
+
+    "allowance_title": { "zh-Hant": "常態零用錢", "en": "Allowance" },
+    "allowance_new": { "zh-Hant": "＋新增排程", "en": "+ New schedule" },
+    "allowance_empty": { "zh-Hant": "還沒有常態零用錢", "en": "No allowance yet" },
+    "allowance_hint": { "zh-Hant": "App 多天沒開時，開啟後依到期日補記；暫停期間不補發", "en": "Missed days are added by due date when the app opens. Paused time isn't paid." },
+    "allowance_period": { "zh-Hant": "週期", "en": "How often" },
+    "period_daily": { "zh-Hant": "每天", "en": "Daily" },
+    "period_weekly": { "zh-Hant": "每週", "en": "Weekly" },
+    "period_biweekly": { "zh-Hant": "每兩週", "en": "Every 2 weeks" },
+    "period_monthly": { "zh-Hant": "每月", "en": "Monthly" },
+    "allowance_weekday": { "zh-Hant": "星期幾", "en": "Day of week" },
+    "allowance_month_day": { "zh-Hant": "每月幾號（1～31，小月份在月底發）", "en": "Day of month (1–31; short months pay on the last day)" },
+    "weekday_short": { "zh-Hant": "一,二,三,四,五,六,日", "en": "M,T,W,T,F,S,S" },
+    "allowance_paused": { "zh-Hant": "暫停中", "en": "Paused" },
+    "allowance_active": { "zh-Hant": "發放中", "en": "Active" },
+    "allowance_pause": { "zh-Hant": "暫停", "en": "Pause" },
+    "allowance_resume": { "zh-Hant": "恢復", "en": "Resume" },
+    "allowance_invalid": { "zh-Hant": "請填金額，並選好星期幾或幾號", "en": "Enter an amount and pick the day" },
+    "allowance_summary_weekly": { "zh-Hant": "%1$s（星期%2$s）", "en": "%1$s (%2$s)" },
+    "allowance_summary_monthly": { "zh-Hant": "每月 %1$d 號", "en": "Monthly on day %1$d" }
   }
 }

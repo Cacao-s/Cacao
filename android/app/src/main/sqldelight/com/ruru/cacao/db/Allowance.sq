@@ -1,0 +1,26 @@
+insert:
+INSERT INTO allowance_schedule(id, child_id, source_id, amount, period, weekday, month_day, active_from, paused, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?);
+
+forChild:
+SELECT * FROM allowance_schedule WHERE child_id = ? AND deleted_at IS NULL ORDER BY created_at;
+
+active:
+SELECT * FROM allowance_schedule WHERE deleted_at IS NULL AND paused = 0;
+
+byId:
+SELECT * FROM allowance_schedule WHERE id = ?;
+
+update:
+UPDATE allowance_schedule
+SET source_id = ?, amount = ?, period = ?, weekday = ?, month_day = ?, active_from = ?, updated_at = ?
+WHERE id = ?;
+
+setPaused:
+UPDATE allowance_schedule SET paused = ?, active_from = ?, updated_at = ? WHERE id = ?;
+
+softDelete:
+UPDATE allowance_schedule SET deleted_at = ?, updated_at = ? WHERE id = ?;
+
+lastDue:
+SELECT MAX(allowance_due) AS last FROM ledger_entry WHERE allowance_id = ?;

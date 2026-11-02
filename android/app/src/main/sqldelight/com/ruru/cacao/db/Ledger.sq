@@ -6,6 +6,10 @@ insertEntry:
 INSERT INTO ledger_entry(id, group_id, child_id, account, kind, amount, occurred_on, source_id, goal_id, note, message, recorded_by, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+insertAllowanceEntry:
+INSERT OR IGNORE INTO ledger_entry(id, group_id, child_id, account, kind, amount, occurred_on, source_id, allowance_id, allowance_due, created_at)
+VALUES (?, ?, ?, 'savings', 'income_allowance', ?, ?, ?, ?, ?, ?);
+
 voidGroup:
 INSERT INTO ledger_void(id, group_id, voided_by, created_at)
 VALUES (?, ?, ?, ?);

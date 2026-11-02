@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.ruru.cacao.data.AllowanceRepository
 import com.ruru.cacao.data.GoalRepository
 import com.ruru.cacao.data.LedgerRepository
 import com.ruru.cacao.data.MemberRepository
@@ -49,12 +50,13 @@ sealed interface Screen {
     data class Tasks(val parentId: String) : Screen
     data class NewTask(val parentId: String) : Screen
     data class ChildTasks(val childId: String) : Screen
+    data class Allowance(val parentId: String, val childId: String) : Screen
 }
 
 val Screen.isParentMode: Boolean
     get() = when (this) {
         is Screen.ParentHome, is Screen.ForgotPin, is Screen.ChildOverview,
-        is Screen.AddIncome, is Screen.Payout, is Screen.Ledger, is Screen.Tasks, is Screen.NewTask -> true
+        is Screen.AddIncome, is Screen.Payout, is Screen.Ledger, is Screen.Tasks, is Screen.NewTask, is Screen.Allowance -> true
         is Screen.Goals -> parentId != null
         is Screen.GoalDetail -> parentId != null
         is Screen.NewGoal -> parentId != null
@@ -68,6 +70,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val goals = GoalRepository(db)
     val ledger = LedgerRepository(db, goals = { goals.states(it) }).also { goals.ledger = it }
     val tasks = TaskRepository(db, ledger)
+    val allowance = AllowanceRepository(db)
+
+    /** 開 App（含從背景回來）時補記常態零用錢 */
+    fun backfillAllowance() {
+        if (allowance.backfillAll() > 0) ledgerChanged()
+    }
 
     /** 每次記帳後遞增，讓畫面重新讀餘額 */
     var ledgerVersion by mutableStateOf(0)
@@ -139,6 +147,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun onForeground(nowMillis: Long) {
         if (backgroundSince > 0 && nowMillis - backgroundSince > 60_000) lockParentMode()
         backgroundSince = 0
+        backfillAllowance()
     }
 
     private fun save(purpose: PinPurpose, state: AttemptState) {

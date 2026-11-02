@@ -1,0 +1,56 @@
+# M5 常態零用錢：新增每天 10 元（當天就發）→ 暫停 → 恢復同一天不重複發 → 改成每月
+# 跨日補記由單元測試 AllowanceRepositoryTest 用可控時鐘驗證
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_allowance
+- tapOn:
+    id: allowance_new
+- tapOn:
+    id: allowance_amount
+- inputText: "10"
+- hideKeyboard
+- tapOn:
+    id: period_daily
+- tapOn:
+    id: allowance_save
+- assertVisible:
+    id: schedule_Mom_10
+
+# 暫停再恢復，同一天不會重複發
+- tapOn:
+    id: schedule_toggle_Mom_10
+- tapOn:
+    id: schedule_toggle_Mom_10
+- tapOn:
+    id: back
+- assertVisible:
+    id: overview_savings
+    text: "\\$10"
+
+# 每週沒選星期幾不能存
+- tapOn:
+    id: overview_allowance
+- tapOn:
+    id: schedule_Mom_10
+- tapOn:
+    id: period_weekly
+- tapOn:
+    id: allowance_save
+- assertVisible:
+    id: allowance_save
+- tapOn:
+    id: weekday_3
+- tapOn:
+    id: allowance_save
+- assertNotVisible:
+    id: allowance_save
+- tapOn:
+    id: back
+- assertVisible:
+    id: overview_savings
+    text: "\\$10"

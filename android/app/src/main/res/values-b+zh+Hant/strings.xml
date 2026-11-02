@@ -9,6 +9,20 @@
     <string name="action_save">記下來</string>
     <string name="action_void">作廢這筆</string>
     <string name="age_years">%1$d 歲</string>
+    <string name="allowance_active">發放中</string>
+    <string name="allowance_empty">還沒有常態零用錢</string>
+    <string name="allowance_hint">App 多天沒開時，開啟後依到期日補記；暫停期間不補發</string>
+    <string name="allowance_invalid">請填金額，並選好星期幾或幾號</string>
+    <string name="allowance_month_day">每月幾號（1～31，小月份在月底發）</string>
+    <string name="allowance_new">＋新增排程</string>
+    <string name="allowance_pause">暫停</string>
+    <string name="allowance_paused">暫停中</string>
+    <string name="allowance_period">週期</string>
+    <string name="allowance_resume">恢復</string>
+    <string name="allowance_summary_monthly">每月 %1$d 號</string>
+    <string name="allowance_summary_weekly">%1$s（星期%2$s）</string>
+    <string name="allowance_title">常態零用錢</string>
+    <string name="allowance_weekday">星期幾</string>
     <string name="amount_invalid">請輸入大於 0 的金額</string>
     <string name="amount_label">金額</string>
     <string name="app_name">Cacao</string>
@@ -94,6 +108,10 @@
     <string name="payout_over">超過可出金額 %1$s</string>
     <string name="payout_title">出金・%1$s</string>
     <string name="payout_to_wallet">錢會進 %1$s 的錢包</string>
+    <string name="period_biweekly">每兩週</string>
+    <string name="period_daily">每天</string>
+    <string name="period_monthly">每月</string>
+    <string name="period_weekly">每週</string>
     <string name="pin_confirm_label">再輸入一次</string>
     <string name="pin_enter">輸入 PIN</string>
     <string name="pin_forgot">忘記 PIN</string>
@@ -134,5 +152,6 @@
     <string name="void_confirm_title">作廢這筆？</string>
     <string name="void_negative">作廢後存款會變成負數，請先作廢相關的出金</string>
     <string name="wallet">錢包</string>
+    <string name="weekday_short">一,二,三,四,五,六,日</string>
     <string name="who_is_using">誰在用？</string>
 </resources>

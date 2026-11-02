@@ -9,6 +9,20 @@
     <string name="action_save">Save</string>
     <string name="action_void">Void</string>
     <string name="age_years">%1$d yrs</string>
+    <string name="allowance_active">Active</string>
+    <string name="allowance_empty">No allowance yet</string>
+    <string name="allowance_hint">Missed days are added by due date when the app opens. Paused time isn\'t paid.</string>
+    <string name="allowance_invalid">Enter an amount and pick the day</string>
+    <string name="allowance_month_day">Day of month (1–31; short months pay on the last day)</string>
+    <string name="allowance_new">+ New schedule</string>
+    <string name="allowance_pause">Pause</string>
+    <string name="allowance_paused">Paused</string>
+    <string name="allowance_period">How often</string>
+    <string name="allowance_resume">Resume</string>
+    <string name="allowance_summary_monthly">Monthly on day %1$d</string>
+    <string name="allowance_summary_weekly">%1$s (%2$s)</string>
+    <string name="allowance_title">Allowance</string>
+    <string name="allowance_weekday">Day of week</string>
     <string name="amount_invalid">Enter an amount above 0</string>
     <string name="amount_label">Amount</string>
     <string name="app_name">Cacao</string>
@@ -94,6 +108,10 @@
     <string name="payout_over">More than the available %1$s</string>
     <string name="payout_title">Pay out · %1$s</string>
     <string name="payout_to_wallet">The money goes to %1$s\'s wallet</string>
+    <string name="period_biweekly">Every 2 weeks</string>
+    <string name="period_daily">Daily</string>
+    <string name="period_monthly">Monthly</string>
+    <string name="period_weekly">Weekly</string>
     <string name="pin_confirm_label">Enter it again</string>
     <string name="pin_enter">Enter PIN</string>
     <string name="pin_forgot">Forgot PIN</string>
@@ -134,5 +152,6 @@
     <string name="void_confirm_title">Void this entry?</string>
     <string name="void_negative">Voiding this would make savings negative. Void the related payout first.</string>
     <string name="wallet">Wallet</string>
+    <string name="weekday_short">M,T,W,T,F,S,S</string>
     <string name="who_is_using">Who\'s using Cacao?</string>
 </resources>
