@@ -37,10 +37,10 @@
 - [ ] M8 備份：匯出／匯入、Google 雲端、30 天自動備份
 - [ ] M9 慶祝動畫與音效
 - [ ] M10 截圖測試（每畫面 × 4 主題）＋ Maestro 主要流程
-- [ ] M11 上架準備：OAuth 同意畫面、隱私權政策、Play Console
+- [ ] M11 上架準備：OAuth 同意畫面、隱私權政策、Play Console、簽名金鑰；第一版手動上傳（CD 在 Phase 2）；個人帳號需先封閉測試（12 人 × 14 天）
   - 5a repo 骨架（`android/`、`ios/` 佔位、`shared/` 資料、`tools/` 工具）＋ codegen ＋ CI
   - 5b Android 實作＋自動化測試到通
-- Phase 2（下一個迭代，不計入第一版進度）：iOS 版，共用 `shared/`；驗證 Android ↔ iPhone 備份互相還原
+- Phase 2（下一個迭代，不計入第一版進度）：iOS 版，共用 `shared/`；驗證 Android ↔ iPhone 備份互相還原；CD 自動上架到 Google Play
 
 | Task | Status | Skill owner | Notes |
 | --- | --- | --- | --- |
@@ -54,6 +54,7 @@
 | 認證與備份 `docs/auth-design.md` | Done | auth-design | PIN（驗證點、輸錯等待、救援碼、自動鎖回）、Google 授權 drive.appdata、手動＋30 天自動備份、雲端留 7 份、`.cacao` 備份檔格式、匯入覆蓋、換手機還原；5 項 AI 決定見文件末；線框 S01 待補「從備份還原」 |
 | 開發實作（Android） | Pending | — | 依賴階段 1–4；先做 `shared/` 與 CI，再做 Android；高保真視覺邊開發邊調 |
 | iOS 版 | Phase 2 | — | 下一個迭代；共用 `shared/`，不計入第一版進度 |
+| CD 自動上架 | Phase 2 | — | 版本標籤觸發 → 簽名 AAB → Google Play 內部測試軌道；第一版只有 CI、手動上架 |
 | 進度管理 `docs/progress.md` | Done | progress | 本文件 |
 
 ## UI 提案

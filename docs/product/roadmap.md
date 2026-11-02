@@ -22,6 +22,7 @@
 
 ## 第二版以後
 
+- **CD 自動上架（Phase 2）**：GitHub Actions 打版本標籤時自動編譯簽名的 AAB，透過 Google Play API 送到內部測試軌道；正式版仍在 Play Console 手動發布。需要 Play 開發者帳號、第一版手動上傳、上傳金鑰與服務帳號存 GitHub Secrets（2026-11-02 決定延到 Phase 2）。第一版只有 CI，上架採手動。
 - **iOS 版（Phase 2）**：Swift＋SwiftUI，共用第一版的 `shared/`（schema SQL、主題、翻譯、測試案例）；Android 與 iPhone 備份互相還原在這時驗證。
 - **裝置之間同步**：多台手機在家連同一個 Wi-Fi 時互相同步，不經過任何伺服器
   - 父母在自己的手機上直接核准任務
