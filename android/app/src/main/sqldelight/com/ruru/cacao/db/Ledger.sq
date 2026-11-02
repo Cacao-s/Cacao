@@ -34,3 +34,19 @@ WHERE v.group_id IN (SELECT group_id FROM ledger_entry WHERE child_id = ?);
 
 groupEntries:
 SELECT * FROM ledger_entry WHERE group_id = ?;
+
+incomeBetween:
+SELECT CAST(COALESCE(SUM(amount), 0) AS INTEGER) FROM ledger_entry
+WHERE child_id = ? AND account = 'savings' AND kind LIKE 'income_%'
+  AND occurred_on >= ? AND occurred_on < ?
+  AND group_id NOT IN (SELECT group_id FROM ledger_void);
+
+tasksBetween:
+SELECT COUNT(*) FROM task_completion c JOIN task t ON t.id = c.task_id
+WHERE t.child_id = ? AND substr(c.completed_at, 1, 10) >= ? AND substr(c.completed_at, 1, 10) < ?;
+
+goalsCompletedBetween:
+SELECT COUNT(DISTINCT e.goal_id) FROM goal_event e JOIN goal g ON g.id = e.goal_id
+WHERE g.child_id = ? AND e.kind = 'completed'
+  AND substr(e.created_at, 1, 10) >= ? AND substr(e.created_at, 1, 10) < ?
+  AND (e.ledger_group_id IS NULL OR e.ledger_group_id NOT IN (SELECT group_id FROM ledger_void));

@@ -1,6 +1,12 @@
 package com.ruru.cacao.ui.identity
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.ui.platform.LocalContext
+import com.ruru.cacao.ui.backup.ImportDialogs
+import com.ruru.cacao.ui.backup.ImportState
+import com.ruru.cacao.ui.backup.startImport
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,11 +71,16 @@ fun OnboardingScreen(vm: AppViewModel) {
             Title(stringResource(R.string.onboarding_welcome), Modifier.align(Alignment.CenterHorizontally))
             Spacer(Modifier.weight(1f))
             PrimaryButton(stringResource(R.string.onboarding_new_family), "onboarding_new") { step = OnboardingStep.PARENT }
-            var showLater by remember { mutableStateOf(false) }
-            TextButton(onClick = { showLater = true }, modifier = Modifier.fillMaxWidth().testTag("onboarding_restore")) {
+            val context = LocalContext.current
+            val importState = remember { ImportState() }
+            val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                if (uri != null) startImport(vm, importState, vm.backup.read(uri))
+            }
+            TextButton(onClick = { picker.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth().testTag("onboarding_restore")) {
                 Text(stringResource(R.string.onboarding_restore), color = Cacao.colors.primary)
             }
-            if (showLater) Body(stringResource(R.string.onboarding_restore_later))
+            ErrorText(importState.error?.let { stringResource(it) })
+            ImportDialogs(vm, importState, context)
         }
 
         OnboardingStep.PARENT -> ParentForm(

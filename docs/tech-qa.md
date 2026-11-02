@@ -31,7 +31,7 @@
 
 - **四層都做**：單元、資料庫、截圖（每個畫面 × 4 個主題）、端對端（只涵蓋主要流程）（TQ-27）。→ D-23
 - **共用測試案例**：`shared/test-cases/` 的 JSON 兩邊單元測試都跑，保證計算結果一致（TQ-28）。→ D-23
-- **端對端用 Maestro**（TQ-29）、**截圖用 Paparazzi＋swift-snapshot-testing**（TQ-30）。→ D-23
+- **端對端用 Maestro**（TQ-29）、**截圖用 Paparazzi＋swift-snapshot-testing**（TQ-30；2026-11-02 Android 改用 Roborazzi，見 D-23）。→ D-23
 - **CI 用 GitHub Actions**，iOS 截圖與端對端只在合併前跑（TQ-31）。→ D-23
 
 ---

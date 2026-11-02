@@ -42,6 +42,7 @@ import com.ruru.cacao.domain.GoalStatus
 import com.ruru.cacao.ui.AppViewModel
 import com.ruru.cacao.ui.Screen
 import com.ruru.cacao.ui.components.Body
+import com.ruru.cacao.ui.components.Celebration
 import com.ruru.cacao.ui.components.ErrorText
 import com.ruru.cacao.ui.components.PlainField
 import com.ruru.cacao.ui.components.PrimaryButton
@@ -221,7 +222,8 @@ fun GoalDetailScreen(vm: AppViewModel, childId: String, goalId: String, parentId
 
         if (view.achievable && parentId == null) {
             PrimaryButton(stringResource(R.string.goal_confirm), "goal_confirm") {
-                vm.goals.confirm(childId, goalId, childId); changed()
+                if (vm.goals.confirm(childId, goalId, childId) == GoalResult.Ok) vm.celebrate(Celebration.GoalReached(goal.name))
+                changed()
             }
         }
         if (view.state.status == GoalStatus.ACHIEVED) {

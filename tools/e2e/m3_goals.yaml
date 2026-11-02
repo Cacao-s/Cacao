@@ -76,6 +76,8 @@ appId: com.ruru.cacao
     id: goal_Lego
 - tapOn:
     id: goal_confirm
+- tapOn:
+    id: celebrate_ok
 - assertVisible:
     id: goal_revert
 - tapOn:

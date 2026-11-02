@@ -65,6 +65,19 @@ class MemberRepository(
         queries.updatePassword(password?.let(PinHasher::hash), now(), childId)
     }
 
+    fun rename(memberId: String, name: String): Boolean {
+        if (name.isBlank()) return false
+        queries.rename(name.trim(), now(), memberId)
+        return true
+    }
+
+    /** 重新產生救援碼（在父母模式裡，已驗證過 PIN） */
+    fun regenerateRecovery(parentId: String): String {
+        val code = RecoveryCode.generate()
+        queries.updateRecovery(PinHasher.hash(RecoveryCode.normalize(code)), now(), parentId)
+        return code
+    }
+
     /** 換 PIN 時救援碼也換新的（用過就作廢） */
     private fun replacePin(memberId: String, newPin: String): String {
         val code = RecoveryCode.generate()

@@ -1,0 +1,73 @@
+# M8 備份：匯出備份檔（系統存檔畫面）→ 改資料 → 匯入備份檔（整個取代）→ 資料回到匯出時
+# Google 雲端硬碟需要有 Google Play 的裝置與 OAuth 設定，不在這條流程裡（見 docs/progress.md M11）
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "500"
+- hideKeyboard
+- tapOn:
+    id: income_save
+- tapOn:
+    id: back
+
+# 匯出
+- tapOn:
+    id: parent_settings
+- tapOn:
+    id: settings_backup
+- assertVisible:
+    id: backup_status_none
+- tapOn:
+    id: backup_export
+- tapOn:
+    text: "(?i)save|儲存"
+- assertNotVisible:
+    id: backup_status_none
+
+# 匯出後再記一筆，存款變 800
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "300"
+- hideKeyboard
+- tapOn:
+    id: income_save
+- assertVisible:
+    id: overview_savings
+    text: "\\$800"
+- tapOn:
+    id: back
+
+# 匯入剛剛的備份檔 → App 重新啟動 → 存款回到 500
+- tapOn:
+    id: parent_settings
+- tapOn:
+    id: settings_backup
+- tapOn:
+    id: backup_import
+- tapOn:
+    text: "cacao-.*\\.cacao"
+- tapOn:
+    id: import_replace
+- waitForAnimationToEnd
+- launchApp
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: child_row_cacao
+- assertVisible:
+    id: overview_savings
+    text: "\\$500"

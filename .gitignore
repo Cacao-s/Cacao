@@ -1,0 +1,7 @@
+# JVM 記憶體不足時產生的當機紀錄
+hs_err_pid*.log
+replay_pid*.log
+
+# 暫存與本機設定
+.odin/
+.claude/settings.local.json

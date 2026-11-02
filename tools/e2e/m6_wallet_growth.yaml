@@ -1,0 +1,89 @@
+# M6 錢包與成長紀錄：出金 300 → 孩子記花費 80 → 校正到 0 → 父母作廢花費 → 成長紀錄統計
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "500"
+- hideKeyboard
+- tapOn:
+    id: income_save
+- tapOn:
+    id: overview_payout
+- tapOn:
+    id: payout_amount
+- inputText: "300"
+- hideKeyboard
+- tapOn:
+    id: payout_save
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+
+# 孩子：記花費 80，再校正成實際剩 0
+- tapOn:
+    id: member_cacao
+- tapOn:
+    id: tile_wallet
+- assertVisible:
+    id: wallet_balance
+    text: "\\$300"
+- tapOn:
+    id: wallet_expense
+- tapOn:
+    id: expense_amount
+- inputText: "80"
+- tapOn:
+    id: expense_note
+- inputText: Pens
+- hideKeyboard
+- tapOn:
+    id: expense_save
+- assertVisible:
+    id: wallet_balance
+    text: "\\$220"
+- tapOn:
+    id: wallet_calibrate
+- tapOn:
+    id: calibrate_amount
+- inputText: "0"
+- hideKeyboard
+- tapOn:
+    id: calibrate_save
+- assertVisible:
+    id: wallet_balance
+    text: "\\$0"
+- tapOn:
+    id: back
+
+# 成長紀錄：這一年存了 500
+- tapOn:
+    id: tile_growth
+- assertVisible:
+    id: growth_saved
+    text: "\\$500"
+- tapOn:
+    id: back
+
+# 父母：作廢那筆花費，錢包回到 80（校正那筆仍在）
+- tapOn:
+    id: child_lock
+- runFlow: subflows/pin_1234.yaml
+- tapOn:
+    id: child_row_cacao
+- tapOn:
+    id: overview_wallet_history
+- longPressOn:
+    id: wallet_entry_Pens_-80
+- tapOn:
+    id: void_confirm
+- assertVisible:
+    id: wallet_balance
+    text: "\\$80"

@@ -439,8 +439,15 @@ docs/
 |---|---|---|---|
 | 單元測試 | 帳本、瀑布填充、餘額、零用錢補記等計算 | JUnit | XCTest／Swift Testing |
 | 資料庫測試 | migration、備份還原（含跨平台還原） | SQLDelight 測試驅動 | GRDB 記憶體資料庫 |
-| 截圖測試 | 每個畫面 × 4 個主題 | Paparazzi | swift-snapshot-testing |
+| 截圖測試 | 每個畫面 × 4 個主題 | Roborazzi（Robolectric） | swift-snapshot-testing |
 | 端對端測試 | 首次設定、記收入、任務驗收、目標達成出金 | Maestro | Maestro |
+
+### 截圖測試改用 Roborazzi（2026-11-02，AI 決定）
+
+- 原定 Paparazzi，但 1.3.5 與 2.0.0-alpha02 都無法在 compileSdk 36 執行（讀取平台 build.prop 失敗）。
+- 改用 **Roborazzi 1.77＋Robolectric 4.17**：同樣在 JVM 上算繪、不需要模擬器；Robolectric 可固定算繪用的 SDK（35），不受 compileSdk 影響。
+- 基準圖放 `android/app/src/test/snapshots/`（要 commit）；`gradlew recordRoborazziDebug` 更新基準、`gradlew verifyRoborazziDebug` 比對。基準以繁中介面記錄。
+- 不同作業系統的字型算繪可能有像素差，CI 只跑測試不做比對；比對在本機做。
 
 ### 兩個平台計算一致
 

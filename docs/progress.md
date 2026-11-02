@@ -3,10 +3,10 @@
 > 最後更新：2026-11-02
 > 這份只追蹤階段與進度；內容細節見下方〈文件〉。
 
-- Current focus: Phase 1 開發，M5 常態零用錢完成
-- Next action: M6 錢包、成長紀錄
+- Current focus: Phase 1 開發，M6～M10 完成；只剩 M11 上架準備（需要使用者操作）
+- Next action: M11 上架準備：Claude 一步步帶使用者申請 Play 開發者帳號、建立 OAuth、簽名金鑰、隱私權政策、封閉測試
 
-## Phase 1 階段進度：91%
+## Phase 1 階段進度：99%
 
 > 第一版，只做 Android。5 個階段平均；開發階段內 5a 基礎佔 20%，M1～M11 各約 7.3%。
 
@@ -14,7 +14,7 @@
 - 階段 2 技術選型：[##########] 100%（`docs/tech-decisions.md`）
 - 階段 3 UI/UX 設計：[##########] 100%（`docs/design.md`）
 - 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md`）
-- 階段 5 開發實作：[######----] 56%（`android/`、`shared/`、`tools/`）
+- 階段 5 開發實作：[#########-] 93%（`android/`、`shared/`、`tools/`）
 
 ### Phase 1 開發追蹤
 
@@ -24,11 +24,11 @@
 - [x] M3 目標
 - [x] M4 任務
 - [x] M5 常態零用錢
-- [ ] M6 錢包、成長紀錄
-- [ ] M7 設定
-- [ ] M8 備份
-- [ ] M9 慶祝動畫與音效
-- [ ] M10 截圖測試＋主要流程
+- [x] M6 錢包、成長紀錄
+- [x] M7 設定
+- [x] M8 備份（匯出／匯入已驗證；Google 雲端程式完成，待 M11 設好 OAuth 後在有 Google Play 的裝置驗證）
+- [x] M9 慶祝動畫與音效
+- [x] M10 截圖測試＋主要流程（Roborazzi 12 張基準圖；Maestro 9 條流程，`tools/scripts/e2e.ps1`）
 - [ ] M11 上架準備（人工上架）
 
 ## Phase 2 階段進度：0%

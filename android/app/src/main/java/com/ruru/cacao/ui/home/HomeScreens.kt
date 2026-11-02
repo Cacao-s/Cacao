@@ -77,6 +77,9 @@ fun ParentHomeScreen(vm: AppViewModel, parentId: String) {
         TextButton(onClick = { vm.go(Screen.Tasks(parentId)) }, modifier = Modifier.testTag("parent_tasks")) {
             Text(stringResource(R.string.parent_tasks) + " ›", color = Cacao.colors.primary, fontWeight = FontWeight.Bold)
         }
+        TextButton(onClick = { vm.go(Screen.Settings(parentId)) }, modifier = Modifier.testTag("parent_settings")) {
+            Text(stringResource(R.string.settings_title) + " ›", color = Cacao.colors.primary, fontWeight = FontWeight.Bold)
+        }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { vm.go(Screen.SelectUser) }, modifier = Modifier.testTag("parent_logout")) {
             Text(stringResource(R.string.logout_parent), color = Cacao.colors.primary)
@@ -123,10 +126,14 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
             Tile(stringResource(R.string.menu_tasks), stringResource(R.string.tasks_pending_count, pendingTasks), Cacao.colors.secondary, "tile_tasks", Modifier.weight(1f)) {
                 vm.go(Screen.ChildTasks(childId))
             }
-            Tile(stringResource(R.string.menu_wallet), stringResource(R.string.coming_soon), Cacao.colors.primary, "tile_wallet", Modifier.weight(1f), null)
+            Tile(stringResource(R.string.menu_wallet), stringResource(R.string.wallet_add_expense), Cacao.colors.primary, "tile_wallet", Modifier.weight(1f)) {
+                vm.go(Screen.Wallet(childId, null))
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Tile(stringResource(R.string.menu_growth), stringResource(R.string.coming_soon), Cacao.colors.outline, "tile_growth", Modifier.weight(1f), null)
+            Tile(stringResource(R.string.menu_growth), stringResource(R.string.growth_title), Cacao.colors.outline, "tile_growth", Modifier.weight(1f)) {
+                vm.go(Screen.Growth(childId, null))
+            }
             Spacer(Modifier.weight(2f).padding(5.dp))
         }
         Spacer(Modifier.weight(1f))

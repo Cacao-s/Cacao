@@ -1,0 +1,109 @@
+# M7 設定：切換主題 → 新增長輩、孩子、第二位父母（顯示救援碼）→ 改名 → 第二位父母可以登入
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: parent_settings
+
+# 主題切換
+- tapOn:
+    id: theme_starry_gold
+- tapOn:
+    id: theme_cocoa_milk
+
+# 家庭成員
+- tapOn:
+    id: settings_family
+- tapOn:
+    id: family_add_elder
+- scrollUntilVisible:
+    element:
+        id: add_save
+- tapOn:
+    id: add_name
+- inputText: Grandma
+- hideKeyboard
+- tapOn:
+    id: add_save
+- assertVisible:
+    id: family_Grandma
+
+- tapOn:
+    id: family_add_child
+- scrollUntilVisible:
+    element:
+        id: add_save
+- tapOn:
+    id: add_name
+- inputText: Ben
+- hideKeyboard
+- tapOn:
+    id: add_birthday
+- inputText: 2021-08-05
+- hideKeyboard
+- tapOn:
+    id: add_save
+- assertVisible:
+    id: family_Ben
+
+- tapOn:
+    id: family_add_parent
+- scrollUntilVisible:
+    element:
+        id: add_save
+- tapOn:
+    id: add_name
+- inputText: Dad
+- hideKeyboard
+- tapOn:
+    id: add_pin
+- inputText: "4321"
+- hideKeyboard
+- tapOn:
+    id: add_pin_confirm
+- inputText: "4321"
+- hideKeyboard
+- tapOn:
+    id: add_save
+- assertVisible:
+    id: recovery_code
+- tapOn:
+    id: recovery_close
+
+# 改名：Ben → Benny
+- tapOn:
+    id: family_rename_Ben
+- scrollUntilVisible:
+    element:
+        id: rename_save
+- tapOn:
+    id: rename_input
+- eraseText
+- inputText: Benny
+- hideKeyboard
+- tapOn:
+    id: rename_save
+- assertVisible:
+    id: family_Benny
+
+# 第二位父母用自己的 PIN 登入
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+- assertVisible:
+    id: member_Benny
+- tapOn:
+    id: member_Dad
+- tapOn: { id: pin_key_4 }
+- tapOn: { id: pin_key_3 }
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_1 }
+- assertVisible:
+    id: parent_home_title
+- assertVisible:
+    id: child_row_Benny

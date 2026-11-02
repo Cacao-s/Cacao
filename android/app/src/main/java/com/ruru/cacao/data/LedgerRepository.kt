@@ -13,6 +13,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
+data class Growth(val saved: Long, val tasksDone: Long, val goalsDone: Long)
+
+/** 孩子「N 歲這一年」的區間：[生日＋N 年, 生日＋N＋1 年) */
+fun ageYear(birthday: LocalDate, age: Int): Pair<LocalDate, LocalDate> =
+    birthday.plusYears(age.toLong()) to birthday.plusYears(age.toLong() + 1)
+
 sealed interface LedgerResult {
     data object Ok : LedgerResult
     data class OverAvailable(val available: Long) : LedgerResult
@@ -66,6 +72,28 @@ class LedgerRepository(
         }
         return LedgerResult.Ok
     }
+
+    /** 錢包記花費；不擋超過餘額，錢包本來就不需要對上實際現金 */
+    fun addWalletExpense(childId: String, amount: Long, recordedBy: String, note: String?): LedgerResult {
+        if (amount <= 0) return LedgerResult.InvalidAmount
+        insert(UUID.randomUUID().toString(), childId, Account.WALLET, "wallet_expense", -amount, null, null, note, null, recordedBy)
+        return LedgerResult.Ok
+    }
+
+    /** 校正餘額：輸入實際剩多少，差額記成「未記錄支出」；沒有差額就不記 */
+    fun calibrateWallet(childId: String, actual: Long, recordedBy: String): LedgerResult {
+        if (actual < 0) return LedgerResult.InvalidAmount
+        val diff = actual - balances(childId).wallet
+        if (diff != 0L) insert(UUID.randomUUID().toString(), childId, Account.WALLET, "wallet_adjustment", diff, null, null, null, null, recordedBy)
+        return LedgerResult.Ok
+    }
+
+    /** 成長紀錄（簡單版）：[from, to) 區間內存了多少、完成幾個任務、達成幾個目標 */
+    fun growth(childId: String, from: LocalDate, to: LocalDate): Growth = Growth(
+        saved = queries.incomeBetween(childId, from.toString(), to.toString()).executeAsOne(),
+        tasksDone = queries.tasksBetween(childId, from.toString(), to.toString()).executeAsOne(),
+        goalsDone = queries.goalsCompletedBetween(childId, from.toString(), to.toString()).executeAsOne(),
+    )
 
     /** 任務獎勵入帳存款，來源是出題人；回傳 group_id */
     internal fun addTaskReward(childId: String, amount: Long, issuerId: String, verifiedBy: String, title: String): String {

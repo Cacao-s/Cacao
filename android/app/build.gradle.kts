@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.roborazzi)
 }
 
 val sharedDir = rootProject.projectDir.resolve("../shared")
@@ -39,6 +40,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -47,9 +49,15 @@ android {
         }
     }
 
+    // 動畫與音效共用 shared/（D-22）
+    sourceSets["main"].assets.srcDirs(sharedDir.resolve("animations"), sharedDir.resolve("sounds"))
+
     testOptions {
+        unitTests.isIncludeAndroidResources = true
         unitTests.all {
             it.systemProperty("cacao.sharedDir", sharedDir.absolutePath)
+            it.maxHeapSize = "1g"
+            it.maxParallelForks = 1
         }
     }
 }
@@ -87,9 +95,20 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.sqldelight.android)
     implementation(libs.bouncycastle)
+    implementation(libs.appcompat)
+    implementation(libs.serialization.json)
+    implementation(libs.play.services.auth)
+    implementation(libs.lottie.compose)
     debugImplementation(libs.compose.ui.tooling)
 
     testImplementation(libs.junit)
     testImplementation(libs.sqldelight.jvm)
     testImplementation(libs.serialization.json)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.rule)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

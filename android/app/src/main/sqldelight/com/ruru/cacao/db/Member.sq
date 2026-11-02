@@ -14,5 +14,11 @@ SELECT COUNT(*) FROM member WHERE deleted_at IS NULL;
 updatePin:
 UPDATE member SET pin_hash = ?, recovery_hash = ?, updated_at = ? WHERE id = ?;
 
+rename:
+UPDATE member SET name = ?, updated_at = ? WHERE id = ?;
+
+updateRecovery:
+UPDATE member SET recovery_hash = ?, updated_at = ? WHERE id = ?;
+
 updatePassword:
 UPDATE member SET password_hash = ?, updated_at = ? WHERE id = ?;

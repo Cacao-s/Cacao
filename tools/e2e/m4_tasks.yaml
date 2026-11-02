@@ -69,6 +69,10 @@ appId: com.ruru.cacao
     id: task_done_Clean
 - runFlow: subflows/pin_1234.yaml
 - assertVisible:
+    id: celebrate_ok
+- tapOn:
+    id: celebrate_ok
+- assertVisible:
     id: task_completed_Clean
 - assertNotVisible:
     id: task_done_Clean
