@@ -52,11 +52,18 @@
 
 ## 文件
 
-- 產品規格：`docs/product/`（overview／features／roadmap）
+### Phase 1
+
+- 產品規格：`docs/product/`（overview／features／roadmap〈第一版〉）
 - 技術決策：`docs/tech-decisions.md`
 - UI/UX 設計：`docs/design.md`（線框 <https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>）
 - 資料模型：`docs/data-model.md`
 - 身分與備份：`docs/auth-design.md`
+
+### Phase 2
+
+- 範圍：`docs/product/roadmap.md`〈第二版以後〉
+- 其他文件（技術選型、UI/UX、裝置同步設計）在 Phase 2 各階段開始時建立
 
 ## Blockers
 
