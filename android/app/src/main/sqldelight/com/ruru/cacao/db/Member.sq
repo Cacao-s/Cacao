@@ -1,0 +1,18 @@
+insert:
+INSERT INTO member(id, role, name, birthday, avatar_color, pin_hash, recovery_hash, password_hash, sort_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+active:
+SELECT * FROM member WHERE deleted_at IS NULL ORDER BY sort_order, created_at;
+
+byId:
+SELECT * FROM member WHERE id = ?;
+
+countActive:
+SELECT COUNT(*) FROM member WHERE deleted_at IS NULL;
+
+updatePin:
+UPDATE member SET pin_hash = ?, recovery_hash = ?, updated_at = ? WHERE id = ?;
+
+updatePassword:
+UPDATE member SET password_hash = ?, updated_at = ? WHERE id = ?;

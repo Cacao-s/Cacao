@@ -41,6 +41,12 @@ android {
         compose = true
     }
 
+    packaging {
+        resources {
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
+
     testOptions {
         unitTests.all {
             it.systemProperty("cacao.sharedDir", sharedDir.absolutePath)
@@ -78,7 +84,9 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.activity.compose)
     implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.sqldelight.android)
+    implementation(libs.bouncycastle)
     debugImplementation(libs.compose.ui.tooling)
 
     testImplementation(libs.junit)

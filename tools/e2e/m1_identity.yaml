@@ -1,0 +1,143 @@
+# M1 身分：首次設定 → 選擇使用者 → PIN（含輸錯）→ 孩子模式切回父母 → 孩子密碼 → 用救援碼重設 PIN
+# 用 id 定位，不受介面語言影響。名字用英文是因為模擬器輸入法打不了中文。
+appId: com.ruru.cacao
+---
+- launchApp:
+    clearState: true
+
+# 首次設定
+- tapOn:
+    id: onboarding_new
+- tapOn:
+    id: parent_name
+- inputText: Mom
+- tapOn:
+    id: pin_new
+- inputText: "1234"
+- tapOn:
+    id: pin_confirm
+- inputText: "1234"
+- hideKeyboard
+- tapOn:
+    id: parent_next
+- assertVisible:
+    id: recovery_code
+- copyTextFrom:
+    id: recovery_code
+- tapOn:
+    id: recovery_saved
+- tapOn:
+    id: recovery_next
+- tapOn:
+    id: child_name
+- inputText: Ann
+- tapOn:
+    id: child_birthday
+- inputText: 2017-03-12
+- hideKeyboard
+- tapOn:
+    id: child_done
+
+# 選擇使用者 → 父母輸錯 PIN 不能進
+- assertVisible:
+    id: member_Mom
+- assertVisible:
+    id: member_Ann
+- tapOn:
+    id: member_Mom
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- tapOn: { id: pin_key_9 }
+- assertNotVisible:
+    id: parent_home_title
+- tapOn: { id: pin_key_1 }
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_3 }
+- tapOn: { id: pin_key_4 }
+- assertVisible:
+    id: parent_home_title
+- assertVisible:
+    id: child_row_Ann
+
+# 孩子模式 → 鎖頭切回父母模式
+- tapOn:
+    id: parent_logout
+- tapOn:
+    id: member_Ann
+- assertVisible:
+    id: child_home_title
+- tapOn:
+    id: child_lock
+- tapOn: { id: pin_key_1 }
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_3 }
+- tapOn: { id: pin_key_4 }
+- assertVisible:
+    id: parent_home_title
+
+# 孩子設定密碼後，進入要輸入密碼
+- tapOn:
+    id: parent_logout
+- tapOn:
+    id: member_Ann
+- tapOn:
+    id: child_set_password
+- tapOn:
+    id: child_pw_new
+- inputText: "2468"
+- tapOn:
+    id: child_pw_confirm
+- inputText: "2468"
+- hideKeyboard
+- tapOn:
+    id: child_pw_done
+- tapOn:
+    id: child_back
+- tapOn:
+    id: member_Ann
+- assertNotVisible:
+    id: child_home_title
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_4 }
+- tapOn: { id: pin_key_6 }
+- tapOn: { id: pin_key_8 }
+- assertVisible:
+    id: child_home_title
+- tapOn:
+    id: child_back
+
+# 忘記 PIN：只有一位父母，用救援碼重設
+- tapOn:
+    id: member_Mom
+- tapOn:
+    id: pin_forgot
+- tapOn:
+    id: recovery_input
+- inputText: ${maestro.copiedText}
+- hideKeyboard
+- tapOn:
+    id: recovery_input_next
+- tapOn:
+    id: pin_new
+- inputText: "5678"
+- tapOn:
+    id: pin_confirm
+- inputText: "5678"
+- hideKeyboard
+- tapOn:
+    id: parent_next
+- assertVisible:
+    id: recovery_code
+- tapOn:
+    id: recovery_saved
+- tapOn:
+    id: recovery_next
+- tapOn:
+    id: member_Mom
+- tapOn: { id: pin_key_5 }
+- tapOn: { id: pin_key_6 }
+- tapOn: { id: pin_key_7 }
+- tapOn: { id: pin_key_8 }
+- assertVisible:
+    id: parent_home_title
