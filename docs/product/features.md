@@ -168,7 +168,7 @@
 
 - 4 個主題：**可可牛奶**、**彩色積木**、**棉花糖**、**星夜金幣**。
 - 一台手機一個主題設定，在設定裡切換。不綁帳號、也不綁孩子；它是這台手機的設定，不屬於家庭資料。
-- Logo：可可豆存錢筒。
+- Logo：**④ 發芽的可可豆**（2026-11-02 使用者改定；設計稿「Logo 提案」第 4 款：淺綠底、咖啡色可可豆冒出兩片綠芽，字標 Fredoka）。早期記的「可可豆存錢筒」已不採用。App 圖示在 `android/app/src/main/res/drawable/ic_launcher_*.xml`，商店圖在 `docs/store/`。
 - 設計稿：<https://claude.ai/artifact/XkWynXKhLPrwvBhwCYXcC4>
 
 ## 語言
