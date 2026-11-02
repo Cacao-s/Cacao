@@ -396,6 +396,8 @@ docs/
 
 - `shared/tokens/` 用一份 JSON 定義 4 個主題的顏色、字型、圓角、陰影等，用產生腳本輸出 Kotlin（Compose）與 Swift（SwiftUI）程式碼。
 - 字型照 D-11：英文數字字型打包成 App 資源，中文用系統字型；每個主題的字型寫在 token 裡，換字型只改 JSON。
+- 產生工具：`tools/codegen/tokens.py`（Python）。產生的 Kotlin 檔會 commit，CI 用 `--check` 確認它跟 JSON 一致；這樣 Android 建置不需要 Python（2026-11-02，AI 決定）。
+- 字型檔：Fraunces、Rubik、Nunito、Sora 的可變字型（Google Fonts，OFL 授權）放在 `android/app/src/main/res/font/`，共約 1.1 MB。
 
 ---
 

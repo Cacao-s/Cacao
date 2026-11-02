@@ -1,0 +1,89 @@
+{
+  "description": "4 個主題的 design token（D-19）。改這裡後執行 tools/codegen/tokens.py 重新產生各平台程式碼。數值來自 UI 提案畫布 https://claude.ai/artifact/XkWynXKhLPrwvBhwCYXcC4",
+  "themes": [
+    {
+      "id": "cocoa_milk",
+      "name": { "zh-Hant": "可可牛奶", "en": "Cocoa Milk" },
+      "dark": false,
+      "color": {
+        "background": "#FBF6EF",
+        "surface": "#FFFFFF",
+        "onSurface": "#2A1A12",
+        "muted": "#6E5A4C",
+        "outline": "#D9C8B6",
+        "primary": "#6B3B22",
+        "onPrimary": "#FFFFFF",
+        "secondary": "#2F7D6D",
+        "onSecondary": "#FFFFFF",
+        "locked": "#E9B44C",
+        "onLocked": "#2A1A12",
+        "danger": "#B3261E"
+      },
+      "font": { "number": "fraunces", "titleSerif": true },
+      "shape": { "radius": 22, "border": 0, "hardShadow": 0 }
+    },
+    {
+      "id": "color_blocks",
+      "name": { "zh-Hant": "彩色積木", "en": "Color Blocks" },
+      "dark": false,
+      "color": {
+        "background": "#FFFBF0",
+        "surface": "#FFFFFF",
+        "onSurface": "#161616",
+        "muted": "#4A4A4A",
+        "outline": "#161616",
+        "primary": "#2D5BFF",
+        "onPrimary": "#FFFFFF",
+        "secondary": "#3DDC97",
+        "onSecondary": "#161616",
+        "locked": "#FFD23F",
+        "onLocked": "#161616",
+        "danger": "#D7263D"
+      },
+      "font": { "number": "rubik", "titleSerif": false },
+      "shape": { "radius": 16, "border": 2.5, "hardShadow": 4 }
+    },
+    {
+      "id": "marshmallow",
+      "name": { "zh-Hant": "棉花糖", "en": "Marshmallow" },
+      "dark": false,
+      "color": {
+        "background": "#F6F1FF",
+        "surface": "#FFFFFF",
+        "onSurface": "#2B2350",
+        "muted": "#6C6590",
+        "outline": "#DCD2FF",
+        "primary": "#6A51F0",
+        "onPrimary": "#FFFFFF",
+        "secondary": "#BDEFD8",
+        "onSecondary": "#134A35",
+        "locked": "#FFE59A",
+        "onLocked": "#5E4700",
+        "danger": "#C2410C"
+      },
+      "font": { "number": "nunito", "titleSerif": false },
+      "shape": { "radius": 28, "border": 0, "hardShadow": 0 }
+    },
+    {
+      "id": "starry_gold",
+      "name": { "zh-Hant": "星夜金幣", "en": "Starry Gold" },
+      "dark": true,
+      "color": {
+        "background": "#12142B",
+        "surface": "#1D2042",
+        "onSurface": "#F4F1E8",
+        "muted": "#A9AACB",
+        "outline": "#34386A",
+        "primary": "#F5C451",
+        "onPrimary": "#2A1E00",
+        "secondary": "#5FE3B5",
+        "onSecondary": "#0A2A20",
+        "locked": "#F5C451",
+        "onLocked": "#2A1E00",
+        "danger": "#FF8A80"
+      },
+      "font": { "number": "sora", "titleSerif": false },
+      "shape": { "radius": 20, "border": 0, "hardShadow": 0 }
+    }
+  ]
+}

@@ -21,7 +21,7 @@
 - [x] 共用 schema 接 SQLDelight、資料庫測試
 - [x] 計算邏輯（餘額、可出金額、瀑布填充）＋共用測試案例
 - [x] 模擬器跑起來
-- [ ] 主題 token JSON＋codegen（4 個主題、字型跟主題）
+- [x] 主題 token JSON＋codegen（4 個主題、字型跟主題）
 - [ ] 翻譯來源＋codegen（繁中、英文）
 - [ ] CI：GitHub Actions 跑單元測試與編譯
 - [ ] Maestro 端對端測試環境
