@@ -17,9 +17,12 @@
 
 ## 3. Google 雲端備份（OAuth）
 
-- 👤 在 Google Cloud Console 建立專案。
-- 👤 設定 OAuth 同意畫面：外部使用者、App 名稱 Cacao、支援信箱、範圍只加 `drive.appdata`（非敏感範圍，不需要 Google 審核）。
-- 🤖👤 建立 Android OAuth 用戶端：套件名稱 `com.ruru.cacao`，SHA-1 要加兩組：上傳金鑰的、以及 Play Console 裡「App 簽署金鑰」的。
+> 為避免點錯，Claude 代操作：使用者只負責登入，不需要給 API key 或密碼。
+
+- 👤 在終端機輸入 `! gcloud auth login`，用瀏覽器登入 Google 一次。
+- 🤖 用 `gcloud` 建立專案、啟用 Drive API（`gcloud projects create`、`gcloud services enable drive.googleapis.com`）。
+- 🤖 OAuth 同意畫面用 Chrome 擴充在使用者已登入的瀏覽器代點（gcloud 沒有對應指令）：外部使用者、App 名稱 Cacao、支援信箱、範圍只加 `drive.appdata`（非敏感範圍，不需要 Google 審核）。
+- 🤖 同樣用 Chrome 代點建立 Android OAuth 用戶端：套件名稱 `com.ruru.cacao`，SHA-1 要加兩組：上傳金鑰的、以及 Play Console 裡「App 簽署金鑰」的。
 - 🤖 在有 Google Play 的模擬器或手機上驗證：開啟雲端備份、立即備份、從 Google 還原、30 天自動備份。
 
 ## 4. 上架資料
