@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo ④ 發芽的可可豆（設計稿「Logo 提案」第 4 款），原圖 120 畫布縮放進 108dp 的中央安全區 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:scaleX="0.75" android:scaleY="0.75" android:translateX="9" android:translateY="6">
+        <path android:strokeColor="#2E9C70" android:strokeWidth="5" android:strokeLineCap="round" android:pathData="M60,62 V36" />
+        <path android:fillColor="#2E9C70" android:pathData="M60,46 Q42,32 36,42 Q46,54 60,46 Z" />
+        <path android:fillColor="#3DBB85" android:pathData="M60,40 Q78,24 86,34 Q76,48 60,40 Z" />
+        <path android:fillColor="#6B3B22" android:pathData="M28,82 a32,22 0 1,0 64,0 a32,22 0 1,0 -64,0 Z" />
+        <path android:strokeColor="#C9A386" android:strokeWidth="3" android:strokeLineCap="round" android:pathData="M36,82 Q60,72 84,82" />
+    </group>
+</vector>
