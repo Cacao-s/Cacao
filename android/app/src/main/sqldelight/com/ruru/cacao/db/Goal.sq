@@ -1,0 +1,36 @@
+insert:
+INSERT INTO goal(id, child_id, name, target_amount, priority, fill_enabled, created_by, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?);
+
+forChild:
+SELECT * FROM goal WHERE child_id = ? AND deleted_at IS NULL ORDER BY priority;
+
+allForChild:
+SELECT * FROM goal WHERE child_id = ? ORDER BY priority;
+
+byId:
+SELECT * FROM goal WHERE id = ?;
+
+updatePriority:
+UPDATE goal SET priority = ?, updated_at = ? WHERE id = ?;
+
+updateFill:
+UPDATE goal SET fill_enabled = ?, updated_at = ? WHERE id = ?;
+
+updateTarget:
+UPDATE goal SET target_amount = ?, updated_at = ? WHERE id = ?;
+
+softDelete:
+UPDATE goal SET deleted_at = ?, updated_at = ? WHERE id = ?;
+
+insertEvent:
+INSERT INTO goal_event(id, goal_id, kind, amount, ledger_group_id, member_id, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+eventsForChild:
+SELECT e.* FROM goal_event e JOIN goal g ON g.id = e.goal_id
+WHERE g.child_id = ?
+ORDER BY e.created_at, e.rowid;
+
+voidedGroups:
+SELECT group_id FROM ledger_void;

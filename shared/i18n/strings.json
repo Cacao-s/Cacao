@@ -109,6 +109,28 @@
     "void_confirm_title": { "zh-Hant": "作廢這筆？", "en": "Void this entry?" },
     "void_confirm_body": { "zh-Hant": "作廢後會劃線保留，不算進餘額。記錯的話，作廢後再記一筆正確的。", "en": "It stays crossed out and no longer counts. If it was a mistake, add the correct one after." },
     "void_negative": { "zh-Hant": "作廢後存款會變成負數，請先作廢相關的出金", "en": "Voiding this would make savings negative. Void the related payout first." },
-    "overview_history": { "zh-Hant": "存款明細", "en": "Savings history" }
+    "overview_history": { "zh-Hant": "存款明細", "en": "Savings history" },
+
+    "goals_title": { "zh-Hant": "目標", "en": "Goals" },
+    "goals_hint": { "zh-Hant": "存款照順序往下填，箭頭可以調整順序", "en": "Savings fill goals in order. Use the arrows to reorder." },
+    "goals_empty": { "zh-Hant": "還沒有目標", "en": "No goals yet" },
+    "goal_new": { "zh-Hant": "＋新目標", "en": "+ New goal" },
+    "goal_name_label": { "zh-Hant": "想要什麼", "en": "What do you want?" },
+    "goal_target_label": { "zh-Hant": "目標金額", "en": "Target amount" },
+    "goal_fill": { "zh-Hant": "參與填充", "en": "Fill" },
+    "goal_move_up": { "zh-Hant": "往前", "en": "Move up" },
+    "goal_move_down": { "zh-Hant": "往後", "en": "Move down" },
+    "goal_revert": { "zh-Hant": "退回「進行中」", "en": "Back to saving" },
+    "goal_change_target": { "zh-Hant": "修改目標金額", "en": "Change target" },
+    "goal_delete": { "zh-Hant": "刪除目標", "en": "Delete goal" },
+    "goal_delete_body": { "zh-Hant": "刪除後，存在這個目標的錢會回到存款池。", "en": "Money saved for this goal goes back to savings." },
+    "goal_payout": { "zh-Hant": "出金買下", "en": "Pay out to buy" },
+    "goal_payout_amount": { "zh-Hant": "實際價格", "en": "Actual price" },
+    "goal_payout_over": { "zh-Hant": "超過鎖住的 %1$s，請先退回並修改目標金額", "en": "More than the locked %1$s. Go back to saving and change the target first." },
+    "goal_designated": { "zh-Hant": "指定的錢 %1$s", "en": "Set aside %1$s" },
+    "goal_designate_label": { "zh-Hant": "指定給目標（選填）", "en": "Set aside for a goal (optional)" },
+    "goal_designate_none": { "zh-Hant": "不指定", "en": "None" },
+    "goal_need_more": { "zh-Hant": "再存 %1$s 就達成", "en": "%1$s to go" },
+    "coming_soon": { "zh-Hant": "之後開放", "en": "Coming soon" }
   }
 }

@@ -103,6 +103,7 @@ fun ChildOverviewScreen(vm: AppViewModel, parentId: String, childId: String) {
                 shape = RoundedCornerShape(14.dp),
             ) { Text(stringResource(R.string.action_payout), fontWeight = FontWeight.Bold, color = Cacao.colors.primary) }
         }
+        MenuRow(stringResource(R.string.goals_title), "overview_goals") { vm.go(Screen.Goals(childId, parentId)) }
         MenuRow(stringResource(R.string.overview_history), "overview_history") { vm.go(Screen.Ledger(parentId, childId)) }
     }
 }
@@ -140,6 +141,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
     var note by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var cashToWallet by remember { mutableStateOf(false) }
+    var goalId by remember { mutableStateOf<String?>(null) }
     var addingElder by remember { mutableStateOf(false) }
     var elderName by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
@@ -152,19 +154,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         PlainField(stringResource(R.string.amount_label), amount, "income_amount", KeyboardType.Number) { amount = it.filter(Char::isDigit).take(7) }
         Body(stringResource(R.string.income_source_label))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            sources.forEach { source ->
-                val selected = source.id == sourceId
-                Text(
-                    source.name,
-                    modifier = Modifier
-                        .background(if (selected) Cacao.colors.primary else Cacao.colors.surface, RoundedCornerShape(50))
-                        .border(1.dp, Cacao.colors.outline, RoundedCornerShape(50))
-                        .clickable { sourceId = source.id }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("source_${source.name}"),
-                    color = if (selected) Cacao.colors.onPrimary else Cacao.colors.onSurface,
-                )
-            }
+            sources.forEach { source -> Chip(source.name, source.id == sourceId, "source_${source.name}") { sourceId = source.id } }
         }
         if (addingElder) {
             PlainField(stringResource(R.string.elder_name_label), elderName, "elder_name") { elderName = it }
@@ -181,6 +171,14 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         }
         PlainField(stringResource(R.string.note_label), note, "income_note") { note = it }
         PlainField(stringResource(R.string.message_label), message, "income_message") { message = it }
+        val openGoals = remember(vm.ledgerVersion, childId) { vm.goals.views(childId).filter { it.state.status == com.ruru.cacao.domain.GoalStatus.IN_PROGRESS } }
+        if (openGoals.isNotEmpty()) {
+            Body(stringResource(R.string.goal_designate_label))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                Chip(stringResource(R.string.goal_designate_none), goalId == null, "designate_none") { goalId = null }
+                openGoals.forEach { g -> Chip(g.goal.name, goalId == g.goal.id, "designate_${g.goal.name}") { goalId = g.goal.id } }
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { cashToWallet = !cashToWallet }.testTag("income_cash")) {
             Checkbox(checked = cashToWallet, onCheckedChange = { cashToWallet = it })
             Text(stringResource(R.string.cash_to_wallet), color = Cacao.colors.onSurface, fontSize = 14.sp)
@@ -188,7 +186,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         ErrorText(error)
         Spacer(Modifier.height(8.dp))
         PrimaryButton(stringResource(R.string.action_save), "income_save") {
-            val result = vm.ledger.addIncome(childId, amount.toLongOrNull() ?: 0, sourceId, parentId, note, message, cashToWallet = cashToWallet)
+            val result = vm.ledger.addIncome(childId, amount.toLongOrNull() ?: 0, sourceId, parentId, note, message, goalId = goalId, cashToWallet = cashToWallet)
             if (result == LedgerResult.Ok) {
                 vm.ledgerChanged()
                 vm.go(Screen.ChildOverview(parentId, childId))
@@ -197,6 +195,20 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
             }
         }
     }
+}
+
+@Composable
+private fun Chip(text: String, selected: Boolean, tag: String, onClick: () -> Unit) {
+    Text(
+        text,
+        modifier = Modifier
+            .background(if (selected) Cacao.colors.primary else Cacao.colors.surface, RoundedCornerShape(50))
+            .border(1.dp, Cacao.colors.outline, RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .testTag(tag),
+        color = if (selected) Cacao.colors.onPrimary else Cacao.colors.onSurface,
+    )
 }
 
 /** P04 出金 */

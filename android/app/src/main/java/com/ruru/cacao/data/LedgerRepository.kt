@@ -67,6 +67,14 @@ class LedgerRepository(
         return LedgerResult.Ok
     }
 
+    /** 目標出金：額度檢查由 GoalRepository 負責（鎖住的錢），回傳 group_id */
+    internal fun payoutForGoal(childId: String, amount: Long, recordedBy: String, note: String?, goalId: String): String {
+        val group = UUID.randomUUID().toString()
+        insert(group, childId, Account.SAVINGS, "payout", -amount, null, goalId, note, null, recordedBy)
+        insert(group, childId, Account.WALLET, "payout", amount, null, goalId, note, null, recordedBy)
+        return group
+    }
+
     /** 作廢一整組；作廢後存款不能變負數（例如收入已經被出金用掉） */
     fun voidGroup(groupId: String, voidedBy: String): LedgerResult {
         val groupLines = queries.groupEntries(groupId).executeAsList()

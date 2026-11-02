@@ -1,0 +1,153 @@
+# M3 目標：建立 → 瀑布填充 → 調整順序 → 孩子確認鎖錢 → 父母特價出金 → 指定的錢不能出金 → 刪除回到存款池
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: child_row_cacao
+
+# 存 1000
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "1000"
+- hideKeyboard
+- tapOn:
+    id: income_save
+
+# 建兩個目標：Lego 600、Bike 3000
+- tapOn:
+    id: overview_goals
+- tapOn:
+    id: goal_new
+- tapOn:
+    id: goal_name
+- inputText: Lego
+- tapOn:
+    id: goal_target
+- inputText: "600"
+- hideKeyboard
+- tapOn:
+    id: goal_save
+- tapOn:
+    id: goal_new
+- tapOn:
+    id: goal_name
+- inputText: Bike
+- tapOn:
+    id: goal_target
+- inputText: "3000"
+- hideKeyboard
+- tapOn:
+    id: goal_save
+- assertVisible:
+    id: goal_saved_Lego
+    text: "\\$600 / \\$600"
+- assertVisible:
+    id: goal_saved_Bike
+    text: "\\$400 / \\$3,000"
+
+# 調整順序：Bike 往前就先填 Bike
+- tapOn:
+    id: goal_up_Bike
+- assertVisible:
+    id: goal_saved_Bike
+    text: "\\$1,000 / \\$3,000"
+- tapOn:
+    id: goal_down_Bike
+- assertVisible:
+    id: goal_saved_Lego
+    text: "\\$600 / \\$600"
+
+# 孩子確認 Lego，鎖錢
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- tapOn:
+    id: member_cacao
+- tapOn:
+    id: tile_goals
+- tapOn:
+    id: goal_Lego
+- tapOn:
+    id: goal_confirm
+- assertVisible:
+    id: goal_revert
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+
+# 父母：可出金額 = 1000 − 600 鎖住
+- tapOn:
+    id: child_lock
+- runFlow: subflows/pin_1234.yaml
+- tapOn:
+    id: child_row_cacao
+- assertVisible:
+    id: overview_available
+    text: "\\$400"
+
+# 特價 550 買下 Lego，剩下的解鎖
+- tapOn:
+    id: overview_goals
+- tapOn:
+    id: goal_Lego
+- tapOn:
+    id: goal_payout
+- tapOn:
+    id: goal_price
+- eraseText
+- inputText: "550"
+- hideKeyboard
+- tapOn:
+    id: goal_payout_save
+- assertNotVisible:
+    id: goal_revert
+- tapOn:
+    id: back
+- tapOn:
+    id: back
+- assertVisible:
+    id: overview_savings
+    text: "\\$450"
+- assertVisible:
+    id: overview_wallet
+    text: "\\$550"
+
+# 指定給 Bike 的 200 不能一般出金（DQ-13）
+- tapOn:
+    id: overview_income
+- tapOn:
+    id: income_amount
+- inputText: "200"
+- hideKeyboard
+- tapOn:
+    id: designate_Bike
+- tapOn:
+    id: income_save
+- assertVisible:
+    id: overview_savings
+    text: "\\$650"
+- assertVisible:
+    id: overview_available
+    text: "\\$450"
+
+# 刪除 Bike，指定的錢回到存款池（DQ-05）
+- tapOn:
+    id: overview_goals
+- tapOn:
+    id: goal_Bike
+- tapOn:
+    id: goal_delete
+- tapOn:
+    id: goal_delete_confirm
+- tapOn:
+    id: back
+- assertVisible:
+    id: overview_available
+    text: "\\$650"

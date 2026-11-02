@@ -19,6 +19,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.ruru.cacao.ui.AppViewModel
 import com.ruru.cacao.ui.Screen
+import com.ruru.cacao.ui.goals.GoalDetailScreen
+import com.ruru.cacao.ui.goals.GoalsScreen
+import com.ruru.cacao.ui.goals.NewGoalScreen
 import com.ruru.cacao.ui.home.ChildHomeScreen
 import com.ruru.cacao.ui.home.ParentHomeScreen
 import com.ruru.cacao.ui.identity.ChildPasswordScreen
@@ -74,6 +77,9 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.AddIncome -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
             is Screen.Payout -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
             is Screen.Ledger -> vm.go(Screen.ChildOverview(screen.parentId, screen.childId))
+            is Screen.Goals -> vm.go(screen.parentId?.let { Screen.ChildOverview(it, screen.childId) } ?: Screen.ChildHome(screen.childId))
+            is Screen.GoalDetail -> vm.go(Screen.Goals(screen.childId, screen.parentId))
+            is Screen.NewGoal -> vm.go(Screen.Goals(screen.childId, screen.parentId))
             else -> vm.go(Screen.SelectUser)
         }
     }
@@ -90,6 +96,9 @@ private fun AppRoot(vm: AppViewModel) {
             is Screen.AddIncome -> AddIncomeScreen(vm, screen.parentId, screen.childId)
             is Screen.Payout -> PayoutScreen(vm, screen.parentId, screen.childId)
             is Screen.Ledger -> LedgerScreen(vm, screen.parentId, screen.childId)
+            is Screen.Goals -> GoalsScreen(vm, screen.childId, screen.parentId)
+            is Screen.GoalDetail -> GoalDetailScreen(vm, screen.childId, screen.goalId, screen.parentId)
+            is Screen.NewGoal -> NewGoalScreen(vm, screen.childId, screen.parentId)
         }
     }
 }

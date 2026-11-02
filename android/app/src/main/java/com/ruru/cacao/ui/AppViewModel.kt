@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.ruru.cacao.data.GoalRepository
 import com.ruru.cacao.data.LedgerRepository
 import com.ruru.cacao.data.MemberRepository
 import com.ruru.cacao.data.Role
@@ -36,17 +37,29 @@ sealed interface Screen {
     data class AddIncome(val parentId: String, val childId: String) : Screen
     data class Payout(val parentId: String, val childId: String) : Screen
     data class Ledger(val parentId: String, val childId: String) : Screen
+
+    /** 目標畫面父母與孩子共用（UQ-05）；parentId 為 null 表示孩子模式 */
+    data class Goals(val childId: String, val parentId: String?) : Screen
+    data class GoalDetail(val childId: String, val goalId: String, val parentId: String?) : Screen
+    data class NewGoal(val childId: String, val parentId: String?) : Screen
 }
 
 val Screen.isParentMode: Boolean
-    get() = this is Screen.ParentHome || this is Screen.ForgotPin || this is Screen.ChildOverview ||
-        this is Screen.AddIncome || this is Screen.Payout || this is Screen.Ledger
+    get() = when (this) {
+        is Screen.ParentHome, is Screen.ForgotPin, is Screen.ChildOverview,
+        is Screen.AddIncome, is Screen.Payout, is Screen.Ledger -> true
+        is Screen.Goals -> parentId != null
+        is Screen.GoalDetail -> parentId != null
+        is Screen.NewGoal -> parentId != null
+        else -> false
+    }
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = CacaoDatabase(AndroidSqliteDriver(CacaoDatabase.Schema, application, "cacao.db"))
     val members = MemberRepository(db)
-    val ledger = LedgerRepository(db)
+    val goals = GoalRepository(db)
+    val ledger = LedgerRepository(db, goals = { goals.states(it) }).also { goals.ledger = it }
 
     /** 每次記帳後遞增，讓畫面重新讀餘額 */
     var ledgerVersion by mutableStateOf(0)

@@ -1,0 +1,8 @@
+# 共用：從「誰在用？」以 Mom（1234）進入父母模式
+appId: com.ruru.cacao
+---
+- tapOn:
+    id: member_Mom
+- runFlow: pin_1234.yaml
+- assertVisible:
+    id: parent_home_title

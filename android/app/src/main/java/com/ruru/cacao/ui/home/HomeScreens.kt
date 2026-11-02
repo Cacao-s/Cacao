@@ -3,6 +3,8 @@ package com.ruru.cacao.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.remember
 import com.ruru.cacao.ui.ledger.money
 import androidx.compose.foundation.layout.Arrangement
@@ -79,16 +81,47 @@ fun ParentHomeScreen(vm: AppViewModel, parentId: String) {
     }
 }
 
-/** C01 孩子首頁（M1 先做骨架，按鈕與餘額在 M2～M6 接上） */
+/** C01 孩子首頁：上半部存款、錢包、最近收到的錢；下半部彩色正方形按鈕一排 3 個（UQ-09） */
 @Composable
 fun ChildHomeScreen(vm: AppViewModel, childId: String) {
     val child = vm.member(childId) ?: return
+    val b = remember(vm.ledgerVersion, childId) { vm.ledger.balances(childId) }
+    val topGoal = remember(vm.ledgerVersion, childId) { vm.goals.views(childId).firstOrNull { it.state.status != com.ruru.cacao.domain.GoalStatus.COMPLETED } }
+    val names = vm.memberList.associate { it.id to it.name }
+    val gift = remember(vm.ledgerVersion, childId) {
+        vm.ledger.entries(childId).firstOrNull { it.voided == 0L && it.kind == "income_onetime" && it.source_id != null }
+    }
     ScreenColumn {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Title(stringResource(R.string.child_greeting, child.name), Modifier.weight(1f).testTag("child_home_title"))
             TextButton(onClick = { vm.go(Screen.Pin(PinPurpose.AnyParent)) }, modifier = Modifier.testTag("child_lock")) {
                 CuteLock(28.dp, stringResource(R.string.switch_to_parent))
             }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            BalanceCard(stringResource(R.string.savings), b.savings, Cacao.colors.primary, Cacao.colors.onPrimary, "child_savings", Modifier.weight(1f))
+            BalanceCard(stringResource(R.string.wallet), b.wallet, Cacao.colors.surface, Cacao.colors.onSurface, "child_wallet", Modifier.weight(1f))
+        }
+        gift?.let {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Cacao.colors.locked.copy(alpha = 0.25f), RoundedCornerShape(Cacao.shape.radius))
+                    .padding(14.dp),
+            ) {
+                Text(stringResource(R.string.gift_from, names[it.source_id].orEmpty(), money(it.amount)), fontWeight = FontWeight.Bold, color = Cacao.colors.onSurface)
+                it.message?.let { m -> Text("「$m」", color = Cacao.colors.muted, fontSize = 14.sp) }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            val goalSub = topGoal?.let { "${it.goal.name} ${(it.saved * 100 / it.goal.target_amount)}%" } ?: stringResource(R.string.goals_empty)
+            Tile(stringResource(R.string.menu_goals), goalSub, Cacao.colors.locked, "tile_goals", Modifier.weight(1f)) { vm.go(Screen.Goals(childId, null)) }
+            Tile(stringResource(R.string.menu_tasks), stringResource(R.string.coming_soon), Cacao.colors.secondary, "tile_tasks", Modifier.weight(1f), null)
+            Tile(stringResource(R.string.menu_wallet), stringResource(R.string.coming_soon), Cacao.colors.primary, "tile_wallet", Modifier.weight(1f), null)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Tile(stringResource(R.string.menu_growth), stringResource(R.string.coming_soon), Cacao.colors.outline, "tile_growth", Modifier.weight(1f), null)
+            Spacer(Modifier.weight(2f).padding(5.dp))
         }
         Spacer(Modifier.weight(1f))
         if (child.password_hash == null) {
@@ -103,6 +136,36 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
         TextButton(onClick = { vm.go(Screen.SelectUser) }, modifier = Modifier.testTag("child_back")) {
             Text(stringResource(R.string.back), color = Cacao.colors.primary)
         }
+    }
+}
+
+@Composable
+private fun BalanceCard(label: String, amount: Long, background: Color, content: Color, tag: String, modifier: Modifier) {
+    Column(
+        modifier
+            .background(background, RoundedCornerShape(Cacao.shape.radius))
+            .border(maxOf(Cacao.shape.border, 1.dp), Cacao.colors.outline, RoundedCornerShape(Cacao.shape.radius))
+            .padding(16.dp),
+    ) {
+        Text(label, color = content, fontSize = 14.sp)
+        Text(money(amount), color = content, fontFamily = Cacao.fonts.number, fontWeight = FontWeight.Bold, fontSize = 26.sp, modifier = Modifier.testTag(tag))
+    }
+}
+
+/** 彩色正方形按鈕；onClick 為 null 表示之後開放 */
+@Composable
+private fun Tile(title: String, sub: String, tint: Color, tag: String, modifier: Modifier, onClick: (() -> Unit)?) {
+    Column(
+        modifier
+            .aspectRatio(1f)
+            .background(tint.copy(alpha = if (onClick == null) 0.15f else 0.35f), RoundedCornerShape(Cacao.shape.radius * 0.8f))
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .testTag(tag),
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        Text(title, fontWeight = FontWeight.Bold, fontSize = 19.sp, color = Cacao.colors.onSurface)
+        Text(sub, fontSize = 12.sp, color = Cacao.colors.muted, maxLines = 1)
     }
 }
 

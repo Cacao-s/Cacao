@@ -1,0 +1,7 @@
+# 共用：在 PIN 輸入盤按 1234
+appId: com.ruru.cacao
+---
+- tapOn: { id: pin_key_1 }
+- tapOn: { id: pin_key_2 }
+- tapOn: { id: pin_key_3 }
+- tapOn: { id: pin_key_4 }
