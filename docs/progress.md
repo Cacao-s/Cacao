@@ -37,7 +37,7 @@
 - [ ] M8 備份：匯出／匯入、Google 雲端、30 天自動備份
 - [ ] M9 慶祝動畫與音效
 - [ ] M10 截圖測試（每畫面 × 4 主題）＋ Maestro 主要流程
-- [ ] M11 上架準備：OAuth 同意畫面、隱私權政策、Play Console、簽名金鑰；第一版手動上傳（CD 在 Phase 2）；個人帳號需先封閉測試（12 人 × 14 天）
+- [ ] M11 上架準備：OAuth 同意畫面、隱私權政策、Play Console、簽名金鑰；第一版人工上架，由 Claude 一步步帶使用者熟悉流程（CD 在 Phase 2）；個人帳號需先封閉測試（12 人 × 14 天）
   - 5a repo 骨架（`android/`、`ios/` 佔位、`shared/` 資料、`tools/` 工具）＋ codegen ＋ CI
   - 5b Android 實作＋自動化測試到通
 - Phase 2（下一個迭代，不計入第一版進度）：iOS 版，共用 `shared/`；驗證 Android ↔ iPhone 備份互相還原；CD 自動上架到 Google Play
