@@ -1,10 +1,10 @@
 # 專案進度
 
-> 最後更新：2026-11-02
+> 最後更新：2026-11-04
 > 這份只追蹤階段與進度；內容細節見下方〈文件〉。
 
-- Current focus: M11 上架準備；Claude 能做的已全部完成，剩下的都要使用者本人
-- Next action: 等 Google 驗證身分；改天再補 OAuth 品牌頁（隱私權網址、授權網域）與測試使用者——GCP Console 這兩頁今天輸入沒反應
+- Current focus: M11 上架準備；Play 帳號等 Google 身分審核
+- Next action: 👤 收集測試者 Gmail；🤖 補 OAuth 品牌頁與測試使用者後實測雲端備份
 
 ## Phase 1 階段進度：99%
 
@@ -14,7 +14,7 @@
 - 階段 2 技術選型：[##########] 100%（`docs/tech-decisions.md`）
 - 階段 3 UI/UX 設計：[##########] 100%（`docs/design.md`）
 - 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md`）
-- 階段 5 開發實作：[##########] 96%（`android/`、`shared/`、`tools/`）
+- 階段 5 開發實作：[##########] 97%（`android/`、`shared/`、`tools/`）
 
 ### Phase 1 開發追蹤
 
@@ -29,15 +29,26 @@
 - [x] M8 備份（匯出／匯入已驗證；Google 雲端程式完成，待 M11 設好 OAuth 後在有 Google Play 的裝置驗證）
 - [x] M9 慶祝動畫與音效
 - [x] M10 截圖測試＋主要流程（Roborazzi 12 張基準圖；Maestro 9 條流程，`tools/scripts/e2e.ps1`）
-- [ ] M11 上架準備（人工上架，`docs/release-guide.md`、`docs/store/`、`docs/privacy/`）
-  - [x] Claude：release 開 R8（R8 版 E2E 9/9 通過）、上傳金鑰讀本機設定、App 圖示（④ 發芽的可可豆）
-  - [x] Claude：隱私權政策（已上線 https://cacao-s.github.io/Cacao/privacy/）、商店文案（中英）、圖示 512、主題圖、商店截圖（中英各 6 張）
-  - [x] Claude：工具備妥（gcloud CLI、有 Google Play 的模擬器 `play34`）
-  - [x] 使用者：申請 Play 開發者帳號（個人帳戶，已付款、身分文件已上傳，等 Google 審核）
-  - [ ] 使用者：審核通過後驗證聯絡電話、登入（Play Console／gcloud／Chrome）、提供聯絡信箱
-  - [x] Claude：產生上傳金鑰（使用者自設密碼）、GCP 專案＋Drive API（`infra/gcp`）、OAuth 同意畫面、Android OAuth 用戶端（debug／upload 兩組）、測試使用者
-  - [ ] Claude：雲端備份實測（`play34` 已登入 Google；卡在 OAuth 測試使用者存不進去 → 403，改天再測）、建 App 上傳內部測試、加 Play 簽署金鑰的 OAuth 用戶端、OAuth 發布為正式版、代填表單
-  - [ ] 使用者：拍板目標對象年齡、封閉測試 12 人 14 天、送審發布
+- [ ] M11 上架準備（人工上架，約 50%；`docs/release-guide.md`、`docs/store/`、`docs/privacy/`、`infra/`）
+  - 已完成
+    - [x] release 版：R8 縮小（E2E 9/9 通過）、上傳金鑰簽章、AAB 已產生
+    - [x] App 圖示：④ 發芽的可可豆
+    - [x] 商店素材：中英文案、512 圖示、主題圖、中英截圖各 6 張
+    - [x] 隱私權政策上線：https://cacao-s.github.io/Cacao/privacy/
+    - [x] 決策：個人帳戶、包含 13 歲以下、聯絡信箱 amanda1991910@gmail.com
+    - [x] Play 開發者帳號：已付款、身分文件已送審（2026-11-04）
+    - [x] GCP：專案 `cacao-ruru-app`＋Drive API（Terraform `infra/gcp`）、OAuth 同意畫面、Android 用戶端 debug／upload 兩組
+    - [x] 工具：gcloud、Terraform、有 Google Play 的模擬器 `play34`（已登入 Google）
+  - 待辦（依順序）
+    - [ ] 👤 等 Google 身分驗證通過 → 簡訊驗證聯絡電話
+    - [ ] 🤖 OAuth 品牌頁補隱私權網址、授權網域 `cacao-s.github.io`；加測試使用者（11/04 Console 輸入無反應，改天再試）
+    - [ ] 🤖 雲端備份實測：開啟、立即備份、從 Google 還原（目前 403，等測試使用者加好）
+    - [ ] 🤖 Play Console 建 App、上傳 AAB、填商店資訊／資料安全性／內容分級／目標對象
+    - [ ] 🤖 加第三組 OAuth 用戶端（Play 簽署金鑰 SHA-1）、OAuth 發布為正式版
+    - [ ] 👤 收集 15 位以上測試者 Gmail（Android 手機）
+    - [ ] 🤖 建封閉測試、匯入名單、送審；👤 傳邀請連結給測試者
+    - [ ] 👤 封閉測試連續 14 天（12 人以上不退出）
+    - [ ] 👤 申請正式版、送審、發布
 
 ## Phase 2 階段進度：0%
 
@@ -67,6 +78,9 @@
 - UI/UX 設計（建立）：`docs/design.md`（線框 <https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>）
 - 資料模型（建立）：`docs/data-model.md`
 - 身分與備份（建立）：`docs/auth-design.md`
+- 上架步驟（建立）：`docs/release-guide.md`
+- 商店素材（建立）：`docs/store/`；隱私權政策（建立）：`docs/privacy/`
+- 雲端資源（建立）：`infra/`（Terraform＋指令操作紀錄）
 
 ### Phase 2
 
@@ -78,4 +92,5 @@
 
 ## Blockers
 
-- 無
+- Google Play 身分驗證審核中（2026-11-04 送件，約數天）：卡建 App、上傳、封閉測試
+- GCP Console OAuth 頁面輸入無反應：卡測試使用者 → 雲端備份實測
