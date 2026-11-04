@@ -34,8 +34,9 @@
   - [x] Claude：隱私權政策、商店文案（中英）、圖示 512、主題圖、商店截圖（中英各 6 張）
   - [x] Claude：工具備妥（gcloud CLI、有 Google Play 的模擬器 `play34`）
   - [x] 使用者：申請 Play 開發者帳號（個人帳戶，已付款、身分文件已上傳，等 Google 審核）
-  - [ ] 使用者：審核通過後驗證聯絡電話；設金鑰密碼、登入（Play Console／gcloud／Chrome）、提供聯絡信箱
-  - [ ] Claude：產生上傳金鑰、建 App 上傳內部測試、GCP／OAuth 設定、雲端備份實測、代填表單
+  - [ ] 使用者：審核通過後驗證聯絡電話、登入（Play Console／gcloud／Chrome）、提供聯絡信箱
+  - [x] Claude：產生上傳金鑰（使用者自設密碼）、GCP 專案＋Drive API（`infra/gcp`）、OAuth 同意畫面、Android OAuth 用戶端（debug／upload 兩組）、測試使用者
+  - [ ] Claude：雲端備份實測（使用者先在 `play34` 模擬器登入 Google）、建 App 上傳內部測試、加 Play 簽署金鑰的 OAuth 用戶端、OAuth 發布為正式版、代填表單
   - [ ] 使用者：拍板目標對象年齡、封閉測試 12 人 14 天、送審發布
 
 ## Phase 2 階段進度：0%
