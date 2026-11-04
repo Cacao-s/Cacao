@@ -1,5 +1,7 @@
 # Cacao — 資料模型
 
+> **Phase 1 定案文件**：本文件內容 P1 已實作 ✅；標「第二版」的段落為 ⏭ 延到 P2。Phase 2 的修改會另外標示，不覆蓋 P1 結論。
+
 > 狀態：第一版定稿（2026-11-01）。
 > 依據：`docs/product/features.md`、`docs/data-model-qa.md`（DQ-01～DQ-12）、`docs/design.md`（交給下一階段）、`docs/tech-decisions.md`（D-04～D-08、D-15、D-16）。
 > 這份 SQL 之後放進 `shared/db/`，Android（SQLDelight）與 Phase 2 的 iOS（GRDB）共用同一份。

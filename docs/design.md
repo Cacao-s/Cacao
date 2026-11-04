@@ -1,5 +1,7 @@
 # Cacao — UI/UX 設計
 
+> **Phase 1 定案文件**：本文件內容 P1 已實作 ✅；標「第二版」的段落為 ⏭ 延到 P2。Phase 2 的修改會另外標示，不覆蓋 P1 結論。
+
 > 狀態：完成（2026-11-01）。畫面清單、導覽結構、主要流程、21 個線框、交給下一階段的清單都已完成；UQ-01～UQ-09 已定案。
 > 來源：`docs/product/features.md`、`docs/product/overview.md`、`docs/data-model-qa.md`。
 > 線框畫布（21 個畫面）：<https://claude.ai/artifact/1hViDqnAG3cSEF4oLbudGg>。孩子模式用首頁大方塊選單導覽（UQ-09）。

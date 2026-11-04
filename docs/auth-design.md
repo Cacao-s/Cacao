@@ -1,5 +1,7 @@
 # Cacao — 身分與備份設計
 
+> **Phase 1 定案文件**：本文件內容 P1 已實作 ✅（例外：〈2. Google 登入與雲端備份〉🟡 待實測）；標「第二版」的段落為 ⏭ 延到 P2。Phase 2 的修改會另外標示，不覆蓋 P1 結論。
+
 > 狀態：第一版定稿（2026-11-02）。第一版只實作 Android；iOS 在 Phase 2 照同一份規則實作。
 > 依據：`docs/product/features.md`（裝置與身分、備份與還原）、`docs/tech-decisions.md`（D-02、D-05～D-08、D-16、D-24）、`docs/design.md`（交給下一階段）、`docs/data-model.md`。
 
@@ -71,7 +73,7 @@ flowchart TD
 
 ---
 
-## 2. Google 登入與雲端備份
+## 2. Google 登入與雲端備份 🟡（P1 程式完成，待實測）
 
 ### 開啟雲端備份
 

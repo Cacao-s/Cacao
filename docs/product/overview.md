@@ -1,6 +1,7 @@
 # Cacao — 產品概覽
 
 > 狀態：已定案（2026-10-05）
+> 範圍：Phase 1 定案（2026-10-05），P1 已依此實作完成 ✅；Phase 2 若有調整會另外標示。
 > 功能細節見 [features.md](features.md)，版本規劃見 [roadmap.md](roadmap.md)。決策過程見 [discover-qa.md](discover-qa.md)。
 
 ---
