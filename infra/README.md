@@ -1,17 +1,17 @@
-# iac — Cacao 的雲端資源（Infrastructure as Code）
+# infra — Cacao 的雲端資源（Infrastructure as Code）
 
 Cacao 沒有後端。雲端資源只有一個 GCP 專案，用途只有一個：讓 App 用 Google 登入，把備份存到**使用者自己的**雲端硬碟（`drive.appdata`）。
 
 ## 規則
 
-- 用 API／指令建立或修改的雲端資源，一律寫進 `iac/`（能用 Terraform 就用 Terraform），並在下方〈操作紀錄〉記一筆。
+- 用 API／指令建立或修改的雲端資源，一律寫進 `infra/`（能用 Terraform 就用 Terraform），並在下方〈操作紀錄〉記一筆。
 - 只能在 Console 畫面設定的（OAuth 同意畫面、Android OAuth 用戶端、Play Console）不在這裡記錄。
 - 不放任何密碼、金鑰、token；state 只在本機（已 gitignore）。
 
 ## 結構
 
 ```
-iac/
+infra/
 ├── README.md        # 本檔：規則、用法、操作紀錄
 └── gcp/             # GCP 專案（Terraform root module，一個 root＝一份 state）
     ├── versions.tf  # Terraform／provider 版本
@@ -22,7 +22,7 @@ iac/
     └── outputs.tf
 ```
 
-之後有新的雲端（例如 Phase 2 的 iOS／CI 需要的資源）就在 `iac/` 下開平行資料夾（`iac/<平台>/`），各自一份 state；共用的寫成 `iac/modules/`。
+之後有新的雲端（例如 Phase 2 的 iOS／CI 需要的資源）就在 `infra/` 下開平行資料夾（`infra/<平台>/`），各自一份 state；共用的寫成 `infra/modules/`。
 
 ## 用法
 
@@ -34,7 +34,7 @@ gcloud auth login
 # Terraform 直接借用 gcloud 的 token，不需要另外的金鑰檔
 export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
 
-cd iac/gcp
+cd infra/gcp
 terraform init
 terraform plan      # 應該是 No changes
 terraform apply
@@ -42,7 +42,7 @@ terraform apply
 
 ## State
 
-- 目前用**本機 state**（`iac/gcp/terraform.tfstate`，已 gitignore）。這台電腦以外的人要接手，先 `terraform import`（`imports.tf` 已寫好）就能重建 state。
+- 目前用**本機 state**（`infra/gcp/terraform.tfstate`，已 gitignore）。這台電腦以外的人要接手，先 `terraform import`（`imports.tf` 已寫好）就能重建 state。
 - 遠端 state（GCS bucket）需要綁帳單帳戶，Phase 2 有 CI 時再搬。
 
 ## 操作紀錄

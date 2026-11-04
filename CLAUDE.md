@@ -21,7 +21,7 @@ Cacao/
 ├── ios/                 # Phase 2（目前只有 README）
 ├── shared/              # 兩平台共用資料：db、tokens、i18n、test-cases、animations
 ├── tools/               # 兩平台共用工具：codegen、e2e、ci、scripts
-├── iac/                 # 雲端資源（Terraform）與 API 操作紀錄，見 iac/README.md
+├── infra/               # 雲端資源（Terraform）與 API 操作紀錄，見 infra/README.md
 ├── docs/
 │   ├── ai-guide.md      # 人類可讀的 AI 工具教學
 │   ├── tech-decisions.md
