@@ -7,7 +7,7 @@
 >
 > 最後更新：2026-11-04（Phase 2 發散題目 WD-30～WD-40）
 
-> **Phase 1／Phase 2 分開放**：Phase 1 的結論都在〈Phase 1：已確認〉，已定案、已實作；Phase 2 的題目和結論都在〈Phase 2〉，與 Phase 1 互不覆蓋。Phase 2 若改動 Phase 1 的結論，在 Phase 2 區標 ⚠ 並寫明改了哪一條。
+> **Phase 1／Phase 2 分開放**：Phase 1 的結論都在〈Phase 1：已確認〉，已定案、已實作；Phase 2 的題目和結論都在〈Phase 2〉，與 Phase 1 互不覆蓋。Phase 2 若改動 Phase 1 的結論，在 Phase 2 區標 ⚠ 並寫明改了哪一條。內容跨兩個 phase 時，兩邊都標註（例如「P1 ✅ 上下箭頭排序；P2 ⏭ 改拖曳」）。
 
 ---
 
