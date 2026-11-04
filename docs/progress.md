@@ -80,6 +80,7 @@
 - 身分與備份（建立）：`docs/auth-design.md`
 - 上架步驟（建立）：`docs/release-guide.md`
 - 商店素材（建立）：`docs/store/`；隱私權政策（建立）：`docs/privacy/`
+- 專案連結（建立）：`docs/links.md`
 - 雲端資源（建立）：`infra/`（Terraform＋指令操作紀錄）
 
 ### Phase 2

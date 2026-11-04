@@ -15,13 +15,7 @@
 
 其他都由 Claude 做。
 
-## 相關連結
-
-- 隱私權政策（公開網頁）：https://cacao-s.github.io/Cacao/privacy/
-- GitHub Pages 設定頁（`new` 分支 `/docs`）：https://github.com/Cacao-s/Cacao/settings/pages
-- Repo：https://github.com/Cacao-s/Cacao
-- Play Console（開發者帳戶 adaruru）：https://play.google.com/console/u/0/developers/4827365256855679790/home
-- GCP OAuth（Google Auth Platform，專案 `cacao-ruru-app`）：https://console.cloud.google.com/auth/overview?project=cacao-ruru-app
+相關網址見 [`docs/links.md`](links.md)。
 
 ## 1. 帳號
 
