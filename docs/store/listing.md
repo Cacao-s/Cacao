@@ -1,7 +1,7 @@
 # Google Play 商店資訊
 
 > 圖檔：`icon-512.png`、`feature-1024x500.png`（由同目錄 `icon.html`、`feature.html` 用 Chrome headless 截出）；手機截圖在 `screenshots/<語言>/`，用 `pwsh tools/scripts/store-screenshots.ps1 -Locale zh-TW`（或 en-US）重新產生。
-> 隱私權政策：`docs/privacy/index.html`，用 GitHub Pages 公開後填網址。
+> 隱私權政策：`docs/privacy/index.html`，公開網址 https://cacao-s.github.io/Cacao/privacy/（GitHub Pages，`new` 分支 `/docs`）。
 
 ## 繁體中文（zh-TW）
 
@@ -73,7 +73,7 @@ Cacao helps parents and kids manage allowance together, building saving and plan
 
 - 類別：教育（Education）。備選：財經（Finance）。
 - 標籤：家庭、零用錢、理財教育
-- 聯絡信箱：👤 待使用者提供（同時填進隱私權政策 `SUPPORT_EMAIL`）
+- 聯絡信箱：amanda1991910@gmail.com（2026-11-04 使用者同意公開）
 - 網站：可留空
 
 ## Data safety 表單答案
@@ -82,3 +82,9 @@ Cacao helps parents and kids manage allowance together, building saving and plan
 - 分享資料：**否**
 - 傳輸加密：雲端備份經 Google API（HTTPS）
 - 使用者可要求刪除資料：是（解除安裝；雲端備份可在 App 或 Google 帳戶刪除）
+
+## 目標對象
+
+- **包含 13 歲以下**（2026-11-04 使用者決定）：App 給父母與孩子一起用，因此適用 Google Play「Designed for Families」政策。
+- Cacao 本來就符合：無廣告、不收集任何個人資料、無第三方分析 SDK、無應用程式內購買。
+- 填 Play Console「目標對象和內容」時：年齡層勾 5 歲以下以外的兒童年齡層（6–8、9–12）加 13 歲以上；「是否會吸引兒童」選是。
