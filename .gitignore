@@ -10,3 +10,10 @@ replay_pid*.log
 keystore.properties
 *.jks
 *.keystore
+
+# Terraform（state 只在本機；lock 檔要進 git）
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
