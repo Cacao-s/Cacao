@@ -4,7 +4,7 @@
 > 這份只追蹤階段與進度；內容細節見下方〈文件〉。
 
 - Current focus: M11 上架準備；Claude 能做的已全部完成，剩下的都要使用者本人
-- Next action: 使用者申請 Google Play 開發者帳號（步驟見 `docs/release-guide.md`）
+- Next action: 等 Google 驗證身分（2026-11-04 已送件，個人帳戶「adaruru」）；等待期間可先做金鑰密碼、gcloud 登入
 
 ## Phase 1 階段進度：99%
 
@@ -33,7 +33,8 @@
   - [x] Claude：release 開 R8（R8 版 E2E 9/9 通過）、上傳金鑰讀本機設定、App 圖示（④ 發芽的可可豆）
   - [x] Claude：隱私權政策、商店文案（中英）、圖示 512、主題圖、商店截圖（中英各 6 張）
   - [x] Claude：工具備妥（gcloud CLI、有 Google Play 的模擬器 `play34`）
-  - [ ] 使用者：申請 Play 開發者帳號、設金鑰密碼、登入（Play Console／gcloud／Chrome）、提供聯絡信箱
+  - [x] 使用者：申請 Play 開發者帳號（個人帳戶，已付款、身分文件已上傳，等 Google 審核）
+  - [ ] 使用者：審核通過後驗證聯絡電話；設金鑰密碼、登入（Play Console／gcloud／Chrome）、提供聯絡信箱
   - [ ] Claude：產生上傳金鑰、建 App 上傳內部測試、GCP／OAuth 設定、雲端備份實測、代填表單
   - [ ] 使用者：拍板目標對象年齡、封閉測試 12 人 14 天、送審發布
 
