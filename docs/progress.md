@@ -3,7 +3,7 @@
 > 最後更新：2026-11-04
 > 這份只追蹤階段與進度；內容細節見下方〈文件〉。
 
-- Current focus: M11 上架準備；Play 帳號等 Google 身分審核
+- Current focus: M11 上架準備；身分驗證已過，剩電話驗證與交易商聲明
 - Next action: 👤 收集測試者 Gmail；🤖 補 OAuth 品牌頁與測試使用者後實測雲端備份
 
 ## Phase 1 階段進度：99%
@@ -40,7 +40,8 @@
     - [x] GCP：專案 `cacao-ruru-app`＋Drive API（Terraform `infra/gcp`）、OAuth 同意畫面、Android 用戶端 debug／upload 兩組
     - [x] 工具：gcloud、Terraform、有 Google Play 的模擬器 `play34`（已登入 Google）
   - 待辦（依順序）
-    - [ ] 👤 等 Google 身分驗證通過 → 簡訊驗證聯絡電話
+    - [x] 👤 Google 身分驗證通過（2026-11-04）
+    - [ ] 👤 簡訊驗證聯絡電話；聲明交易商身分（Declare trader status）
     - [ ] 🤖 OAuth 品牌頁補隱私權網址、授權網域 `cacao-s.github.io`；加測試使用者（11/04 Console 輸入無反應，改天再試）
     - [ ] 🤖 雲端備份實測：開啟、立即備份、從 Google 還原（目前 403，等測試使用者加好）
     - [ ] 🤖 Play Console 建 App、上傳 AAB、填商店資訊／資料安全性／內容分級／目標對象
@@ -94,5 +95,5 @@
 
 ## Blockers
 
-- Google Play 身分驗證審核中（2026-11-04 送件，約數天）：卡建 App、上傳、封閉測試
+- Play Console 還差：驗證聯絡電話、聲明交易商身分（使用者操作）：卡建 App、上傳、封閉測試
 - GCP Console OAuth 頁面輸入無反應：卡測試使用者 → 雲端備份實測
