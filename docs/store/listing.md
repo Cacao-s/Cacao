@@ -28,7 +28,7 @@ Cacao 讓爸爸媽媽和孩子一起管理零用錢，從小練習存錢與規�
 ・孩子完成後，父母當場驗收、獎勵自動入帳
 
 ▍成長紀錄
-・每年存了多少、花了多少，一年一年看得見
+・每年存了多少、完成幾個任務，一年一年看得見
 
 ▍安心使用
 ・全家共用一台手機，父母模式用驗證碼保護
@@ -71,7 +71,7 @@ Cacao helps parents and kids manage allowance together, building saving and plan
 
 ## 分類與聯絡
 
-- 類別：教育（Education）。備選：財經（Finance）。
+- 類別：懷孕與育兒（Parenting）（2026-11-05 Play Console 已設定）
 - 標籤：家庭、零用錢、理財教育
 - 聯絡信箱：amanda1991910@gmail.com（2026-11-04 使用者同意公開）
 - 網站：可留空
