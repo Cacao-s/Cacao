@@ -14,6 +14,7 @@
 ## 後台
 
 - Play Console（開發者帳戶 adaruru）：<https://play.google.com/console/u/0/developers/4827365256855679790/home>
+- Play Console App「Cacao 零用錢」：<https://play.google.com/console/u/0/developers/4827365256855679790/app/4974980796401372547/app-dashboard>
 - GCP OAuth（Google Auth Platform，專案 `cacao-ruru-app`）：<https://console.cloud.google.com/auth/overview?project=cacao-ruru-app>
 
 ## 設計
