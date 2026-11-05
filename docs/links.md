@@ -4,6 +4,7 @@
 
 ## 公開網頁
 
+- 首頁：<https://cacao-s.github.io/Cacao/>（來源 `docs/index.html`）
 - 隱私權政策：<https://cacao-s.github.io/Cacao/privacy/>（來源 `docs/privacy/index.html`）
 
 ## 測試

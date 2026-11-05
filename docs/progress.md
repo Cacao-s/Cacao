@@ -29,7 +29,7 @@
 - [x] M8 備份（匯出／匯入、Google 雲端備份與還原皆已實測通過，2026-11-05）
 - [x] M9 慶祝動畫與音效
 - [x] M10 截圖測試＋主要流程（Roborazzi 12 張基準圖；Maestro 9 條流程，`tools/scripts/e2e.ps1`）
-- [ ] M11 上架準備（人工上架，約 75%；`docs/release-guide.md`、`docs/store/`、`docs/privacy/`、`infra/`）
+- [ ] M11 上架準備（人工上架，約 80%；`docs/release-guide.md`、`docs/store/`、`docs/privacy/`、`infra/`）
   - 已完成
     - [x] release 版：R8 縮小（E2E 9/9 通過）、上傳金鑰簽章、AAB 已產生
     - [x] App 圖示：④ 發芽的可可豆
@@ -48,7 +48,7 @@
     - [x] 商店資訊（文案、圖示、主題圖、中文截圖 6 張、類別「懷孕與育兒」、聯絡信箱）（2026-11-05）
     - [x] 內部測試發布 0.1.0 (1)，測試者：使用者本人（2026-11-05）
     - [x] 第三組 OAuth 用戶端（Play 簽署金鑰 SHA-1 A2:1A:…:5C:35）
-    - [ ] 🤖 OAuth 發布為正式版（還缺「應用程式首頁」網址，要做一頁 GitHub Pages 首頁）
+    - [x] OAuth 發布為正式版（加了首頁 https://cacao-s.github.io/Cacao/ ；drive.appdata 非敏感範圍，免審）（2026-11-05）
     - [ ] 👤 收集 15 位以上測試者 Gmail（Android 手機）
     - [ ] 🤖 建封閉測試、匯入名單、送審；👤 傳邀請連結給測試者
     - [ ] 👤 封閉測試連續 14 天（12 人以上不退出）
