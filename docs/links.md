@@ -6,6 +6,10 @@
 
 - 隱私權政策：<https://cacao-s.github.io/Cacao/privacy/>（來源 `docs/privacy/index.html`）
 
+## 測試
+
+- 內部測試加入連結（只限名單內帳號）：<https://play.google.com/apps/internaltest/4698776483501089833>
+
 ## 程式碼
 
 - Repo：<https://github.com/Cacao-s/Cacao>
