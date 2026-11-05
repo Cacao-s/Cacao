@@ -14,7 +14,7 @@
 - 階段 2 技術選型：[##########] 100%（`docs/tech-decisions.md`）
 - 階段 3 UI/UX 設計：[##########] 100%（`docs/design.md`）
 - 階段 4 架構設計：[##########] 100%（`docs/data-model.md`、`docs/auth-design.md`）
-- 階段 5 開發實作：[##########] 97%（`android/`、`shared/`、`tools/`）
+- 階段 5 開發實作：[##########] 98%（`android/`、`shared/`、`tools/`）
 
 ### Phase 1 開發追蹤
 
@@ -29,7 +29,7 @@
 - [x] M8 備份（匯出／匯入、Google 雲端備份與還原皆已實測通過，2026-11-05）
 - [x] M9 慶祝動畫與音效
 - [x] M10 截圖測試＋主要流程（Roborazzi 12 張基準圖；Maestro 9 條流程，`tools/scripts/e2e.ps1`）
-- [ ] M11 上架準備（人工上架，約 50%；`docs/release-guide.md`、`docs/store/`、`docs/privacy/`、`infra/`）
+- [ ] M11 上架準備（人工上架，約 75%；`docs/release-guide.md`、`docs/store/`、`docs/privacy/`、`infra/`）
   - 已完成
     - [x] release 版：R8 縮小（E2E 9/9 通過）、上傳金鑰簽章、AAB 已產生
     - [x] App 圖示：④ 發芽的可可豆
