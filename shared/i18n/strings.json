@@ -147,6 +147,11 @@
     "task_done_section": { "zh-Hant": "已完成", "en": "Done" },
     "task_hint": { "zh-Hant": "做完按「完成」，請爸媽當場輸入 PIN 驗收", "en": "When you're done, tap Done and ask a parent to enter their PIN." },
     "task_verify_title": { "zh-Hant": "請父母驗收：%1$s", "en": "Parent, approve: %1$s" },
+    "task_propose_label": { "zh-Hant": "我想做的任務", "en": "A task I want to do" },
+    "task_propose_save": { "zh-Hant": "提議", "en": "Suggest" },
+    "task_proposal_waiting": { "zh-Hant": "$0・等爸媽設定獎勵", "en": "$0 · waiting for a parent to set the reward" },
+    "task_proposals_section": { "zh-Hant": "孩子提議（0 元，設定獎勵後變成任務）", "en": "Kids' ideas ($0 until you set a reward)" },
+    "task_set_reward": { "zh-Hant": "設定獎勵", "en": "Set reward" },
     "task_delete": { "zh-Hant": "刪除", "en": "Delete" },
     "tasks_pending_count": { "zh-Hant": "%1$d 個待完成", "en": "%1$d to do" },
 

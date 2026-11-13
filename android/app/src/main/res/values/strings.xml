@@ -198,7 +198,12 @@
     <string name="task_need_fields">Fill in the task and reward, and pick at least one kid</string>
     <string name="task_new">+ New task</string>
     <string name="task_pending_empty">No tasks right now. Ask your parents!</string>
+    <string name="task_proposal_waiting">$0 · waiting for a parent to set the reward</string>
+    <string name="task_proposals_section">Kids\' ideas ($0 until you set a reward)</string>
+    <string name="task_propose_label">A task I want to do</string>
+    <string name="task_propose_save">Suggest</string>
     <string name="task_reward_label">Reward (each)</string>
+    <string name="task_set_reward">Set reward</string>
     <string name="task_title_label">Task</string>
     <string name="task_verify_title">Parent, approve: %1$s</string>
     <string name="tasks_pending_count">%1$d to do</string>

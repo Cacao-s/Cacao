@@ -78,7 +78,14 @@ private fun Chip(text: String, selected: Boolean, tag: String, onClick: () -> Un
 @Composable
 fun TasksScreen(vm: AppViewModel, parentId: String) {
     val pending = remember(vm.ledgerVersion) { vm.tasks.pendingAll() }
+    val proposals = remember(vm.ledgerVersion) { vm.tasks.proposalsAll() }
     val names = vm.memberList.associate { it.id to it.name }
+    val issuers = vm.memberList.filter { it.roleEnum == Role.PARENT || it.roleEnum == Role.ELDER }
+    val invalid = stringResource(R.string.amount_invalid)
+    var pricingId by remember { mutableStateOf<String?>(null) }
+    var reward by remember { mutableStateOf("") }
+    var issuerId by remember { mutableStateOf(parentId) }
+    var error by remember { mutableStateOf<String?>(null) }
     ScreenColumn(Modifier.verticalScroll(rememberScrollState())) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { vm.go(Screen.ParentHome(parentId)) }, modifier = Modifier.testTag("back")) {
@@ -89,7 +96,44 @@ fun TasksScreen(vm: AppViewModel, parentId: String) {
                 Text(stringResource(R.string.task_new), color = Cacao.colors.primary, fontWeight = FontWeight.Bold)
             }
         }
-        if (pending.isEmpty()) Body(stringResource(R.string.ledger_empty))
+        if (proposals.isNotEmpty()) Body(stringResource(R.string.task_proposals_section))
+        proposals.forEach { p ->
+            val child = names[p.child_id].orEmpty()
+            Card("proposal_${p.title}_$child") {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(p.title, fontWeight = FontWeight.Bold, color = Cacao.colors.onSurface)
+                    Text(stringResource(R.string.task_for, child) + "・" + money(0), fontSize = 13.sp, color = Cacao.colors.muted)
+                    if (pricingId == p.id) {
+                        PlainField(stringResource(R.string.task_reward_label), reward, "proposal_reward", KeyboardType.Number) { reward = it.filter(Char::isDigit).take(6) }
+                        Body(stringResource(R.string.task_issuer_label))
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            issuers.forEach { m -> Chip(m.name, m.id == issuerId, "proposal_issuer_${m.name}") { issuerId = m.id } }
+                        }
+                        ErrorText(error)
+                        PrimaryButton(stringResource(R.string.action_save), "proposal_save") {
+                            if (vm.tasks.price(p.id, reward.toLongOrNull() ?: 0, issuerId) == TaskResult.Ok) {
+                                pricingId = null
+                                vm.ledgerChanged()
+                            } else {
+                                error = invalid
+                            }
+                        }
+                    } else {
+                        Row {
+                            TextButton(
+                                onClick = { pricingId = p.id; reward = ""; issuerId = parentId; error = null },
+                                modifier = Modifier.testTag("proposal_price_${p.title}"),
+                            ) { Text(stringResource(R.string.task_set_reward), color = Cacao.colors.primary, fontWeight = FontWeight.Bold) }
+                            TextButton(
+                                onClick = { vm.tasks.deleteProposal(p.id); vm.ledgerChanged() },
+                                modifier = Modifier.testTag("proposal_delete_${p.title}"),
+                            ) { Text(stringResource(R.string.task_delete), color = Cacao.colors.danger) }
+                        }
+                    }
+                }
+            }
+        }
+        if (pending.isEmpty() && proposals.isEmpty()) Body(stringResource(R.string.ledger_empty))
         pending.forEach { task ->
             Card("ptask_${task.title}_${names[task.child_id]}") {
                 Column(Modifier.weight(1f)) {
@@ -157,7 +201,9 @@ fun NewTaskScreen(vm: AppViewModel, parentId: String) {
 fun ChildTasksScreen(vm: AppViewModel, childId: String) {
     val pending = remember(vm.ledgerVersion, childId) { vm.tasks.pending(childId) }
     val done = remember(vm.ledgerVersion, childId) { vm.tasks.completed(childId) }
+    val proposals = remember(vm.ledgerVersion, childId) { vm.tasks.proposals(childId) }
     val names = vm.memberList.associate { it.id to it.name }
+    var idea by remember { mutableStateOf("") }
     ScreenColumn(Modifier.verticalScroll(rememberScrollState())) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { vm.go(Screen.ChildHome(childId)) }, modifier = Modifier.testTag("back")) {
@@ -166,7 +212,7 @@ fun ChildTasksScreen(vm: AppViewModel, childId: String) {
             Title(stringResource(R.string.tasks_title))
         }
         Body(stringResource(R.string.task_hint))
-        if (pending.isEmpty()) Body(stringResource(R.string.task_pending_empty))
+        if (pending.isEmpty() && proposals.isEmpty()) Body(stringResource(R.string.task_pending_empty))
         pending.forEach { task ->
             Card("task_${task.title}") {
                 Column(Modifier.weight(1f)) {
@@ -180,6 +226,26 @@ fun ChildTasksScreen(vm: AppViewModel, childId: String) {
                     modifier = Modifier.testTag("task_done_${task.title}"),
                 ) { Text(stringResource(R.string.action_done), fontWeight = FontWeight.Bold) }
             }
+        }
+        proposals.forEach { p ->
+            Card("child_proposal_${p.title}") {
+                Column(Modifier.weight(1f)) {
+                    Text(p.title, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Cacao.colors.onSurface)
+                    Text(stringResource(R.string.task_proposal_waiting), fontSize = 13.sp, color = Cacao.colors.muted)
+                }
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.weight(1f)) {
+                PlainField(stringResource(R.string.task_propose_label), idea, "child_propose_title") { idea = it.take(40) }
+            }
+            Button(
+                onClick = { if (vm.tasks.propose(childId, idea) == TaskResult.Ok) { idea = ""; vm.ledgerChanged() } },
+                enabled = idea.isNotBlank(),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(containerColor = Cacao.colors.primary, contentColor = Cacao.colors.onPrimary),
+                modifier = Modifier.testTag("child_propose_save"),
+            ) { Text(stringResource(R.string.task_propose_save), fontWeight = FontWeight.Bold) }
         }
         if (done.isNotEmpty()) Body(stringResource(R.string.task_done_section))
         done.forEach { task ->

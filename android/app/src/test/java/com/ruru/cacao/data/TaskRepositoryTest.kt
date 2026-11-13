@@ -66,4 +66,28 @@ class TaskRepositoryTest {
         assertEquals(0, tasks.pending(ann).size)
         assertEquals("刪除的任務不能完成", TaskResult.Invalid, tasks.complete(id, mom))
     }
+
+    @Test
+    fun childProposalIsZeroUntilParentSetsReward() {
+        assertEquals(TaskResult.Invalid, tasks.propose(ann, " "))
+        assertEquals(TaskResult.Ok, tasks.propose(ann, "洗碗"))
+        val p = tasks.proposals(ann).single()
+        assertEquals("提議不算任務，不能完成", 0, tasks.pending(ann).size)
+
+        assertEquals(TaskResult.Invalid, tasks.price(p.id, 0, mom))
+        assertEquals(TaskResult.Ok, tasks.price(p.id, 30, mom))
+        assertEquals(0, tasks.proposals(ann).size)
+        val task = tasks.pending(ann).single()
+        assertEquals(30, task.reward_amount)
+        assertEquals(mom, task.issuer_id)
+        assertEquals("建立者是提議的孩子", ann, task.created_by)
+        assertEquals("同一份提議不能再設一次", TaskResult.Invalid, tasks.price(p.id, 30, mom))
+    }
+
+    @Test
+    fun deletedProposalDisappears() {
+        tasks.propose(ben, "澆花")
+        tasks.deleteProposal(tasks.proposals(ben).single().id)
+        assertEquals(0, tasks.proposalsAll().size)
+    }
 }

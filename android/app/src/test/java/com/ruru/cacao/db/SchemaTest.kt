@@ -45,4 +45,19 @@ class SchemaTest {
             db.ledgerQueries.insertEntry("e3", "e3", "c1", "wallet", "wallet_expense", 0, "2026-11-01", null, null, null, null, "c1", now)
         }
     }
+
+    @Test
+    fun migratesV1ToCurrent() {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        java.io.File("../../shared/db/001_init.sql").readText()
+            .split(";").map { it.lines().filterNot { l -> l.trimStart().startsWith("--") }.joinToString(" ").trim() }
+            .filter { it.isNotEmpty() }
+            .forEach { driver.execute(null, it, 0) }
+        CacaoDatabase.Schema.migrate(driver, 1, CacaoDatabase.Schema.version)
+        val migrated = CacaoDatabase(driver)
+        migrated.ledgerQueries.insertMember("c1", "child", "小安", "2017-03-12", "peach", null, now, now)
+        migrated.taskQueries.insertProposal("tp1", "c1", "洗碗", now, now)
+        assertEquals(1, migrated.taskQueries.proposalsAll().executeAsList().size)
+        assertEquals(2L, CacaoDatabase.Schema.version)
+    }
 }

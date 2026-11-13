@@ -31,8 +31,8 @@ android {
         applicationId = "com.ruru.cacao"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
     }
 
     // 上傳金鑰放 repo 外，路徑與密碼寫在本機 keystore.properties（不進 git，見 docs/release-guide.md）

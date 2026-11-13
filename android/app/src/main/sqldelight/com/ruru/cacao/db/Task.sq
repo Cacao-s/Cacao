@@ -1,3 +1,14 @@
+-- 孩子提議（schema v2）：新安裝在這裡建表，舊版升級走 shared/db/002_task_proposal.sql，兩邊要一致
+CREATE TABLE task_proposal (
+  id              TEXT NOT NULL PRIMARY KEY,
+  child_id        TEXT NOT NULL REFERENCES member(id),
+  title           TEXT NOT NULL,
+  created_at      TEXT NOT NULL,
+  updated_at      TEXT NOT NULL,
+  deleted_at      TEXT
+);
+CREATE INDEX task_proposal_child ON task_proposal(child_id);
+
 insert:
 INSERT INTO task(id, batch_id, child_id, title, reward_amount, issuer_id, created_by, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -32,3 +43,18 @@ VALUES (?, ?, ?, ?, ?);
 
 softDelete:
 UPDATE task SET deleted_at = ?, updated_at = ? WHERE id = ?;
+
+insertProposal:
+INSERT INTO task_proposal(id, child_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?);
+
+proposalById:
+SELECT * FROM task_proposal WHERE id = ?;
+
+proposalsForChild:
+SELECT * FROM task_proposal WHERE child_id = ? AND deleted_at IS NULL ORDER BY created_at;
+
+proposalsAll:
+SELECT * FROM task_proposal WHERE deleted_at IS NULL ORDER BY created_at;
+
+softDeleteProposal:
+UPDATE task_proposal SET deleted_at = ?, updated_at = ? WHERE id = ?;

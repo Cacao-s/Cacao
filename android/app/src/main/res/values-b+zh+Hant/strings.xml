@@ -198,7 +198,12 @@
     <string name="task_need_fields">請填任務內容、獎勵，並至少選一個孩子</string>
     <string name="task_new">＋新增任務</string>
     <string name="task_pending_empty">目前沒有任務，問問爸媽吧！</string>
+    <string name="task_proposal_waiting">$0・等爸媽設定獎勵</string>
+    <string name="task_proposals_section">孩子提議（0 元，設定獎勵後變成任務）</string>
+    <string name="task_propose_label">我想做的任務</string>
+    <string name="task_propose_save">提議</string>
     <string name="task_reward_label">獎勵（每人）</string>
+    <string name="task_set_reward">設定獎勵</string>
     <string name="task_title_label">任務內容</string>
     <string name="task_verify_title">請父母驗收：%1$s</string>
     <string name="tasks_pending_count">%1$d 個待完成</string>

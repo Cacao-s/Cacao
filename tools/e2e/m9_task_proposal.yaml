@@ -1,0 +1,77 @@
+# Phase 2 孩子提議任務（discover WD-35）：孩子新增 0 元任務 → 父母設獎勵就成立 → 孩子完成、父母驗收入帳；父母也可以刪掉提議
+appId: com.ruru.cacao
+---
+- runFlow: subflows/new_family.yaml
+
+# 孩子提議兩個任務
+- tapOn:
+    id: member_cacao
+- tapOn:
+    id: tile_tasks
+- tapOn:
+    id: child_propose_title
+- inputText: Dishes
+- hideKeyboard
+- tapOn:
+    id: child_propose_save
+- assertVisible:
+    id: child_proposal_Dishes
+- tapOn:
+    id: child_propose_title
+- inputText: Dance
+- hideKeyboard
+- tapOn:
+    id: child_propose_save
+- assertVisible:
+    id: child_proposal_Dance
+- assertNotVisible:
+    id: task_done_Dishes
+- tapOn:
+    id: back
+- tapOn:
+    id: child_back
+- waitForAnimationToEnd
+
+# 父母：Dishes 設獎勵 30，Dance 刪掉
+- runFlow: subflows/parent_login.yaml
+- tapOn:
+    id: parent_tasks
+- tapOn:
+    id: proposal_price_Dishes
+- tapOn:
+    id: proposal_reward
+- inputText: "30"
+- hideKeyboard
+- tapOn:
+    id: proposal_save
+- assertVisible:
+    id: ptask_Dishes_cacao
+- tapOn:
+    id: proposal_delete_Dance
+- assertNotVisible:
+    id: proposal_Dance_cacao
+- tapOn:
+    id: back
+- tapOn:
+    id: parent_logout
+- waitForAnimationToEnd
+
+# 孩子完成 Dishes，父母驗收入帳
+- tapOn:
+    id: member_cacao
+- tapOn:
+    id: tile_tasks
+- assertNotVisible:
+    id: child_proposal_Dance
+- tapOn:
+    id: task_done_Dishes
+- runFlow: subflows/pin_1234.yaml
+- tapOn:
+    id: celebrate_ok
+- assertVisible:
+    id: task_completed_Dishes
+- tapOn:
+    id: back
+- assertVisible:
+    id: child_savings
+    text: "\\$30"

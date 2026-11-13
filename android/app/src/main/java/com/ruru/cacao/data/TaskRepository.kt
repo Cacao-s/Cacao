@@ -3,6 +3,7 @@ package com.ruru.cacao.data
 import com.ruru.cacao.db.CacaoDatabase
 import com.ruru.cacao.db.CompletedForChild
 import com.ruru.cacao.db.Task
+import com.ruru.cacao.db.Task_proposal
 import java.time.Clock
 import java.time.Instant
 import java.util.UUID
@@ -58,6 +59,35 @@ class TaskRepository(
         val time = now()
         queries.softDelete(time, time, taskId)
         return TaskResult.Ok
+    }
+
+    /** 孩子提議：0 元，等父母設金額（discover WD-35） */
+    fun propose(childId: String, title: String): TaskResult {
+        if (title.isBlank()) return TaskResult.Invalid
+        val time = now()
+        queries.insertProposal(UUID.randomUUID().toString(), childId, title.trim(), time, time)
+        return TaskResult.Ok
+    }
+
+    fun proposals(childId: String): List<Task_proposal> = queries.proposalsForChild(childId).executeAsList()
+
+    fun proposalsAll(): List<Task_proposal> = queries.proposalsAll().executeAsList()
+
+    /** 父母設金額＝同意：轉成正式任務，提議收起來 */
+    fun price(proposalId: String, reward: Long, issuerId: String): TaskResult {
+        val p = queries.proposalById(proposalId).executeAsOneOrNull() ?: return TaskResult.Invalid
+        if (p.deleted_at != null || reward <= 0) return TaskResult.Invalid
+        val time = now()
+        db.transaction {
+            queries.insert(UUID.randomUUID().toString(), UUID.randomUUID().toString(), p.child_id, p.title, reward, issuerId, p.child_id, time, time)
+            queries.softDeleteProposal(time, time, proposalId)
+        }
+        return TaskResult.Ok
+    }
+
+    fun deleteProposal(proposalId: String) {
+        val time = now()
+        queries.softDeleteProposal(time, time, proposalId)
     }
 
     private fun now(): String = Instant.now(clock).toString()
