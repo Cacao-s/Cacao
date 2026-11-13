@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
+import com.ruru.cacao.domain.BirthdayInput
 import com.ruru.cacao.R
 import com.ruru.cacao.data.Role
 import com.ruru.cacao.data.roleEnum
@@ -153,7 +155,9 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
         listOf(Role.PARENT to R.string.role_parent, Role.ELDER to R.string.role_elder, Role.CHILD to R.string.role_child).forEach { (role, label) ->
             Body(stringResource(label))
             Section {
-                vm.memberList.filter { it.roleEnum == role }.forEach { m ->
+                val people = vm.memberList.filter { it.roleEnum == role }
+                if (people.isEmpty()) Body(stringResource(R.string.family_empty))
+                people.forEach { m ->
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("family_${m.name}")) {
                         Column(Modifier.weight(1f)) {
                             Text(m.name, color = Cacao.colors.onSurface, fontWeight = FontWeight.Medium)
@@ -198,17 +202,17 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
             }
             else -> Section {
                 PlainField(stringResource(R.string.child_name_label), name, "add_name") { name = it }
-                if (adding == AddKind.CHILD) PlainField(stringResource(R.string.child_birthday_label), birthday, "add_birthday") { birthday = it.trim() }
+                if (adding == AddKind.CHILD) PlainField(stringResource(R.string.child_birthday_label), birthday, "add_birthday", KeyboardType.Number) { birthday = it.trim() }
                 if (adding == AddKind.PARENT) {
                     SecretField(stringResource(R.string.pin_label), pin, "add_pin") { pin = it }
                     SecretField(stringResource(R.string.pin_confirm_label), confirm, "add_pin_confirm") { confirm = it }
                 }
                 ErrorText(error?.let { stringResource(it) })
                 PrimaryButton(stringResource(R.string.action_save), "add_save") {
-                    val date = runCatching { LocalDate.parse(birthday) }.getOrNull()
+                    val date = BirthdayInput.parse(birthday)
                     error = when {
                         name.isBlank() -> R.string.name_required
-                        adding == AddKind.CHILD && (date == null || date.isAfter(LocalDate.now())) -> R.string.birthday_invalid
+                        adding == AddKind.CHILD && date == null -> R.string.birthday_invalid
                         adding == AddKind.PARENT && pin.length != 4 -> R.string.pin_need_4_digits
                         adding == AddKind.PARENT && pin != confirm -> R.string.pin_mismatch
                         else -> null
@@ -217,7 +221,7 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
                         when (adding) {
                             AddKind.PARENT -> shownCode = vm.members.createParent(name, pin).second
                             AddKind.ELDER -> vm.members.createElder(name)
-                            AddKind.CHILD -> vm.members.createChild(name, birthday)
+                            AddKind.CHILD -> vm.members.createChild(name, date.toString())
                             AddKind.NONE -> Unit
                         }
                         reset()

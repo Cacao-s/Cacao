@@ -3,7 +3,9 @@ package com.ruru.cacao.ui.identity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalContext
+import com.ruru.cacao.domain.BirthdayInput
 import com.ruru.cacao.ui.backup.ImportDialogs
 import com.ruru.cacao.ui.backup.ImportState
 import com.ruru.cacao.ui.backup.startImport
@@ -168,17 +170,17 @@ private fun ChildForm(onDone: (name: String, birthday: String) -> Unit) {
     ScreenColumn {
         Title(stringResource(R.string.child_setup_title))
         PlainField(stringResource(R.string.child_name_label), name, "child_name") { name = it }
-        PlainField(stringResource(R.string.child_birthday_label), birthday, "child_birthday") { birthday = it.trim() }
+        PlainField(stringResource(R.string.child_birthday_label), birthday, "child_birthday", KeyboardType.Number) { birthday = it.trim() }
         ErrorText(error?.let { stringResource(it) })
         Spacer(Modifier.weight(1f))
         PrimaryButton(stringResource(R.string.action_done), "child_done") {
-            val date = runCatching { LocalDate.parse(birthday) }.getOrNull()
+            val date = BirthdayInput.parse(birthday)
             error = when {
                 name.isBlank() -> R.string.name_required
-                date == null || date.isAfter(LocalDate.now()) -> R.string.birthday_invalid
+                date == null -> R.string.birthday_invalid
                 else -> null
             }
-            if (error == null) onDone(name, birthday)
+            if (date != null && error == null) onDone(name, date.toString())
         }
     }
 }

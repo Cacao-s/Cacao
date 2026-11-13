@@ -48,14 +48,14 @@
     <string name="backup_password_optional">備份檔密碼（選填）</string>
     <string name="backup_password_warning">設了密碼的備份檔，忘記密碼就永遠打不開。</string>
     <string name="backup_restore_previous">還原匯入前的資料</string>
-    <string name="birthday_invalid">生日格式要像 2017-03-12</string>
+    <string name="birthday_invalid">生日要像 20170312 或 2017-03-12，而且不能是未來</string>
     <string name="cash_to_wallet">現金留在孩子手上（同時記一筆出金到錢包）</string>
     <string name="celebrate_goal_body">錢已經幫你鎖起來，等爸媽帶你去買。</string>
     <string name="celebrate_goal_title">%1$s達成了！</string>
     <string name="celebrate_ok">太棒了</string>
     <string name="celebrate_task_body">%1$s 存進你的存款了。</string>
     <string name="celebrate_task_title">%1$s完成了！</string>
-    <string name="child_birthday_label">生日（例如 2017-03-12）</string>
+    <string name="child_birthday_label">生日（例如 20170312）</string>
     <string name="child_clear_password">取消我的密碼</string>
     <string name="child_greeting">嗨，%1$s</string>
     <string name="child_name_label">名字</string>
@@ -69,6 +69,7 @@
     <string name="family_add_elder">＋新增長輩</string>
     <string name="family_add_parent">＋新增父母</string>
     <string name="family_clear_child_password">清除密碼</string>
+    <string name="family_empty">還沒有，可以從下方新增</string>
     <string name="family_has_password">有設密碼</string>
     <string name="family_no_password">未設密碼</string>
     <string name="family_regenerate_recovery">重新產生我的救援碼</string>

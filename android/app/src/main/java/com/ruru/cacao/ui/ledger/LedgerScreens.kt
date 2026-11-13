@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -156,7 +157,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         Title(stringResource(R.string.income_title, child.name))
         PlainField(stringResource(R.string.amount_label), amount, "income_amount", KeyboardType.Number) { amount = it.filter(Char::isDigit).take(7) }
         Body(stringResource(R.string.income_source_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             sources.forEach { source -> Chip(source.name, source.id == sourceId, "source_${source.name}") { sourceId = source.id } }
         }
         if (addingElder) {
@@ -177,7 +178,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         val openGoals = remember(vm.ledgerVersion, childId) { vm.goals.views(childId).filter { it.state.status == com.ruru.cacao.domain.GoalStatus.IN_PROGRESS } }
         if (openGoals.isNotEmpty()) {
             Body(stringResource(R.string.goal_designate_label))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 Chip(stringResource(R.string.goal_designate_none), goalId == null, "designate_none") { goalId = null }
                 openGoals.forEach { g -> Chip(g.goal.name, goalId == g.goal.id, "designate_${g.goal.name}") { goalId = g.goal.id } }
             }

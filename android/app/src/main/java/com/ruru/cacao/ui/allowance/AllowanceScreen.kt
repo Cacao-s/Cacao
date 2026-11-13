@@ -3,6 +3,7 @@ package com.ruru.cacao.ui.allowance
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -153,17 +154,17 @@ fun AllowanceScreen(vm: AppViewModel, parentId: String, childId: String) {
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Body(stringResource(R.string.income_source_label))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     sources.forEach { m -> Chip(m.name, m.id == sourceId, "allowance_source_${m.name}") { sourceId = m.id } }
                 }
                 PlainField(stringResource(R.string.amount_label), amount, "allowance_amount", KeyboardType.Number) { amount = it.filter(Char::isDigit).take(6) }
                 Body(stringResource(R.string.allowance_period))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Period.entries.forEach { p -> Chip(periodLabel(p), p == period, "period_${p.code}") { period = p } }
                 }
                 if (period == Period.WEEKLY || period == Period.BIWEEKLY) {
                     Body(stringResource(R.string.allowance_weekday))
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         weekdays.forEachIndexed { i, label -> Chip(label, weekday == i + 1, "weekday_${i + 1}") { weekday = i + 1 } }
                     }
                 }

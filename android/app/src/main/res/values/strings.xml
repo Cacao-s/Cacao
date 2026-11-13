@@ -48,14 +48,14 @@
     <string name="backup_password_optional">Backup password (optional)</string>
     <string name="backup_password_warning">If you forget the password, the file can never be opened.</string>
     <string name="backup_restore_previous">Undo last import</string>
-    <string name="birthday_invalid">Use a date like 2017-03-12</string>
+    <string name="birthday_invalid">Use a past date like 20170312 or 2017-03-12</string>
     <string name="cash_to_wallet">Cash stays with the kid (also pays it out to the wallet)</string>
     <string name="celebrate_goal_body">The money is locked in. Time to go shopping with your parents!</string>
     <string name="celebrate_goal_title">%1$s reached!</string>
     <string name="celebrate_ok">Awesome</string>
     <string name="celebrate_task_body">%1$s added to your savings.</string>
     <string name="celebrate_task_title">%1$s done!</string>
-    <string name="child_birthday_label">Birthday (e.g. 2017-03-12)</string>
+    <string name="child_birthday_label">Birthday (e.g. 20170312)</string>
     <string name="child_clear_password">Remove my password</string>
     <string name="child_greeting">Hi, %1$s</string>
     <string name="child_name_label">Name</string>
@@ -69,6 +69,7 @@
     <string name="family_add_elder">+ Add relative</string>
     <string name="family_add_parent">+ Add parent</string>
     <string name="family_clear_child_password">Clear password</string>
+    <string name="family_empty">None yet. Add one below.</string>
     <string name="family_has_password">Has password</string>
     <string name="family_no_password">No password</string>
     <string name="family_regenerate_recovery">Get a new recovery code</string>

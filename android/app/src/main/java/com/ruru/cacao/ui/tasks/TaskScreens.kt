@@ -3,6 +3,7 @@ package com.ruru.cacao.ui.tasks
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -125,13 +126,13 @@ fun NewTaskScreen(vm: AppViewModel, parentId: String) {
         PlainField(stringResource(R.string.task_title_label), title, "task_title") { title = it }
         PlainField(stringResource(R.string.task_reward_label), reward, "task_reward", KeyboardType.Number) { reward = it.filter(Char::isDigit).take(6) }
         Body(stringResource(R.string.task_children_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             children.forEach { c ->
                 Chip(c.name, c.id in picked, "task_child_${c.name}") { picked = if (c.id in picked) picked - c.id else picked + c.id }
             }
         }
         Body(stringResource(R.string.task_issuer_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             issuers.forEach { m -> Chip(m.name, m.id == issuerId, "task_issuer_${m.name}") { issuerId = m.id } }
         }
         ErrorText(error)

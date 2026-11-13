@@ -186,7 +186,7 @@ fun BackupScreen(vm: AppViewModel, parentId: String) {
                 if (showCloudList) {
                     vm.cloudFiles.forEach { f ->
                         Text(
-                            f.createdTime.take(16).replace("T", " "),
+                            runCatching { DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault()).format(Instant.parse(f.createdTime)) }.getOrDefault(f.createdTime),
                             modifier = Modifier.fillMaxWidth().clickable { vm.downloadCloud(f) { startImport(vm, importState, it) } }.padding(vertical = 8.dp),
                             color = Cacao.colors.onSurface,
                         )
