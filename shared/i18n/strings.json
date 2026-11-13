@@ -166,6 +166,8 @@
     "allowance_active": { "zh-Hant": "發放中", "en": "Active" },
     "allowance_pause": { "zh-Hant": "暫停", "en": "Pause" },
     "allowance_resume": { "zh-Hant": "恢復", "en": "Resume" },
+    "allowance_start_label": { "zh-Hant": "開始日期（例如 20261101；空白就是今天）", "en": "Start date (e.g. 20261101; blank = today)" },
+    "allowance_start_invalid": { "zh-Hant": "開始日期要在前後一年內，例如 20261101", "en": "Start date must be within a year, e.g. 20261101" },
     "allowance_invalid": { "zh-Hant": "請填金額，並選好星期幾或幾號", "en": "Enter an amount and pick the day" },
     "allowance_summary_weekly": { "zh-Hant": "%1$s（星期%2$s）", "en": "%1$s (%2$s)" },
     "allowance_summary_monthly": { "zh-Hant": "每月 %1$d 號", "en": "Monthly on day %1$d" },

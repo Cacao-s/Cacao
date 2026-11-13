@@ -5,7 +5,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.LocalDate
 
-class BirthdayInputTest {
+class DateInputTest {
 
     private val today = LocalDate.of(2026, 11, 13)
     private val expected = LocalDate.of(2023, 8, 30)
@@ -27,4 +27,7 @@ class BirthdayInputTest {
         assertNull(BirthdayInput.parse("20271231", today))
         assertNull(BirthdayInput.parse("", today))
     }
+
+    @Test
+    fun dateInputAllowsFuture() = assertEquals(LocalDate.of(2027, 1, 5), DateInput.parse("20270105"))
 }

@@ -19,6 +19,8 @@
     <string name="allowance_paused">暫停中</string>
     <string name="allowance_period">週期</string>
     <string name="allowance_resume">恢復</string>
+    <string name="allowance_start_invalid">開始日期要在前後一年內，例如 20261101</string>
+    <string name="allowance_start_label">開始日期（例如 20261101；空白就是今天）</string>
     <string name="allowance_summary_monthly">每月 %1$d 號</string>
     <string name="allowance_summary_weekly">%1$s（星期%2$s）</string>
     <string name="allowance_title">常態零用錢</string>

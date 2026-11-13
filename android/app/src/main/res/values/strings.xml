@@ -19,6 +19,8 @@
     <string name="allowance_paused">Paused</string>
     <string name="allowance_period">How often</string>
     <string name="allowance_resume">Resume</string>
+    <string name="allowance_start_invalid">Start date must be within a year, e.g. 20261101</string>
+    <string name="allowance_start_label">Start date (e.g. 20261101; blank = today)</string>
     <string name="allowance_summary_monthly">Monthly on day %1$d</string>
     <string name="allowance_summary_weekly">%1$s (%2$s)</string>
     <string name="allowance_title">Allowance</string>

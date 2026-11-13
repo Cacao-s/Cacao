@@ -15,6 +15,7 @@ data class ScheduleInput(
     val period: Period,
     val weekday: Int?,
     val monthDay: Int?,
+    val startDate: LocalDate? = null,
 )
 
 val Allowance_schedule.periodEnum: Period get() = Period.entries.first { it.code == period }
@@ -27,11 +28,13 @@ class AllowanceRepository(
 
     fun schedules(childId: String): List<Allowance_schedule> = queries.forChild(childId).executeAsList()
 
+    /** 開始日期在過去就從那天補發到今天；前後限一年內，避免打錯年份一次補發太多 */
     fun create(childId: String, input: ScheduleInput): Boolean {
-        if (!valid(input)) return false
+        val start = input.startDate ?: today()
+        if (!valid(input) || !validStart(start)) return false
         val time = now()
         val id = UUID.randomUUID().toString()
-        queries.insert(id, childId, input.sourceId, input.amount, input.period.code, input.weekday?.toLong(), input.monthDay?.toLong(), today().toString(), time, time)
+        queries.insert(id, childId, input.sourceId, input.amount, input.period.code, input.weekday?.toLong(), input.monthDay?.toLong(), start.toString(), time, time)
         backfill(id)
         return true
     }
@@ -92,6 +95,9 @@ class AllowanceRepository(
         Period.WEEKLY, Period.BIWEEKLY -> input.weekday in 1..7
         Period.MONTHLY -> input.monthDay in 1..31
     }
+
+    fun validStart(start: LocalDate): Boolean =
+        !start.isBefore(today().minusYears(1)) && !start.isAfter(today().plusYears(1))
 
     private fun today(): LocalDate = LocalDate.now(clock)
 

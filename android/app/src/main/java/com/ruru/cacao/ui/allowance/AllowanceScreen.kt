@@ -33,6 +33,7 @@ import com.ruru.cacao.data.ScheduleInput
 import com.ruru.cacao.data.periodEnum
 import com.ruru.cacao.data.roleEnum
 import com.ruru.cacao.db.Allowance_schedule
+import com.ruru.cacao.domain.DateInput
 import com.ruru.cacao.domain.Period
 import com.ruru.cacao.ui.AppViewModel
 import com.ruru.cacao.ui.Screen
@@ -86,6 +87,7 @@ fun AllowanceScreen(vm: AppViewModel, parentId: String, childId: String) {
     val sources = vm.memberList.filter { it.roleEnum == Role.PARENT || it.roleEnum == Role.ELDER }
     val weekdays = stringResource(R.string.weekday_short).split(",")
     val invalid = stringResource(R.string.allowance_invalid)
+    val startInvalid = stringResource(R.string.allowance_start_invalid)
 
     var editingId by remember { mutableStateOf<String?>(null) }
     var showForm by remember { mutableStateOf(false) }
@@ -94,6 +96,7 @@ fun AllowanceScreen(vm: AppViewModel, parentId: String, childId: String) {
     var period by remember { mutableStateOf(Period.WEEKLY) }
     var weekday by remember { mutableStateOf<Int?>(null) }
     var monthDay by remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
     fun openForm(s: Allowance_schedule?) {
@@ -103,6 +106,7 @@ fun AllowanceScreen(vm: AppViewModel, parentId: String, childId: String) {
         period = s?.periodEnum ?: Period.WEEKLY
         weekday = s?.weekday?.toInt()
         monthDay = s?.month_day?.toString().orEmpty()
+        startDate = ""
         error = null
         showForm = true
     }
@@ -171,9 +175,17 @@ fun AllowanceScreen(vm: AppViewModel, parentId: String, childId: String) {
                 if (period == Period.MONTHLY) {
                     PlainField(stringResource(R.string.allowance_month_day), monthDay, "allowance_month_day", KeyboardType.Number) { monthDay = it.filter(Char::isDigit).take(2) }
                 }
+                if (editingId == null) {
+                    PlainField(stringResource(R.string.allowance_start_label), startDate, "allowance_start", KeyboardType.Number) { startDate = it.take(10) }
+                }
                 ErrorText(error)
                 PrimaryButton(stringResource(R.string.action_save), "allowance_save") {
-                    val input = ScheduleInput(sourceId, amount.toLongOrNull() ?: 0, period, weekday, monthDay.toIntOrNull())
+                    val start = if (startDate.isBlank()) null else DateInput.parse(startDate)
+                    if (startDate.isNotBlank() && (start == null || !vm.allowance.validStart(start))) {
+                        error = startInvalid
+                        return@PrimaryButton
+                    }
+                    val input = ScheduleInput(sourceId, amount.toLongOrNull() ?: 0, period, weekday, monthDay.toIntOrNull(), start)
                     val ok = editingId?.let { vm.allowance.update(it, input) } ?: vm.allowance.create(childId, input)
                     if (ok) {
                         showForm = false

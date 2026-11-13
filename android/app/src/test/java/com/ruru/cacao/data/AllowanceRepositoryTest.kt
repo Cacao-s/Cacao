@@ -89,4 +89,30 @@ class AllowanceRepositoryTest {
         assertFalse(allowance.create(kid, ScheduleInput(mom, 100, Period.WEEKLY, null, null)))
         assertFalse(allowance.create(kid, ScheduleInput(mom, 100, Period.MONTHLY, null, 32)))
     }
+
+    @Test
+    fun pastStartDateBackfillsFromStart() {
+        allowance.create(kid, ScheduleInput(mom, 100, Period.WEEKLY, 1, null, LocalDate.parse("2026-10-12")))
+        assertEquals(
+            listOf("2026-11-02", "2026-10-26", "2026-10-19", "2026-10-12"),
+            ledger.entries(kid).map { it.occurred_on },
+        )
+        assertEquals(400, savings())
+    }
+
+    @Test
+    fun futureStartDatePaysNothingUntilThen() {
+        allowance.create(kid, ScheduleInput(mom, 100, Period.WEEKLY, 1, null, LocalDate.parse("2026-11-10")))
+        assertEquals(0, savings())
+        clock.date = LocalDate.parse("2026-11-16")
+        allowance.backfillAll()
+        assertEquals(100, savings())
+    }
+
+    @Test
+    fun startDateMoreThanAYearAwayRejected() {
+        assertFalse(allowance.create(kid, ScheduleInput(mom, 100, Period.DAILY, null, null, LocalDate.parse("2025-11-01"))))
+        assertFalse(allowance.create(kid, ScheduleInput(mom, 100, Period.DAILY, null, null, LocalDate.parse("2027-11-03"))))
+        assertEquals(0, savings())
+    }
 }

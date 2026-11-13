@@ -2,6 +2,10 @@ package com.ruru.cacao.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ruru.cacao.ui.theme.Cacao
@@ -109,5 +114,34 @@ fun Avatar(name: String, color: String, size: Int = 48) {
         contentAlignment = Alignment.Center,
     ) {
         Text(name.take(1), fontWeight = FontWeight.Bold, fontSize = (size / 2.4).sp, color = Color(0xFF2A1A12))
+    }
+}
+
+class TileItem(val title: String, val sub: String, val tint: Color, val tag: String, val onClick: (() -> Unit)?)
+
+/** 彩色正方形按鈕，一列 3 個（UQ-09） */
+@Composable
+fun TileGrid(items: List<TileItem>, titleSize: TextUnit = 19.sp) {
+    items.chunked(3).forEach { row ->
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            row.forEach { Tile(it, titleSize, Modifier.weight(1f)) }
+            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+        }
+    }
+}
+
+@Composable
+private fun Tile(item: TileItem, titleSize: TextUnit, modifier: Modifier) {
+    Column(
+        modifier
+            .aspectRatio(1f)
+            .background(item.tint.copy(alpha = if (item.onClick == null) 0.15f else 0.35f), RoundedCornerShape(Cacao.shape.radius * 0.8f))
+            .then(if (item.onClick != null) Modifier.clickable(onClick = item.onClick) else Modifier)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .testTag(item.tag),
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        Text(item.title, fontWeight = FontWeight.Bold, fontSize = titleSize, color = Cacao.colors.onSurface)
+        if (item.sub.isNotEmpty()) Text(item.sub, fontSize = 12.sp, color = Cacao.colors.muted, maxLines = 1)
     }
 }

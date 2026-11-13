@@ -3,6 +3,7 @@ package com.ruru.cacao.ui.goals
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +22,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -80,19 +90,71 @@ fun GoalsScreen(vm: AppViewModel, childId: String, parentId: String?) {
         }
         Body(stringResource(R.string.goals_hint))
         if (views.isEmpty()) Body(stringResource(R.string.goals_empty))
-        views.forEachIndexed { index, view ->
-            GoalCard(vm, view, childId, parentId, canUp = index > 0, canDown = index < views.lastIndex)
+        GoalList(vm, views, childId, parentId)
+    }
+}
+
+/** 拖右邊的 ≡ 上下調整順序，放開才存（只上下） */
+@Composable
+private fun GoalList(vm: AppViewModel, views: List<GoalView>, childId: String, parentId: String?) {
+    var order by remember(views) { mutableStateOf(views) }
+    var draggingId by remember { mutableStateOf<String?>(null) }
+    var offset by remember { mutableFloatStateOf(0f) }
+    val heights = remember { mutableStateMapOf<String, Float>() }
+    val gap = with(LocalDensity.current) { 16.dp.toPx() }
+
+    fun finish() {
+        if (draggingId == null) return
+        draggingId = null
+        offset = 0f
+        if (order.map { it.goal.id } != views.map { it.goal.id }) {
+            vm.goals.reorder(childId, order.map { it.goal.id })
+            vm.ledgerChanged()
+        }
+    }
+
+    fun drag(id: String, dy: Float) {
+        offset += dy
+        val i = order.indexOfFirst { it.goal.id == id }
+        val j = if (offset > 0) i + 1 else i - 1
+        if (j !in order.indices) return
+        val step = (heights[order[j].goal.id] ?: return) + gap
+        if (kotlin.math.abs(offset) < step / 2) return
+        order = order.toMutableList().apply { add(j, removeAt(i)) }
+        offset -= if (j > i) step else -step
+    }
+
+    order.forEach { view ->
+        val id = view.goal.id
+        key(id) {
+            val dragging = draggingId == id
+            GoalCard(
+                vm, view, childId, parentId,
+                modifier = Modifier
+                    .onSizeChanged { heights[id] = it.height.toFloat() }
+                    .zIndex(if (dragging) 1f else 0f)
+                    .graphicsLayer { translationY = if (dragging) offset else 0f }
+                    .then(if (dragging) Modifier.shadow(8.dp, RoundedCornerShape(Cacao.shape.radius)) else Modifier),
+                handle = Modifier.pointerInput(id, views) {
+                    detectVerticalDragGestures(
+                        onDragStart = { draggingId = id; offset = 0f },
+                        onDragEnd = { finish() },
+                        onDragCancel = { finish() },
+                        onVerticalDrag = { change, dy -> change.consume(); drag(id, dy) },
+                    )
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun GoalCard(vm: AppViewModel, view: GoalView, childId: String, parentId: String?, canUp: Boolean, canDown: Boolean) {
+private fun GoalCard(vm: AppViewModel, view: GoalView, childId: String, parentId: String?, modifier: Modifier, handle: Modifier) {
     val goal = view.goal
     val locked = view.state.status == GoalStatus.ACHIEVED
     val shape = RoundedCornerShape(Cacao.shape.radius)
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(Cacao.colors.surface, shape)
             .border(if (locked || view.achievable) 2.dp else maxOf(Cacao.shape.border, 1.dp), if (locked || view.achievable) Cacao.colors.locked else Cacao.colors.outline, shape)
@@ -129,8 +191,12 @@ private fun GoalCard(vm: AppViewModel, view: GoalView, childId: String, parentId
                     Text(stringResource(R.string.goal_fill), fontSize = 12.sp, color = Cacao.colors.muted)
                 }
             }
-            TextButton(onClick = { vm.goals.move(childId, goal.id, up = true); vm.ledgerChanged() }, enabled = canUp, modifier = Modifier.testTag("goal_up_${goal.name}")) { Text("↑") }
-            TextButton(onClick = { vm.goals.move(childId, goal.id, up = false); vm.ledgerChanged() }, enabled = canDown, modifier = Modifier.testTag("goal_down_${goal.name}")) { Text("↓") }
+            Text(
+                "≡",
+                fontSize = 24.sp,
+                color = Cacao.colors.muted,
+                modifier = handle.padding(horizontal = 12.dp, vertical = 4.dp).testTag("goal_drag_${goal.name}"),
+            )
         }
     }
 }

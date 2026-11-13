@@ -54,6 +54,8 @@ import com.ruru.cacao.ui.components.ErrorText
 import com.ruru.cacao.ui.components.PlainField
 import com.ruru.cacao.ui.components.PrimaryButton
 import com.ruru.cacao.ui.components.ScreenColumn
+import com.ruru.cacao.ui.components.TileGrid
+import com.ruru.cacao.ui.components.TileItem
 import com.ruru.cacao.ui.components.Title
 import com.ruru.cacao.ui.theme.Cacao
 import java.text.NumberFormat
@@ -104,11 +106,16 @@ fun ChildOverviewScreen(vm: AppViewModel, parentId: String, childId: String) {
                 shape = RoundedCornerShape(14.dp),
             ) { Text(stringResource(R.string.action_payout), fontWeight = FontWeight.Bold, color = Cacao.colors.primary) }
         }
-        MenuRow(stringResource(R.string.goals_title), "overview_goals") { vm.go(Screen.Goals(childId, parentId)) }
-        MenuRow(stringResource(R.string.overview_history), "overview_history") { vm.go(Screen.Ledger(parentId, childId)) }
-        MenuRow(stringResource(R.string.allowance_title), "overview_allowance") { vm.go(Screen.Allowance(parentId, childId)) }
-        MenuRow(stringResource(R.string.overview_wallet), "overview_wallet_history") { vm.go(Screen.Wallet(childId, parentId)) }
-        MenuRow(stringResource(R.string.growth_title), "overview_growth") { vm.go(Screen.Growth(childId, parentId)) }
+        TileGrid(
+            listOf(
+                TileItem(stringResource(R.string.goals_title), "", Cacao.colors.locked, "overview_goals") { vm.go(Screen.Goals(childId, parentId)) },
+                TileItem(stringResource(R.string.overview_history), "", Cacao.colors.primary, "overview_history") { vm.go(Screen.Ledger(parentId, childId)) },
+                TileItem(stringResource(R.string.allowance_title), "", Cacao.colors.secondary, "overview_allowance") { vm.go(Screen.Allowance(parentId, childId)) },
+                TileItem(stringResource(R.string.overview_wallet), "", Cacao.colors.primary, "overview_wallet_history") { vm.go(Screen.Wallet(childId, parentId)) },
+                TileItem(stringResource(R.string.growth_title), "", Cacao.colors.outline, "overview_growth") { vm.go(Screen.Growth(childId, parentId)) },
+            ),
+            titleSize = 16.sp,
+        )
     }
 }
 
@@ -117,22 +124,6 @@ private fun Stat(label: String, amount: Long, tag: String, modifier: Modifier) {
     Column(modifier) {
         Text(label, color = Cacao.colors.onPrimary, fontSize = 12.sp)
         Text(money(amount), color = Cacao.colors.onPrimary, fontFamily = Cacao.fonts.number, fontWeight = FontWeight.Bold, fontSize = 17.sp, modifier = Modifier.testTag(tag))
-    }
-}
-
-@Composable
-private fun MenuRow(text: String, tag: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Cacao.colors.surface, RoundedCornerShape(Cacao.shape.radius))
-            .border(maxOf(Cacao.shape.border, 1.dp), Cacao.colors.outline, RoundedCornerShape(Cacao.shape.radius))
-            .clickable(onClick = onClick)
-            .padding(16.dp)
-            .testTag(tag),
-    ) {
-        Text(text, fontSize = 16.sp, color = Cacao.colors.onSurface, modifier = Modifier.weight(1f))
-        Text("›", color = Cacao.colors.muted)
     }
 }
 

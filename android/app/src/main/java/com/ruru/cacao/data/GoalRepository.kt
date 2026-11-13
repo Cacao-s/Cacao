@@ -99,15 +99,13 @@ class GoalRepository(
     }
 
     /** 往前或往後移一格（與相鄰目標交換優先順序） */
-    fun move(childId: String, goalId: String, up: Boolean) {
-        val list = queries.forChild(childId).executeAsList()
-        val i = list.indexOfFirst { it.id == goalId }
-        val j = if (up) i - 1 else i + 1
-        if (i < 0 || j !in list.indices) return
+    /** 拖曳排序後整份寫回：priority 依清單順序 1、2、3… */
+    fun reorder(childId: String, goalIds: List<String>) {
+        val current = queries.forChild(childId).executeAsList().map { it.id }
+        if (goalIds.toSet() != current.toSet()) return
         val time = now()
         db.transaction {
-            queries.updatePriority(list[j].priority, time, list[i].id)
-            queries.updatePriority(list[i].priority, time, list[j].id)
+            goalIds.forEachIndexed { index, id -> queries.updatePriority((index + 1).toDouble(), time, id) }
         }
     }
 

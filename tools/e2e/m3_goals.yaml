@@ -48,14 +48,18 @@ appId: com.ruru.cacao
     id: goal_saved_Bike
     text: "\\$400 / \\$3,000"
 
-# 調整順序：Bike 往前就先填 Bike
-- tapOn:
-    id: goal_up_Bike
+# 調整順序：拖 Bike 到最前面就先填 Bike
+- swipe:
+    from:
+      id: goal_drag_Bike
+    direction: UP
 - assertVisible:
     id: goal_saved_Bike
     text: "\\$1,000 / \\$3,000"
-- tapOn:
-    id: goal_down_Bike
+- swipe:
+    from:
+      id: goal_drag_Bike
+    direction: DOWN
 - assertVisible:
     id: goal_saved_Lego
     text: "\\$600 / \\$600"

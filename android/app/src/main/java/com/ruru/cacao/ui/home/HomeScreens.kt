@@ -3,7 +3,6 @@ package com.ruru.cacao.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.remember
 import com.ruru.cacao.ui.ledger.money
@@ -34,6 +33,8 @@ import com.ruru.cacao.ui.components.Avatar
 import com.ruru.cacao.ui.components.Body
 import com.ruru.cacao.ui.components.CuteLock
 import com.ruru.cacao.ui.components.ScreenColumn
+import com.ruru.cacao.ui.components.TileGrid
+import com.ruru.cacao.ui.components.TileItem
 import com.ruru.cacao.ui.components.Title
 import com.ruru.cacao.ui.theme.Cacao
 import java.time.LocalDate
@@ -119,23 +120,16 @@ fun ChildHomeScreen(vm: AppViewModel, childId: String) {
                 it.message?.let { m -> Text("「$m」", color = Cacao.colors.muted, fontSize = 14.sp) }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            val goalSub = topGoal?.let { "${it.goal.name} ${(it.saved * 100 / it.goal.target_amount)}%" } ?: stringResource(R.string.goals_empty)
-            Tile(stringResource(R.string.menu_goals), goalSub, Cacao.colors.locked, "tile_goals", Modifier.weight(1f)) { vm.go(Screen.Goals(childId, null)) }
-            val pendingTasks = remember(vm.ledgerVersion, childId) { vm.tasks.pending(childId).size }
-            Tile(stringResource(R.string.menu_tasks), stringResource(R.string.tasks_pending_count, pendingTasks), Cacao.colors.secondary, "tile_tasks", Modifier.weight(1f)) {
-                vm.go(Screen.ChildTasks(childId))
-            }
-            Tile(stringResource(R.string.menu_wallet), stringResource(R.string.wallet_add_expense), Cacao.colors.primary, "tile_wallet", Modifier.weight(1f)) {
-                vm.go(Screen.Wallet(childId, null))
-            }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Tile(stringResource(R.string.menu_growth), stringResource(R.string.growth_title), Cacao.colors.outline, "tile_growth", Modifier.weight(1f)) {
-                vm.go(Screen.Growth(childId, null))
-            }
-            Spacer(Modifier.weight(2f).padding(5.dp))
-        }
+        val goalSub = topGoal?.let { "${it.goal.name} ${(it.saved * 100 / it.goal.target_amount)}%" } ?: stringResource(R.string.goals_empty)
+        val pendingTasks = remember(vm.ledgerVersion, childId) { vm.tasks.pending(childId).size }
+        TileGrid(
+            listOf(
+                TileItem(stringResource(R.string.menu_goals), goalSub, Cacao.colors.locked, "tile_goals") { vm.go(Screen.Goals(childId, null)) },
+                TileItem(stringResource(R.string.menu_tasks), stringResource(R.string.tasks_pending_count, pendingTasks), Cacao.colors.secondary, "tile_tasks") { vm.go(Screen.ChildTasks(childId)) },
+                TileItem(stringResource(R.string.menu_wallet), stringResource(R.string.wallet_add_expense), Cacao.colors.primary, "tile_wallet") { vm.go(Screen.Wallet(childId, null)) },
+                TileItem(stringResource(R.string.menu_growth), stringResource(R.string.growth_title), Cacao.colors.outline, "tile_growth") { vm.go(Screen.Growth(childId, null)) },
+            ),
+        )
         Spacer(Modifier.weight(1f))
         if (child.password_hash == null) {
             TextButton(onClick = { vm.go(Screen.ChildPassword(childId)) }, modifier = Modifier.testTag("child_set_password")) {
@@ -162,23 +156,6 @@ private fun BalanceCard(label: String, amount: Long, background: Color, content:
     ) {
         Text(label, color = content, fontSize = 14.sp)
         Text(money(amount), color = content, fontFamily = Cacao.fonts.number, fontWeight = FontWeight.Bold, fontSize = 26.sp, modifier = Modifier.testTag(tag))
-    }
-}
-
-/** 彩色正方形按鈕；onClick 為 null 表示之後開放 */
-@Composable
-private fun Tile(title: String, sub: String, tint: Color, tag: String, modifier: Modifier, onClick: (() -> Unit)?) {
-    Column(
-        modifier
-            .aspectRatio(1f)
-            .background(tint.copy(alpha = if (onClick == null) 0.15f else 0.35f), RoundedCornerShape(Cacao.shape.radius * 0.8f))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 12.dp, vertical = 10.dp)
-            .testTag(tag),
-        verticalArrangement = Arrangement.Bottom,
-    ) {
-        Text(title, fontWeight = FontWeight.Bold, fontSize = 19.sp, color = Cacao.colors.onSurface)
-        Text(sub, fontSize = 12.sp, color = Cacao.colors.muted, maxLines = 1)
     }
 }
 

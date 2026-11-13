@@ -42,7 +42,7 @@ class GoalRepositoryTest {
         assertTrue(goal("樂高").achievable)
         assertEquals(400, goal("腳踏車").saved)
 
-        goals.move(kid, goal("腳踏車").goal.id, up = true)
+        goals.reorder(kid, listOf(goal("腳踏車").goal.id, goal("樂高").goal.id))
         assertEquals(1000, goal("腳踏車").saved)
         assertFalse(goal("樂高").achievable)
 
