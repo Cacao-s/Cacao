@@ -34,7 +34,21 @@ class MemberRepository(
 
     fun createChild(name: String, birthday: String): String = insert(Role.CHILD, name, birthday, null, null)
 
-    fun createElder(name: String): String = insert(Role.ELDER, name, null, null, null)
+    /** 長輩算新增他的那位父母這邊的（discover WD-41） */
+    fun createElder(name: String, parentId: String): String {
+        val id = insert(Role.ELDER, name, null, null, null)
+        setElderSide(id, parentId)
+        return id
+    }
+
+    fun setElderSide(elderId: String, parentId: String) {
+        val time = now()
+        queries.setElderSide(elderId, parentId, time, time)
+    }
+
+    /** 長輩 id → 是哪位父母這邊的；沒有的是升級前就有、還沒分邊的長輩 */
+    fun elderSides(): Map<String, String> =
+        queries.elderSides().executeAsList().associate { it.elder_id to it.parent_id }
 
     fun verifyPin(memberId: String, pin: String): Boolean {
         val hash = member(memberId)?.pin_hash ?: return false

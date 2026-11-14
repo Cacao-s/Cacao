@@ -154,7 +154,7 @@ fun AddIncomeScreen(vm: AppViewModel, parentId: String, childId: String) {
         if (addingElder) {
             PlainField(stringResource(R.string.elder_name_label), elderName, "elder_name") { elderName = it }
             PrimaryButton(stringResource(R.string.action_save), "elder_save", enabled = elderName.isNotBlank()) {
-                sourceId = vm.members.createElder(elderName)
+                sourceId = vm.members.createElder(elderName, parentId)
                 vm.go(Screen.AddIncome(parentId, childId))
                 addingElder = false
                 elderName = ""

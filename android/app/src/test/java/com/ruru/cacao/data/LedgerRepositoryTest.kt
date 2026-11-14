@@ -20,7 +20,7 @@ class LedgerRepositoryTest {
         val db = CacaoDatabase(driver)
         val members = MemberRepository(db)
         momId = members.createParent("媽媽", "1234").first
-        grandpaId = members.createElder("爺爺")
+        grandpaId = members.createElder("爺爺", momId)
         childId = members.createChild("小安", "2017-03-12")
         ledger = LedgerRepository(db)
     }

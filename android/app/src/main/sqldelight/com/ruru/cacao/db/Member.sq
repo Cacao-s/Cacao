@@ -1,3 +1,11 @@
+-- 長輩是哪位父母這邊的（schema v3）：新安裝在這裡建表，舊版升級走 shared/db/003_elder_side.sql，兩邊要一致
+CREATE TABLE elder_side (
+  elder_id        TEXT NOT NULL PRIMARY KEY REFERENCES member(id),
+  parent_id       TEXT NOT NULL REFERENCES member(id),
+  created_at      TEXT NOT NULL,
+  updated_at      TEXT NOT NULL
+);
+
 insert:
 INSERT INTO member(id, role, name, birthday, avatar_color, pin_hash, recovery_hash, password_hash, sort_order, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -22,3 +30,9 @@ UPDATE member SET recovery_hash = ?, updated_at = ? WHERE id = ?;
 
 updatePassword:
 UPDATE member SET password_hash = ?, updated_at = ? WHERE id = ?;
+
+elderSides:
+SELECT elder_id, parent_id FROM elder_side;
+
+setElderSide:
+INSERT OR REPLACE INTO elder_side(elder_id, parent_id, created_at, updated_at) VALUES (?, ?, ?, ?);

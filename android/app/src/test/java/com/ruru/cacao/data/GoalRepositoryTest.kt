@@ -24,7 +24,7 @@ class GoalRepositoryTest {
         val db = CacaoDatabase(driver)
         val members = MemberRepository(db)
         mom = members.createParent("媽媽", "1234").first
-        grandma = members.createElder("外婆")
+        grandma = members.createElder("外婆", mom)
         kid = members.createChild("小安", "2017-03-12")
         goals = GoalRepository(db)
         ledger = LedgerRepository(db, goals = { goals.states(it) })

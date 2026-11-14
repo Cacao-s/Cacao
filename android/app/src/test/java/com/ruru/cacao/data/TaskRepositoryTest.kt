@@ -22,7 +22,7 @@ class TaskRepositoryTest {
         val db = CacaoDatabase(driver)
         val members = MemberRepository(db)
         mom = members.createParent("媽媽", "1234").first
-        grandpa = members.createElder("爺爺")
+        grandpa = members.createElder("爺爺", mom)
         ann = members.createChild("小安", "2017-03-12")
         ben = members.createChild("小明", "2021-08-05")
         ledger = LedgerRepository(db)

@@ -188,6 +188,7 @@ CREATE TABLE task_completion (
 
 - 規則：`shared/db/001_init.sql` 是 v1 初始 schema，之後每個版本一個 `NNN_*.sql`，只寫升級語句。Android 由 SQLDelight 轉成 `.sqm`，新安裝的建表寫在 `sqldelight/*.sq`，兩邊要一致。舊版備份匯入後，開 App 時自動升級。
 - **v2（`002_task_proposal.sql`，Phase 2）**：新增 `task_proposal` 孩子提議任務（discover WD-35）。孩子新增的任務是 0 元，先放這張表；父母設定金額後轉成正式 `task`（`created_by` 是孩子），提議軟刪除。不改 `task.reward_amount > 0` 的限制，所以 0 元提議不能「完成」，要先設金額。
+- **v3（`003_elder_side.sql`，Phase 2）**：新增 `elder_side`（`elder_id` → `parent_id`），記錄長輩是哪位父母這邊的（discover WD-41）：哪位父母登入時新增的長輩，就算那位父母這邊的。給之後的金錢貢獻報表用，「誰給的」選單不過濾。升級時只有一位父母的家庭，舊長輩直接分給他；兩位父母的，舊長輩先不分，在家庭成員頁按「算我這邊」。
 
 ## 推算規則
 

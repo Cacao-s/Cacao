@@ -13,12 +13,15 @@ import org.junit.Test
 class MemberRepositoryTest {
 
     private lateinit var repo: MemberRepository
+    private lateinit var db: CacaoDatabase
+    private lateinit var driver: JdbcSqliteDriver
 
     @Before
     fun setUp() {
-        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         CacaoDatabase.Schema.create(driver)
-        repo = MemberRepository(CacaoDatabase(driver))
+        db = CacaoDatabase(driver)
+        repo = MemberRepository(db)
     }
 
     @Test
@@ -64,6 +67,27 @@ class MemberRepositoryTest {
         repo.createParent("爸爸", "4321")
         assertEquals("爸爸", repo.parentForPin("4321")?.name)
         assertNull(repo.parentForPin("0000"))
+    }
+
+    @Test
+    fun elderBelongsToParentWhoAddedIt() {
+        val (momId, _) = repo.createParent("媽媽", "1234")
+        val (dadId, _) = repo.createParent("爸爸", "4321")
+        val grandma = repo.createElder("外婆", momId)
+        val nana = repo.createElder("奶奶", dadId)
+        assertEquals(mapOf(grandma to momId, nana to dadId), repo.elderSides())
+    }
+
+    @Test
+    fun unassignedElderCanBeClaimed() {
+        val (momId, _) = repo.createParent("媽媽", "1234")
+        val (dadId, _) = repo.createParent("爸爸", "4321")
+        val auntie = repo.createElder("乾媽", momId)
+        driver.execute(null, "DELETE FROM elder_side WHERE elder_id = '$auntie'", 0)
+        assertNull(repo.elderSides()[auntie])
+
+        repo.setElderSide(auntie, dadId)
+        assertEquals(dadId, repo.elderSides()[auntie])
     }
 
     @Test

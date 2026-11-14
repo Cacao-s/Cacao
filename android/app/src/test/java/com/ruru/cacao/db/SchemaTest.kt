@@ -46,18 +46,43 @@ class SchemaTest {
         }
     }
 
-    @Test
-    fun migratesV1ToCurrent() {
+    private fun v1Driver(): JdbcSqliteDriver {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         java.io.File("../../shared/db/001_init.sql").readText()
             .split(";").map { it.lines().filterNot { l -> l.trimStart().startsWith("--") }.joinToString(" ").trim() }
             .filter { it.isNotEmpty() }
             .forEach { driver.execute(null, it, 0) }
+        return driver
+    }
+
+    @Test
+    fun migrationAssignsOldEldersWhenOnlyOneParent() {
+        val driver = v1Driver()
+        CacaoDatabase(driver).ledgerQueries.insertMember("p1", "parent", "媽媽", null, "brown", "h", now, now)
+        CacaoDatabase(driver).ledgerQueries.insertMember("e1", "elder", "外婆", null, "mint", null, now, now)
+        CacaoDatabase.Schema.migrate(driver, 1, CacaoDatabase.Schema.version)
+        assertEquals("p1", CacaoDatabase(driver).memberQueries.elderSides().executeAsList().single().parent_id)
+    }
+
+    @Test
+    fun migrationLeavesOldEldersUnassignedWithTwoParents() {
+        val driver = v1Driver()
+        val q = CacaoDatabase(driver).ledgerQueries
+        q.insertMember("p1", "parent", "媽媽", null, "brown", "h", now, now)
+        q.insertMember("p2", "parent", "爸爸", null, "sky", "h", now, now)
+        q.insertMember("e1", "elder", "外婆", null, "mint", null, now, now)
+        CacaoDatabase.Schema.migrate(driver, 1, CacaoDatabase.Schema.version)
+        assertEquals(0, CacaoDatabase(driver).memberQueries.elderSides().executeAsList().size)
+    }
+
+    @Test
+    fun migratesV1ToCurrent() {
+        val driver = v1Driver()
         CacaoDatabase.Schema.migrate(driver, 1, CacaoDatabase.Schema.version)
         val migrated = CacaoDatabase(driver)
         migrated.ledgerQueries.insertMember("c1", "child", "小安", "2017-03-12", "peach", null, now, now)
         migrated.taskQueries.insertProposal("tp1", "c1", "洗碗", now, now)
         assertEquals(1, migrated.taskQueries.proposalsAll().executeAsList().size)
-        assertEquals(2L, CacaoDatabase.Schema.version)
+        assertEquals(3L, CacaoDatabase.Schema.version)
     }
 }

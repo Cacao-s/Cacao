@@ -212,6 +212,9 @@
     "family_regenerate_recovery": { "zh-Hant": "重新產生我的救援碼", "en": "Get a new recovery code" },
     "family_no_password": { "zh-Hant": "未設密碼", "en": "No password" },
     "family_has_password": { "zh-Hant": "有設密碼", "en": "Has password" },
+    "elder_side_of": { "zh-Hant": "%1$s這邊", "en": "%1$s's side" },
+    "elder_side_none": { "zh-Hant": "還沒分是誰這邊的", "en": "Side not set" },
+    "elder_claim": { "zh-Hant": "算我這邊", "en": "My side" },
     "settings_backup": { "zh-Hant": "備份與還原", "en": "Backup & restore" },
 
     "backup_last": { "zh-Hant": "上次備份：%1$s", "en": "Last backup: %1$s" },

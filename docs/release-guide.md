@@ -35,6 +35,7 @@
 - 🤖 Chrome 代點建立 App（名稱 Cacao、免費、App 類型）。
 - 🤖 產生 release AAB（`gradlew bundleRelease`）。
 - 🤖 Chrome 代點上傳到「內部測試」；Play App Signing 用預設（Google 保管 App 簽署金鑰）。
+- 🤖 每次上傳後，在 build 的那個 commit 打 annotated tag 並 push：`git tag -a vX.Y.Z <commit> -m "X.Y.Z (versionCode) 軌道"`。只打 tag，不建 GitHub Release（AAB 已由 Play 發送）。
 - 👤 從內部測試連結把 App 裝到自己手機試用。
 
 ## 4. Google 雲端備份（OAuth）
@@ -64,3 +65,4 @@
 - 👤 邀請至少 12 位測試者（提供他們的 Google 帳號 email），讓他們連續 14 天保持參與。
 - 🤖 期間收到的問題由 Claude 修，重新產生 AAB 上傳。
 - 👤 14 天後申請正式版存取權、按下送審與發布。
+- 🤖 正式版上架後，用那一版的 tag 建 GitHub Release，內文放 Play 商店連結（不附 AAB）。

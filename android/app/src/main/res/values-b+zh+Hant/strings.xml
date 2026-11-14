@@ -66,7 +66,10 @@
     <string name="child_setup_title">新增第一個孩子</string>
     <string name="children_title">孩子們</string>
     <string name="coming_soon">之後開放</string>
+    <string name="elder_claim">算我這邊</string>
     <string name="elder_name_label">長輩的稱呼（例如爺爺）</string>
+    <string name="elder_side_none">還沒分是誰這邊的</string>
+    <string name="elder_side_of">%1$s這邊</string>
     <string name="family_add_child">＋新增孩子</string>
     <string name="family_add_elder">＋新增長輩</string>
     <string name="family_add_parent">＋新增父母</string>

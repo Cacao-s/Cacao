@@ -156,17 +156,31 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
             Body(stringResource(label))
             Section {
                 val people = vm.memberList.filter { it.roleEnum == role }
+                val sides = vm.members.elderSides()
                 if (people.isEmpty()) Body(stringResource(R.string.family_empty))
                 people.forEach { m ->
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.testTag("family_${m.name}")) {
                         Column(Modifier.weight(1f)) {
                             Text(m.name, color = Cacao.colors.onSurface, fontWeight = FontWeight.Medium)
+                            if (role == Role.ELDER) {
+                                Text(
+                                    sides[m.id]?.let { stringResource(R.string.elder_side_of, vm.member(it)?.name.orEmpty()) } ?: stringResource(R.string.elder_side_none),
+                                    fontSize = 13.sp,
+                                    color = Cacao.colors.muted,
+                                    modifier = Modifier.testTag("elder_side_${m.name}"),
+                                )
+                            }
                             if (role == Role.CHILD) {
                                 Text(
                                     listOfNotNull(m.birthday, stringResource(if (m.password_hash != null) R.string.family_has_password else R.string.family_no_password)).joinToString("・"),
                                     fontSize = 13.sp,
                                     color = Cacao.colors.muted,
                                 )
+                            }
+                        }
+                        if (role == Role.ELDER && sides[m.id] == null) {
+                            TextButton(onClick = { vm.members.setElderSide(m.id, parentId); vm.go(Screen.Family(parentId)) }, modifier = Modifier.testTag("elder_claim_${m.name}")) {
+                                Text(stringResource(R.string.elder_claim), color = Cacao.colors.primary, fontSize = 13.sp)
                             }
                         }
                         if (role == Role.CHILD && m.password_hash != null) {
@@ -220,7 +234,7 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
                     if (error == null) {
                         when (adding) {
                             AddKind.PARENT -> shownCode = vm.members.createParent(name, pin).second
-                            AddKind.ELDER -> vm.members.createElder(name)
+                            AddKind.ELDER -> vm.members.createElder(name, parentId)
                             AddKind.CHILD -> vm.members.createChild(name, date.toString())
                             AddKind.NONE -> Unit
                         }
