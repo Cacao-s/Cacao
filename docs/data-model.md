@@ -192,6 +192,14 @@ CREATE TABLE task_completion (
 
 ## 推算規則
 
+### 金錢貢獻（報表用，discover WD-36、WD-41）
+
+- 「給的人」：`ledger_entry.source_id`（一次性收入、零用錢自動入帳、任務獎勵入帳都會寫）；排程與任務本身另有 `allowance_schedule.source_id`、`task.issuer_id`。
+- 「記的人」：`ledger_entry.recorded_by`（零用錢自動入帳是系統產生，為 `NULL`）、`task.created_by`。只是誰經手，**不影響貢獻歸屬**。
+- 「哪一邊」：給的人是父母 → 那位父母這邊；是長輩 → 查 `elder_side.parent_id`；查不到 → 「還沒分邊」。
+- 例：媽媽記「姑姑給 $500」：`source_id` = 姑姑、`recorded_by` = 媽媽；姑姑的 `elder_side` 是爸爸 → 算爸爸這邊。
+- 只算有效紀錄（排除作廢的 group），`kind` 為 `income_*` 的正數金額。
+
 ### 餘額
 
 - **存款** = 該孩子 `account = 'savings'` 有效紀錄的 `amount` 加總。
