@@ -11,10 +11,10 @@
     <string name="age_years">%1$d yrs</string>
     <string name="allowance_active">Active</string>
     <string name="allowance_empty">No allowance yet</string>
-    <string name="allowance_hint">Missed days are added by due date when the app opens. Paused time isn\'t paid.</string>
+    <string name="allowance_hint">If the app isn\'t opened for a few days, missed allowance is added when you open it. Nothing is added while paused.</string>
     <string name="allowance_invalid">Enter an amount and pick the day</string>
     <string name="allowance_month_day">Day of month (1–31; short months pay on the last day)</string>
-    <string name="allowance_new">+ New schedule</string>
+    <string name="allowance_new">+ Add allowance</string>
     <string name="allowance_pause">Pause</string>
     <string name="allowance_paused">Paused</string>
     <string name="allowance_period">How often</string>
@@ -65,7 +65,6 @@
     <string name="child_set_password">Set my password</string>
     <string name="child_setup_title">Add your first kid</string>
     <string name="children_title">Kids</string>
-    <string name="coming_soon">Coming soon</string>
     <string name="elder_change_side">Side</string>
     <string name="elder_change_side_title">Whose side is %1$s on?</string>
     <string name="elder_name_label">Relative\'s name (e.g. Grandpa)</string>
@@ -95,10 +94,8 @@
     <string name="goal_designate_label">Set aside for a goal (optional)</string>
     <string name="goal_designate_none">None</string>
     <string name="goal_designated">Set aside %1$s</string>
-    <string name="goal_fill">Fill</string>
+    <string name="goal_fill">Auto-save</string>
     <string name="goal_in_progress">Saving</string>
-    <string name="goal_move_down">Move down</string>
-    <string name="goal_move_up">Move up</string>
     <string name="goal_name_label">What do you want?</string>
     <string name="goal_need_more">%1$s to go</string>
     <string name="goal_new">+ New goal</string>
@@ -108,12 +105,12 @@
     <string name="goal_revert">Back to saving</string>
     <string name="goal_target_label">Target amount</string>
     <string name="goals_empty">No goals yet</string>
-    <string name="goals_hint">Savings fill goals in order. Use the arrows to reorder.</string>
+    <string name="goals_hint">Savings go to goals in order. Hold ≡ and drag to reorder.</string>
     <string name="goals_title">Goals</string>
     <string name="growth_age_year">Age %1$d</string>
     <string name="growth_count">%1$d</string>
     <string name="growth_goals">Goals reached</string>
-    <string name="growth_hint">Simple view by age year. Charts and trends come in version 2.</string>
+    <string name="growth_hint">Each year starts on the birthday.</string>
     <string name="growth_saved">Saved this year</string>
     <string name="growth_tasks">Tasks done</string>
     <string name="growth_title">Growth</string>
@@ -148,7 +145,6 @@
     <string name="note_label">Note (optional)</string>
     <string name="onboarding_new_family">Start a new family</string>
     <string name="onboarding_restore">New phone? Restore a backup</string>
-    <string name="onboarding_restore_later">Restore is coming in a later version</string>
     <string name="onboarding_welcome">Welcome to Cacao</string>
     <string name="overview_history">Savings history</string>
     <string name="overview_wallet">Wallet history</string>
