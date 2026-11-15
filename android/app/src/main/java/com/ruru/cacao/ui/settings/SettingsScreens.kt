@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -133,6 +134,7 @@ private enum class AddKind { NONE, PARENT, ELDER, CHILD }
 fun FamilyScreen(vm: AppViewModel, parentId: String) {
     var adding by remember { mutableStateOf(AddKind.NONE) }
     var renaming by remember { mutableStateOf<Member?>(null) }
+    var changingSide by remember { mutableStateOf<Member?>(null) }
     var name by remember { mutableStateOf("") }
     var birthday by remember { mutableStateOf("") }
     var pin by remember { mutableStateOf("") }
@@ -140,7 +142,7 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
     var shownCode by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<Int?>(null) }
 
-    fun reset() { adding = AddKind.NONE; renaming = null; name = ""; birthday = ""; pin = ""; confirm = ""; error = null }
+    fun reset() { adding = AddKind.NONE; renaming = null; changingSide = null; name = ""; birthday = ""; pin = ""; confirm = ""; error = null }
 
     ScreenColumn(Modifier.verticalScroll(rememberScrollState())) {
         Header(stringResource(R.string.family_title)) { vm.go(Screen.Settings(parentId)) }
@@ -178,9 +180,9 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
                                 )
                             }
                         }
-                        if (role == Role.ELDER && sides[m.id] == null) {
-                            TextButton(onClick = { vm.members.setElderSide(m.id, parentId); vm.go(Screen.Family(parentId)) }, modifier = Modifier.testTag("elder_claim_${m.name}")) {
-                                Text(stringResource(R.string.elder_claim), color = Cacao.colors.primary, fontSize = 13.sp)
+                        if (role == Role.ELDER) {
+                            TextButton(onClick = { reset(); changingSide = m }, modifier = Modifier.testTag("elder_change_${m.name}")) {
+                                Text(stringResource(R.string.elder_change_side), color = Cacao.colors.primary, fontSize = 13.sp)
                             }
                         }
                         if (role == Role.CHILD && m.password_hash != null) {
@@ -196,6 +198,24 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
             }
         }
 
+        // discover WD-42：誰新增的長輩預設算誰那邊，加錯了在這裡改成另一位父母那邊
+        changingSide?.let { m ->
+            Section {
+                Body(stringResource(R.string.elder_change_side_title, m.name))
+                val current = vm.members.elderSides()[m.id]
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    vm.memberList.filter { it.roleEnum == Role.PARENT }.forEach { p ->
+                        Chip(stringResource(R.string.elder_side_of, p.name), p.id == current, "elder_side_pick_${p.name}") {
+                            vm.members.setElderSide(m.id, p.id)
+                            reset()
+                            vm.go(Screen.Family(parentId))
+                        }
+                    }
+                }
+                TextButton(onClick = { reset() }) { Text(stringResource(R.string.action_cancel), color = Cacao.colors.primary) }
+            }
+        }
+
         renaming?.let { m ->
             Section {
                 PlainField(stringResource(R.string.child_name_label), name, "rename_input") { name = it }
@@ -206,7 +226,7 @@ fun FamilyScreen(vm: AppViewModel, parentId: String) {
         }
 
         when (adding) {
-            AddKind.NONE -> if (renaming == null) {
+            AddKind.NONE -> if (renaming == null && changingSide == null) {
                 TextButton(onClick = { reset(); adding = AddKind.PARENT }, modifier = Modifier.testTag("family_add_parent")) { Text(stringResource(R.string.family_add_parent), color = Cacao.colors.primary) }
                 TextButton(onClick = { reset(); adding = AddKind.ELDER }, modifier = Modifier.testTag("family_add_elder")) { Text(stringResource(R.string.family_add_elder), color = Cacao.colors.primary) }
                 TextButton(onClick = { reset(); adding = AddKind.CHILD }, modifier = Modifier.testTag("family_add_child")) { Text(stringResource(R.string.family_add_child), color = Cacao.colors.primary) }

@@ -1,4 +1,4 @@
-# M7 設定：切換主題 → 新增長輩（記是誰那邊的）、孩子、第二位父母（顯示救援碼）→ 改名 → 第二位父母可以登入
+# M7 設定：切換主題 → 新增長輩（記是誰那邊的）、孩子、第二位父母（顯示救援碼）→ 改名 → 長輩改邊 → 第二位父母可以登入
 appId: com.ruru.cacao
 ---
 - runFlow: subflows/new_family.yaml
@@ -28,11 +28,9 @@ appId: com.ruru.cacao
     id: add_save
 - assertVisible:
     id: family_Grandma
-# discover WD-41：誰新增的長輩就算誰那邊，不會出現「算我這邊」
+# discover WD-41：誰新增的長輩就算誰那邊
 - assertVisible:
     id: elder_side_Grandma
-- assertNotVisible:
-    id: elder_claim_Grandma
 
 - tapOn:
     id: family_add_child
@@ -91,6 +89,22 @@ appId: com.ruru.cacao
     id: rename_save
 - assertVisible:
     id: family_Benny
+
+# discover WD-42：加錯邊的長輩可以改成另一位父母那邊
+- tapOn:
+    id: elder_change_Grandma
+- scrollUntilVisible:
+    element:
+        id: elder_side_pick_Dad
+- tapOn:
+    id: elder_side_pick_Dad
+- scrollUntilVisible:
+    element:
+        id: elder_side_Grandma
+    direction: UP
+- assertVisible:
+    id: elder_side_Grandma
+    text: "Dad's side"
 
 # 第二位父母用自己的 PIN 登入
 - tapOn:

@@ -214,7 +214,8 @@
     "family_has_password": { "zh-Hant": "有設密碼", "en": "Has password" },
     "elder_side_of": { "zh-Hant": "%1$s這邊", "en": "%1$s's side" },
     "elder_side_none": { "zh-Hant": "還沒分是誰這邊的", "en": "Side not set" },
-    "elder_claim": { "zh-Hant": "算我這邊", "en": "My side" },
+    "elder_change_side": { "zh-Hant": "改邊", "en": "Side" },
+    "elder_change_side_title": { "zh-Hant": "%1$s 是誰那邊的？", "en": "Whose side is %1$s on?" },
     "settings_backup": { "zh-Hant": "備份與還原", "en": "Backup & restore" },
 
     "backup_last": { "zh-Hant": "上次備份：%1$s", "en": "Last backup: %1$s" },
